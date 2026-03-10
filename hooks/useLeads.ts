@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Lead } from "@/services/mondayService";
+import { FilterState } from "@/components/FilterBar";
 
 interface UseLeadsReturn {
     leads: Lead[];
@@ -10,7 +11,7 @@ interface UseLeadsReturn {
     refreshLeads: () => Promise<void>;
 }
 
-export const useLeads = (): UseLeadsReturn => {
+export const useLeads = (filters?: FilterState): UseLeadsReturn => {
     const [leads, setLeads] = useState<Lead[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -18,7 +19,12 @@ export const useLeads = (): UseLeadsReturn => {
     const fetchLeads = useCallback(async () => {
         try {
             setError(null);
-            const response = await fetch("/api/leads?limit=500");
+            const params = new URLSearchParams({ limit: "5000" });
+            if (filters?.owner) params.set("owner", filters.owner);
+            if (filters?.from) params.set("from", filters.from);
+            if (filters?.to) params.set("to", filters.to);
+
+            const response = await fetch(`/api/leads?${params.toString()}`);
             const data = await response.json();
 
             if (!response.ok || !data.success) {
@@ -31,17 +37,11 @@ export const useLeads = (): UseLeadsReturn => {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [filters?.owner, filters?.from, filters?.to]);
 
     useEffect(() => {
-        // Initial fetch
         fetchLeads();
-
-        // Auto-refresh every 20 seconds
-        const interval = setInterval(() => {
-            fetchLeads();
-        }, 20000);
-
+        const interval = setInterval(fetchLeads, 30000);
         return () => clearInterval(interval);
     }, [fetchLeads]);
 

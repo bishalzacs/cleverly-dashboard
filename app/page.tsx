@@ -7,6 +7,7 @@ import { DialerPanel } from "@/components/DialerPanel";
 import { DirectDialer } from "@/components/DirectDialer";
 import { CallStats } from "@/components/CallStats";
 import { PipelineBoard } from "@/components/PipelineBoard";
+import { FilterBar, FilterState } from "@/components/FilterBar";
 import { useLeads } from "@/hooks/useLeads";
 import { useTwilioDevice } from "@/hooks/useTwilioDevice";
 import { Lead } from "@/services/mondayService";
@@ -14,7 +15,8 @@ import { Lead } from "@/services/mondayService";
 type DashboardTab = "leads" | "pipeline" | "dialer" | "analysis";
 
 export default function Dashboard() {
-    const { leads, isLoading, error: leadsError, refreshLeads } = useLeads();
+    const [filters, setFilters] = useState<FilterState>({ owner: "", from: "", to: "" });
+    const { leads, isLoading, error: leadsError, refreshLeads } = useLeads(filters);
     const { deviceStatus, callStatus, callDuration, error: twilioError, makeCall, hangUp, toggleMute, isMuted } = useTwilioDevice();
 
     const [activeTab, setActiveTab] = useState<DashboardTab>("leads");
@@ -78,27 +80,17 @@ export default function Dashboard() {
                     {/* ── LEADS TAB ── */}
                     {activeTab === "leads" && (
                         <div className="flex flex-col h-full animate-in fade-in duration-300">
-                            {/* Mini stats bar */}
-                            <div className="flex gap-4 px-4 py-2 border-b border-border-subtle bg-surface-panel/30 flex-shrink-0 overflow-x-auto">
-                                {[
-                                    { label: "Total Leads", value: leads.length, color: "text-white" },
-                                    { label: "Connected", value: callStatus === "connected" ? "Active" : "—", color: "text-green-400" },
-                                    { label: "Status", value: callStatus === "idle" ? "Ready" : callStatus.charAt(0).toUpperCase() + callStatus.slice(1), color: "text-brand-accent" },
-                                ].map((s) => (
-                                    <div key={s.label} className="flex items-center gap-2 whitespace-nowrap py-1 px-3 rounded-lg bg-surface-panel border border-border-subtle">
-                                        <span className="text-[10px] text-text-secondary uppercase tracking-wider font-semibold">{s.label}</span>
-                                        <span className={`text-sm font-bold ${s.color}`}>{s.value}</span>
-                                    </div>
-                                ))}
-                            </div>
+                            {/* Filter bar shared across leads + dialer panel */}
+                            <FilterBar leads={leads} filters={filters} onFiltersChange={setFilters} />
 
-                            {/* List + Dialer */}
                             <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+                                {/* Lead List */}
                                 <div className={`${showDialerPanel ? "hidden md:flex" : "flex"} flex-col w-full md:w-[380px] lg:w-[420px] flex-shrink-0 h-full`}>
                                     <LeadList leads={leads} isLoading={isLoading} error={leadsError}
                                         activeLeadId={activeLead?.id || null} isCallActive={isCallActive}
                                         onSelectLead={handleSelectLead} onCallLead={handleCallLead} onRefresh={refreshLeads} />
                                 </div>
+                                {/* Dialer Panel */}
                                 <div className={`${showDialerPanel ? "flex" : "hidden md:flex"} flex-col flex-1 h-full`}>
                                     <div className="md:hidden flex items-center px-4 pt-4">
                                         <button onClick={() => setShowDialerPanel(false)} className="flex items-center gap-2 text-text-secondary hover:text-white text-sm transition-colors">
@@ -117,7 +109,8 @@ export default function Dashboard() {
                     {activeTab === "pipeline" && (
                         <div className="h-full animate-in fade-in duration-300">
                             <PipelineBoard leads={leads} isCallActive={isCallActive}
-                                onCallLead={handleCallLead} onLeadsChange={refreshLeads} />
+                                onCallLead={handleCallLead} onLeadsChange={refreshLeads}
+                                filters={filters} onFiltersChange={setFilters} />
                         </div>
                     )}
 

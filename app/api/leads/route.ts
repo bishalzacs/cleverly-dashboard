@@ -9,22 +9,50 @@ export async function GET(request: Request) {
         );
 
         const { searchParams } = new URL(request.url);
-        const limit = parseInt(searchParams.get("limit") || "50");
+        const limit = parseInt(searchParams.get("limit") || "5000");
         const page = parseInt(searchParams.get("page") || "1");
         const offset = (page - 1) * limit;
+        const owner = searchParams.get("owner") || "";
+        const from = searchParams.get("from") || "";
+        const to = searchParams.get("to") || "";
 
-        const { data: leads, error, count } = await supabase
+        let query = supabase
             .from("leads")
             .select("*", { count: "exact" })
             .order("created_date", { ascending: false })
             .range(offset, offset + limit - 1);
+
+        if (owner) query = query.eq("owner", owner);
+        if (from) query = query.gte("created_date", from);
+        if (to) query = query.lte("created_date", to + "T23:59:59Z");
+
+        const { data: leads, error, count } = await query;
 
         if (error) {
             console.error("Supabase select error:", error);
             throw new Error(error.message);
         }
 
-        return NextResponse.json({ success: true, data: leads, count });
+        // Map Supabase snake_case back to Lead interface (camelCase where needed)
+        const mapped = (leads || []).map((row: any) => ({
+            id: row.id,
+            name: row.name,
+            phone: row.phone,
+            email: row.email,
+            status: row.status,
+            createdDate: row.created_date,
+            pipeline_stage: row.pipeline_stage,
+            owner: row.owner,
+            interested_in: row.interested_in,
+            notes: row.notes,
+            company: row.company,
+            sales_call_date: row.sales_call_date,
+            deal_value: row.deal_value,
+            plan_type: row.plan_type,
+            monday_created_at: row.monday_created_at,
+        }));
+
+        return NextResponse.json({ success: true, data: mapped, count });
     } catch (error: any) {
         console.error("Fetch Leads API Error:", error);
         return NextResponse.json(

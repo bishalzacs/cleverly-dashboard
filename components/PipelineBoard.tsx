@@ -4,17 +4,18 @@ import { useState, useCallback } from "react";
 import { Lead } from "@/services/mondayService";
 import { LeadCard } from "./LeadCard";
 import { LeadEditModal } from "./LeadEditModal";
+import { FilterBar, FilterState } from "./FilterBar";
 
 const PIPELINE_STAGES = [
     { id: "new_lead", label: "New Lead", color: "border-blue-500/40", badge: "bg-blue-500/10 text-blue-400 border-blue-500/20", dot: "bg-blue-400" },
     { id: "first_attempt", label: "1st Attempt", color: "border-yellow-500/40", badge: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20", dot: "bg-yellow-400" },
     { id: "second_attempt", label: "2nd Attempt", color: "border-orange-500/40", badge: "bg-orange-500/10 text-orange-400 border-orange-500/20", dot: "bg-orange-400" },
     { id: "third_attempt", label: "3rd Attempt", color: "border-red-500/40", badge: "bg-red-500/10 text-red-400 border-red-500/20", dot: "bg-red-400" },
-    { id: "call_received", label: "Call Received", color: "border-green-500/40", badge: "bg-green-500/10 text-green-400 border-green-500/20", dot: "bg-green-400" },
+    { id: "call_received", label: "Not Answered", color: "border-rose-500/40", badge: "bg-rose-500/10 text-rose-400 border-rose-500/20", dot: "bg-rose-400" },
     { id: "interested", label: "Interested", color: "border-emerald-500/40", badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", dot: "bg-emerald-400" },
     { id: "not_interested", label: "Not Interested", color: "border-slate-500/40", badge: "bg-slate-500/10 text-slate-400 border-slate-500/20", dot: "bg-slate-400" },
     { id: "follow_up", label: "Follow Up", color: "border-purple-500/40", badge: "bg-purple-500/10 text-purple-400 border-purple-500/20", dot: "bg-purple-400" },
-    { id: "closed", label: "Closed / Won", color: "border-teal-500/40", badge: "bg-teal-500/10 text-teal-400 border-teal-500/20", dot: "bg-teal-400" },
+    { id: "closed", label: "Booked Meeting", color: "border-teal-500/40", badge: "bg-teal-500/10 text-teal-400 border-teal-500/20", dot: "bg-teal-400" },
 ];
 
 interface PipelineBoardProps {
@@ -22,9 +23,11 @@ interface PipelineBoardProps {
     isCallActive: boolean;
     onCallLead: (lead: Lead) => void;
     onLeadsChange: () => void;
+    filters: FilterState;
+    onFiltersChange: (f: FilterState) => void;
 }
 
-export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange }: PipelineBoardProps) => {
+export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, filters, onFiltersChange }: PipelineBoardProps) => {
     const [dragLeadId, setDragLeadId] = useState<string | null>(null);
     const [dragOverStage, setDragOverStage] = useState<string | null>(null);
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
@@ -94,14 +97,17 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange }
     return (
         <div className="h-full flex flex-col bg-surface-base">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between sticky top-0 glass z-10">
-                <div>
-                    <h2 className="text-lg font-semibold text-white">Pipeline</h2>
-                    <p className="text-xs text-text-secondary mt-0.5">Drag leads between stages to track progress</p>
+            <div className="border-b border-border-subtle sticky top-0 glass z-10">
+                <div className="px-6 py-3 flex items-center justify-between">
+                    <div>
+                        <h2 className="text-lg font-semibold text-white">Pipeline</h2>
+                        <p className="text-xs text-text-secondary mt-0.5">Drag leads between stages to track progress</p>
+                    </div>
+                    <span className="text-xs text-text-secondary bg-surface-panel border border-border-subtle px-3 py-1 rounded-full">
+                        {localLeads.length} leads
+                    </span>
                 </div>
-                <span className="text-xs text-text-secondary bg-surface-panel border border-border-subtle px-3 py-1 rounded-full">
-                    {localLeads.length} leads
-                </span>
+                <FilterBar leads={leads} filters={filters} onFiltersChange={onFiltersChange} />
             </div>
 
             {/* Kanban board */}
@@ -118,8 +124,8 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange }
                                 onDragLeave={() => setDragOverStage(null)}
                                 onDrop={(e) => handleDrop(e, stage.id)}
                                 className={`flex flex-col w-64 flex-shrink-0 rounded-2xl border transition-all duration-200 ${isOver
-                                        ? `${stage.color} bg-white/5 shadow-lg scale-[1.01]`
-                                        : "border-border-subtle bg-surface-panel/40"
+                                    ? `${stage.color} bg-white/5 shadow-lg scale-[1.01]`
+                                    : "border-border-subtle bg-surface-panel/40"
                                     }`}
                             >
                                 {/* Column header */}
