@@ -23,7 +23,7 @@ export const getLostLeads = async (): Promise<Lead[]> => {
     query getLostLeads($boardId: [ID!], $groupId: String!) {
       boards(ids: $boardId) {
         groups(ids: [$groupId]) {
-          items_page {
+          items_page(limit: 500) {
             items {
               id
               name

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CallStatus } from "@/hooks/useTwilioDevice";
 
 interface DirectDialerProps {
@@ -41,6 +41,24 @@ export const DirectDialer = ({
     };
 
     const isCallActive = callStatus === "connecting" || callStatus === "ringing" || callStatus === "connected";
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (isCallActive) return;
+
+            const key = e.key;
+            if (/^[0-9*#]$/.test(key)) {
+                setPhoneNumber((prev) => prev + key);
+            } else if (key === "Backspace") {
+                setPhoneNumber((prev) => prev.slice(0, -1));
+            } else if (key === "Enter" && phoneNumber) {
+                onCall(phoneNumber);
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isCallActive, phoneNumber, onCall]);
 
     return (
         <div className="flex flex-col items-center justify-center p-8 glass-panel rounded-2xl w-full max-w-sm mx-auto shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-border-subtle">

@@ -47,15 +47,22 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
                     codecPreferences: [Call.Codec.Opus, Call.Codec.PCMU],
                 });
 
-                initializedDevice.on("ready", () => {
+                initializedDevice.on("registered", () => {
+                    console.log("Twilio Device successfully registered.");
                     setDeviceStatus("ready");
                     setError(null);
+                });
+
+                initializedDevice.on("unregistered", () => {
+                    console.log("Twilio Device unregistered.");
+                    setDeviceStatus("offline");
                 });
 
                 initializedDevice.on("error", (twilioError: any) => {
                     console.error("Twilio Device Error:", twilioError);
                     setDeviceStatus("error");
-                    setError(twilioError.message || "Twilio Device Error");
+                    // Sometimes twilioError is an object with {code, message}
+                    setError(twilioError?.message || JSON.stringify(twilioError) || "Unknown Twilio Error");
                 });
 
                 // Register the device
