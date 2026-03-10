@@ -99,7 +99,7 @@ export default function Dashboard() {
                                         </button>
                                     </div>
                                     <DialerPanel activeLead={activeLead} callStatus={callStatus} callDuration={callDuration}
-                                        isMuted={isMuted} onHangUp={hangUp} onMuteToggle={toggleMute} />
+                                        isMuted={isMuted} onHangUp={hangUp} onMuteToggle={toggleMute} onCall={handleCallLead} />
                                 </div>
                             </div>
                         </div>
