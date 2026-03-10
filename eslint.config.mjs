@@ -13,6 +13,16 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // Twilio SDK uses CommonJS-style require so we need to allow it
+      "@typescript-eslint/no-require-imports": "off",
+      // Allow any type since Twilio and some external APIs use loose types
+      "@typescript-eslint/no-explicit-any": "off",
+      // Allow unused vars with underscore prefix
+      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    },
+  },
 ]);
 
 export default eslintConfig;
