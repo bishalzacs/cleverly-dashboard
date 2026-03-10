@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@supabase/supabase-js";
 
 export async function GET(request: Request) {
     try {
-        const { searchParams } = new URL(request.url);
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
 
-        // Simple pagination
+        const { searchParams } = new URL(request.url);
         const limit = parseInt(searchParams.get("limit") || "50");
         const page = parseInt(searchParams.get("page") || "1");
         const offset = (page - 1) * limit;
 
-        // Fetch leads from Supabase directly
         const { data: leads, error, count } = await supabase
             .from("leads")
             .select("*", { count: "exact" })

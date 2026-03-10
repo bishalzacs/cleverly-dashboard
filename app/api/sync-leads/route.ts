@@ -1,17 +1,20 @@
 import { NextResponse } from "next/server";
 import { getLostLeads } from "@/services/mondayService";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@supabase/supabase-js";
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
     try {
-        // Fetch all leads from Monday.com (now configured up to 500 at a time)
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+
         const leads = await getLostLeads();
 
         if (!leads || leads.length === 0) {
             return NextResponse.json({ success: true, message: "No leads to sync", count: 0 });
         }
 
-        // Format dates correctly and map to Supabase schema
         const recordsToUpsert = leads.map((lead) => ({
             id: lead.id,
             name: lead.name,
@@ -21,7 +24,6 @@ export async function POST(request: Request) {
             created_date: lead.createdDate ? new Date(lead.createdDate).toISOString() : null,
         }));
 
-        // Upsert into Supabase (insert or update on primary key conflict)
         const { error } = await supabase.from("leads").upsert(recordsToUpsert, {
             onConflict: "id",
         });
