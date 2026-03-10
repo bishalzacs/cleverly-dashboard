@@ -1,0 +1,183 @@
+"use client";
+
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Device, Call } from "@twilio/voice-sdk";
+
+export type DeviceStatus = "offline" | "connecting" | "ready" | "error";
+export type CallStatus = "idle" | "connecting" | "ringing" | "connected" | "ended";
+
+interface UseTwilioDeviceReturn {
+    deviceStatus: DeviceStatus;
+    callStatus: CallStatus;
+    callDuration: number;
+    error: string | null;
+    makeCall: (phoneNumber: string) => Promise<void>;
+    hangUp: () => void;
+    toggleMute: () => void;
+    isMuted: boolean;
+}
+
+export const useTwilioDevice = (): UseTwilioDeviceReturn => {
+    const [device, setDevice] = useState<Device | null>(null);
+    const [activeCall, setActiveCall] = useState<Call | null>(null);
+
+    const [deviceStatus, setDeviceStatus] = useState<DeviceStatus>("offline");
+    const [callStatus, setCallStatus] = useState<CallStatus>("idle");
+    const [isMuted, setIsMuted] = useState(false);
+    const [callDuration, setCallDuration] = useState(0);
+    const [error, setError] = useState<string | null>(null);
+
+    const durationTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Initialize Twilio Device on mount
+    useEffect(() => {
+        let initializedDevice: Device;
+
+        const initDevice = async () => {
+            try {
+                setDeviceStatus("connecting");
+                const res = await fetch("/api/twilio/token", { method: "POST" });
+                const data = await res.json();
+
+                if (!res.ok || !data.success || !data.token) {
+                    throw new Error(data.error || "Failed to get Twilio token");
+                }
+
+                initializedDevice = new Device(data.token, {
+                    codecPreferences: [Call.Codec.Opus, Call.Codec.PCMU],
+                });
+
+                initializedDevice.on("ready", () => {
+                    setDeviceStatus("ready");
+                    setError(null);
+                });
+
+                initializedDevice.on("error", (twilioError: any) => {
+                    console.error("Twilio Device Error:", twilioError);
+                    setDeviceStatus("error");
+                    setError(twilioError.message || "Twilio Device Error");
+                });
+
+                // Register the device
+                initializedDevice.register();
+                setDevice(initializedDevice);
+            } catch (err: any) {
+                setDeviceStatus("error");
+                setError(err.message);
+            }
+        };
+
+        initDevice();
+
+        return () => {
+            if (initializedDevice) {
+                initializedDevice.destroy();
+            }
+            if (durationTimerRef.current) {
+                clearInterval(durationTimerRef.current);
+            }
+        };
+    }, []);
+
+    // Timer logic for active call
+    useEffect(() => {
+        if (callStatus === "connected") {
+            durationTimerRef.current = setInterval(() => {
+                setCallDuration((prev) => prev + 1);
+            }, 1000);
+        } else {
+            if (durationTimerRef.current) {
+                clearInterval(durationTimerRef.current);
+            }
+            if (callStatus === "idle" || callStatus === "ended") {
+                setCallDuration(0);
+            }
+        }
+        return () => {
+            if (durationTimerRef.current) clearInterval(durationTimerRef.current);
+        };
+    }, [callStatus]);
+
+    const makeCall = useCallback(
+        async (phoneNumber: string) => {
+            if (!device || deviceStatus !== "ready") {
+                setError("Device is not ready");
+                return;
+            }
+
+            try {
+                setCallStatus("connecting");
+                const params = { To: phoneNumber };
+
+                // initiate call
+                const call = await device.connect({ params });
+                setActiveCall(call);
+
+                call.on("accept", () => {
+                    setCallStatus("connected");
+                    setIsMuted(false);
+                });
+
+                call.on("disconnect", () => {
+                    setCallStatus("ended");
+                    setActiveCall(null);
+                    setIsMuted(false);
+                    // Auto reset to idle after 3s
+                    setTimeout(() => setCallStatus("idle"), 3000);
+                });
+
+                call.on("cancel", () => {
+                    setCallStatus("ended");
+                    setActiveCall(null);
+                    setTimeout(() => setCallStatus("idle"), 3000);
+                });
+
+                call.on("reject", () => {
+                    setCallStatus("ended");
+                    setError("Call rejected");
+                    setActiveCall(null);
+                    setTimeout(() => setCallStatus("idle"), 3000);
+                });
+
+                call.on("error", (err: any) => {
+                    setCallStatus("ended");
+                    setError(err.message || "Call error");
+                    setActiveCall(null);
+                    setTimeout(() => setCallStatus("idle"), 3000);
+                });
+
+            } catch (err: any) {
+                setCallStatus("ended");
+                setError(err.message || "Failed to initiate call");
+            }
+        },
+        [device, deviceStatus]
+    );
+
+    const hangUp = useCallback(() => {
+        if (activeCall) {
+            activeCall.disconnect();
+        } else if (device) {
+            device.disconnectAll();
+        }
+    }, [activeCall, device]);
+
+    const toggleMute = useCallback(() => {
+        if (activeCall) {
+            const currentlyMuted = activeCall.isMuted();
+            activeCall.mute(!currentlyMuted);
+            setIsMuted(!currentlyMuted);
+        }
+    }, [activeCall]);
+
+    return {
+        deviceStatus,
+        callStatus,
+        callDuration,
+        error,
+        makeCall,
+        hangUp,
+        toggleMute,
+        isMuted,
+    };
+};
