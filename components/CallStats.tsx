@@ -1,46 +1,119 @@
 "use client";
 
-import { useMemo } from "react";
-import { Lead } from "@/services/mondayService";
+import { useState, useEffect, useCallback } from "react";
+import { formatDistanceToNow } from "date-fns";
 
-interface CallStatsProps {
-    leads: Lead[];
+interface AnalyticsData {
+    totalLeads: number;
+    callsToday: number;
+    answerRate: string;
+    avgDuration: string;
+    totalCalls: number;
+    recentCalls: {
+        id: string;
+        lead_name: string | null;
+        phone: string;
+        status: string;
+        duration_seconds: number;
+        created_at: string;
+    }[];
 }
 
-export const CallStats = ({ leads }: CallStatsProps) => {
-    // Generate some mock stats based on the leads data to make it look active
-    const stats = useMemo(() => {
-        const totalLeads = leads.length;
-        // Mock data logic just for the aesthetic
-        const totalCallsToday = 142;
-        const answerRate = "34.5%";
-        const avgDuration = "2:14";
+export const CallStats = () => {
+    const [data, setData] = useState<AnalyticsData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-        return { totalLeads, totalCallsToday, answerRate, avgDuration };
-    }, [leads]);
+    const fetchAnalytics = useCallback(async () => {
+        try {
+            setError(null);
+            const res = await fetch("/api/analytics");
+            const json = await res.json();
+            if (!json.success) throw new Error(json.error);
+            setData(json.data);
+        } catch (e: any) {
+            setError(e.message);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
 
-    const recentCalls = [
-        { id: 1, name: "Alice Johnson", number: "+1 (555) 123-4567", status: "Answered", duration: "4:20", time: "10 mins ago" },
-        { id: 2, name: "Bob Smith", number: "+1 (555) 987-6543", status: "No Answer", duration: "0:00", time: "25 mins ago" },
-        { id: 3, name: "Charlie Davis", number: "+1 (555) 456-7890", status: "Voicemail", duration: "0:30", time: "1 hour ago" },
-        { id: 4, name: "Diana Prince", number: "+1 (555) 321-0987", status: "Answered", duration: "1:15", time: "2 hours ago" },
+    useEffect(() => {
+        fetchAnalytics();
+        // Refresh every 30 seconds
+        const interval = setInterval(fetchAnalytics, 30000);
+        return () => clearInterval(interval);
+    }, [fetchAnalytics]);
+
+    const formatDuration = (seconds: number) => {
+        if (!seconds || seconds === 0) return "0:00";
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${String(s).padStart(2, "0")}`;
+    };
+
+    const getStatusStyle = (status: string) => {
+        switch (status) {
+            case "connected": return "bg-green-500/10 text-green-400 border-green-500/20";
+            case "no_answer": return "bg-red-500/10 text-red-400 border-red-500/20";
+            case "failed": return "bg-orange-500/10 text-orange-400 border-orange-500/20";
+            default: return "bg-blue-500/10 text-blue-400 border-blue-500/20";
+        }
+    };
+
+    const getStatusLabel = (status: string) => {
+        switch (status) {
+            case "connected": return "Answered";
+            case "no_answer": return "No Answer";
+            case "failed": return "Failed";
+            default: return status;
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col h-full bg-surface-base p-8 items-center justify-center">
+                <div className="w-8 h-8 rounded-full border-2 border-brand-accent border-t-transparent animate-spin" />
+                <p className="text-text-secondary mt-4 text-sm">Loading analytics...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col h-full bg-surface-base p-8 items-center justify-center">
+                <p className="text-red-400 text-sm">⚠ {error}</p>
+                <button onClick={fetchAnalytics} className="mt-4 text-brand-accent text-xs hover:underline">Retry</button>
+            </div>
+        );
+    }
+
+    const stats = [
+        { label: "Total Leads", value: data?.totalLeads ?? 0, color: "text-white" },
+        { label: "Total Calls", value: data?.totalCalls ?? 0, color: "text-brand-accent" },
+        { label: "Answer Rate", value: data?.answerRate ?? "—", color: "text-green-400" },
+        { label: "Avg Duration", value: data?.avgDuration ?? "—", color: "text-purple-400" },
     ];
 
     return (
         <div className="flex flex-col h-full bg-surface-base p-8 space-y-8 overflow-y-auto custom-scrollbar">
-            <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-white">Call Analytics Overview</h2>
-                <p className="text-text-secondary mt-1 text-sm">Real-time performance metrics and call history.</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-2xl font-semibold tracking-tight text-white">Call Analytics</h2>
+                    <p className="text-text-secondary mt-1 text-sm">Live performance metrics from your Supabase database.</p>
+                </div>
+                <button
+                    onClick={fetchAnalytics}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-panel border border-border-subtle hover:bg-white/5 text-text-secondary hover:text-white transition-all text-xs font-medium"
+                >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    Refresh
+                </button>
             </div>
 
-            {/* Top Metric Cards */}
+            {/* Metric Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {[
-                    { label: "Total Leads", value: stats.totalLeads, color: "text-white" },
-                    { label: "Calls Today", value: stats.totalCallsToday, color: "text-brand-accent" },
-                    { label: "Answer Rate", value: stats.answerRate, color: "text-green-400" },
-                    { label: "Avg Duration", value: stats.avgDuration, color: "text-purple-400" },
-                ].map((stat, i) => (
+                {stats.map((stat, i) => (
                     <div key={i} className="glass-panel p-6 rounded-2xl flex flex-col justify-between hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:-translate-y-1 transition-all duration-300">
                         <span className="text-sm font-semibold text-text-secondary tracking-wider uppercase mb-4">{stat.label}</span>
                         <span className={`text-4xl font-light tracking-tight ${stat.color}`}>{stat.value}</span>
@@ -48,63 +121,51 @@ export const CallStats = ({ leads }: CallStatsProps) => {
                 ))}
             </div>
 
-            {/* Main Content Area */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
-                {/* Chart Area Mockup */}
-                <div className="lg:col-span-2 glass-panel p-6 rounded-2xl flex flex-col">
-                    <h3 className="text-sm font-semibold text-text-secondary tracking-wider uppercase mb-6 flex items-center justify-between">
-                        <span>Activity Volume</span>
-                        <span className="text-xs bg-white/5 py-1 px-3 rounded-full border border-white/5 text-white">Today</span>
-                    </h3>
-                    <div className="flex-1 flex items-end space-x-2 h-48 mt-auto border-b border-border-subtle pb-4">
-                        {[40, 70, 45, 90, 65, 85, 120, 60, 40, 80, 110, 50].map((height, i) => (
-                            <div key={i} className="flex-1 bg-surface-panel hover:bg-brand-accent/40 rounded-t-sm transition-all duration-300 cursor-pointer relative group" style={{ height: `${height}%` }}>
-                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-surface-panel shadow-lg border border-border-subtle rounded px-2 py-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                    {height}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="flex justify-between mt-3 text-[10px] text-text-secondary uppercase tracking-widest font-semibold">
-                        <span>8 AM</span>
-                        <span>12 PM</span>
-                        <span>4 PM</span>
-                        <span>8 PM</span>
-                    </div>
+            {/* Calls Today banner */}
+            <div className="glass-panel p-5 rounded-2xl border border-brand-accent/20 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-brand-accent/10 border border-brand-accent/30 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-brand-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                 </div>
+                <div>
+                    <p className="text-white font-semibold text-lg">{data?.callsToday ?? 0} calls made today</p>
+                    <p className="text-text-secondary text-sm">{data?.totalCalls ?? 0} total calls across all time</p>
+                </div>
+            </div>
 
-                {/* Recent Calls List */}
-                <div className="glass-panel p-6 rounded-2xl flex flex-col">
-                    <h3 className="text-sm font-semibold text-text-secondary tracking-wider uppercase mb-6 flex items-center justify-between">
-                        <span>Recent Logs</span>
-                        <button className="text-brand-accent hover:text-white transition-colors text-xs font-medium">View All</button>
-                    </h3>
-                    <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                        {recentCalls.map((call) => (
+            {/* Recent Calls */}
+            <div className="glass-panel p-6 rounded-2xl flex flex-col flex-1">
+                <h3 className="text-sm font-semibold text-text-secondary tracking-wider uppercase mb-6">Recent Call Logs</h3>
+
+                {(!data?.recentCalls || data.recentCalls.length === 0) ? (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center py-16">
+                        <svg className="w-10 h-10 text-text-secondary/40 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                        <p className="text-text-secondary text-sm font-medium">No calls logged yet</p>
+                        <p className="text-text-secondary/60 text-xs mt-1">Make your first call from the Dialer tab — it will appear here automatically.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-3 overflow-y-auto custom-scrollbar pr-1">
+                        {data.recentCalls.map((call) => (
                             <div key={call.id} className="p-4 rounded-xl bg-surface-panel border border-border-subtle hover:border-white/10 transition-colors">
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
-                                        <p className="text-sm font-medium text-white">{call.name}</p>
-                                        <p className="text-xs text-text-secondary font-mono mt-0.5">{call.number}</p>
+                                        <p className="text-sm font-medium text-white">{call.lead_name || "Unknown"}</p>
+                                        <p className="text-xs text-text-secondary font-mono mt-0.5">{call.phone}</p>
                                     </div>
-                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border ${call.status === "Answered" ? "bg-green-500/10 text-green-400 border-green-500/20" :
-                                            call.status === "Voicemail" ? "bg-purple-500/10 text-purple-400 border-purple-500/20" :
-                                                "bg-red-500/10 text-red-400 border-red-500/20"
-                                        }`}>
-                                        {call.status}
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border ${getStatusStyle(call.status)}`}>
+                                        {getStatusLabel(call.status)}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center text-xs text-text-secondary mt-3">
                                     <span className="flex items-center gap-1.5 font-mono">
                                         <svg className="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        {call.duration}
+                                        {formatDuration(call.duration_seconds)}
                                     </span>
-                                    <span>{call.time}</span>
+                                    <span>{formatDistanceToNow(new Date(call.created_at), { addSuffix: true })}</span>
                                 </div>
                             </div>
                         ))}
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

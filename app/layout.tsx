@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PointSix Dialer | Premium Dashboard",
-  description: "High-end dialer and lead management dashboard.",
+  title: "Cleverly | Sales Dialer",
+  description: "Cleverly — Premium AI-powered sales dialer and lead management dashboard.",
 };
 
 export default function RootLayout({

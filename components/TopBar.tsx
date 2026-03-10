@@ -12,11 +12,11 @@ export const TopBar = ({ deviceStatus, callStatus }: TopBarProps) => {
     return (
         <header className="h-16 glass border-b border-border-subtle flex items-center justify-between px-8 sticky top-0 z-50">
             <div className="flex items-center space-x-6">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-panel border border-border-subtle shadow-md">
-                    <span className="text-brand-accent font-bold font-mono">P6</span>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-accent/10 border border-brand-accent/30 shadow-md">
+                    <span className="text-brand-accent font-bold text-xs tracking-widest">CL</span>
                 </div>
                 <h1 className="text-lg font-semibold tracking-wide text-text-primary">
-                    PointSix<span className="text-text-secondary font-normal ml-1">Dialer</span>
+                    Cleverly<span className="text-text-secondary font-normal ml-1">Dialer</span>
                 </h1>
                 <div className="h-4 w-px bg-border-subtle mx-2" />
                 <StatusIndicator deviceStatus={deviceStatus} callStatus={callStatus} />
