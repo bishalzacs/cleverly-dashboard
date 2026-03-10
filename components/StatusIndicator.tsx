@@ -31,9 +31,15 @@ export const StatusIndicator = ({ deviceStatus, callStatus }: StatusIndicatorPro
     }
 
     return (
-        <div className="flex items-center space-x-2">
-            <div className={`w-3 h-3 rounded-full ${indicatorColor}`}></div>
-            <span className="text-sm text-gray-400 font-medium">{statusText}</span>
+        <div className="flex items-center space-x-2.5 glass-pill px-3 py-1.5 rounded-full">
+            <div className="relative flex h-2.5 w-2.5">
+                {/* Ping animation for active states */}
+                {(indicatorColor.includes("green") || indicatorColor.includes("blue") || indicatorColor.includes("yellow")) && (
+                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-40 ${indicatorColor.replace("bg-", "bg-")}`}></span>
+                )}
+                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${indicatorColor} shadow-[0_0_8px_currentColor]`}></span>
+            </div>
+            <span className="text-xs text-text-secondary font-semibold uppercase tracking-wider">{statusText}</span>
         </div>
     );
 };

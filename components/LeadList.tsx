@@ -25,26 +25,31 @@ export const LeadList = ({
     onRefresh,
 }: LeadListProps) => {
     return (
-        <div className="flex flex-col h-full bg-[#0B0B0B] border-r border-[#1F1F1F]">
-            <div className="p-6 border-b border-[#1F1F1F] flex justify-between items-center sticky top-0 bg-[#0B0B0B]/80 backdrop-blur-md z-10">
+        <div className="flex flex-col h-full bg-surface-base border-r border-border-subtle shadow-[10px_0_30px_rgba(0,0,0,0.5)] z-20 relative">
+            <div className="p-6 border-b border-border-subtle flex justify-between items-center sticky top-0 glass z-10">
                 <div>
-                    <h2 className="text-lg font-semibold text-white">Lost Leads</h2>
-                    <p className="text-sm text-gray-500 mt-1">{leads.length} available to call</p>
+                    <h2 className="text-lg font-semibold tracking-tight text-white flex items-center gap-2">
+                        Lost Leads
+                        <span className="bg-brand-accent/10 text-brand-accent text-xs px-2 py-0.5 rounded-full border border-brand-accent/20">
+                            {leads.length}
+                        </span>
+                    </h2>
+                    <p className="text-xs text-text-secondary mt-1 font-medium tracking-wide uppercase">Ready to dial</p>
                 </div>
 
                 <button
                     onClick={onRefresh}
                     disabled={isLoading}
-                    className="p-2 rounded-md hover:bg-[#1F1F1F] text-gray-400 hover:text-white transition-colors"
+                    className="p-2 rounded-lg bg-surface-panel border border-border-subtle hover:bg-white/5 hover:border-white/10 text-text-secondary hover:text-white transition-all shadow-sm active:scale-95"
                     title="Refresh Leads"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
-                        strokeWidth={1.5}
+                        strokeWidth={2}
                         stroke="currentColor"
-                        className={`w-5 h-5 ${isLoading ? "animate-spin text-blue-500" : ""}`}
+                        className={`w-4 h-4 ${isLoading ? "animate-spin text-brand-accent" : ""}`}
                     >
                         <path
                             strokeLinecap="round"
@@ -55,27 +60,35 @@ export const LeadList = ({
                 </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-3">
                 {error ? (
-                    <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
-                        {error}
+                    <div className="p-4 rounded-xl glass-panel text-red-400 text-sm border-red-500/20 shadow-[0_4px_20px_rgba(239,68,68,0.1)]">
+                        <div className="flex items-center space-x-2 font-medium mb-1">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                            <span>Fetch Error</span>
+                        </div>
+                        <span className="text-xs opacity-80">{error}</span>
                     </div>
                 ) : isLoading && leads.length === 0 ? (
                     // Skeleton Loader
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {[1, 2, 3, 4, 5].map((i) => (
                             <div
                                 key={i}
-                                className="h-[180px] rounded-lg bg-[#111111] border border-[#1F1F1F] animate-pulse"
+                                className="h-[140px] rounded-xl bg-surface-panel border border-border-subtle animate-pulse"
                             ></div>
                         ))}
                     </div>
                 ) : leads.length === 0 ? (
-                    <div className="text-center py-20 text-gray-500">
-                        <p>No leads found in the generic group.</p>
+                    <div className="text-center py-20 text-text-secondary flex flex-col items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-surface-panel border border-border-subtle flex items-center justify-center mb-4">
+                            <svg className="w-8 h-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
+                        </div>
+                        <p className="font-medium">No leads found in orbit.</p>
+                        <p className="text-xs opacity-60 mt-1">Check monday.com group assignments.</p>
                     </div>
                 ) : (
-                    <div className="space-y-1">
+                    <div className="space-y-3">
                         {leads.map((lead) => (
                             <LeadCard
                                 key={lead.id}
