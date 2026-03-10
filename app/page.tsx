@@ -6,11 +6,12 @@ import { LeadList } from "@/components/LeadList";
 import { DialerPanel } from "@/components/DialerPanel";
 import { DirectDialer } from "@/components/DirectDialer";
 import { CallStats } from "@/components/CallStats";
+import { PipelineBoard } from "@/components/PipelineBoard";
 import { useLeads } from "@/hooks/useLeads";
 import { useTwilioDevice } from "@/hooks/useTwilioDevice";
 import { Lead } from "@/services/mondayService";
 
-type DashboardTab = "leads" | "dialer" | "analysis";
+type DashboardTab = "leads" | "pipeline" | "dialer" | "analysis";
 
 export default function Dashboard() {
     const { leads, isLoading, error: leadsError, refreshLeads } = useLeads();
@@ -33,10 +34,16 @@ export default function Dashboard() {
         await makeCall(lead.phone, lead.id, lead.name);
     };
 
+    const switchTab = (tab: DashboardTab) => { setActiveTab(tab); setShowDialerPanel(false); };
+
     const navItems = [
         {
             id: "leads" as DashboardTab, label: "Leads",
             icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
+        },
+        {
+            id: "pipeline" as DashboardTab, label: "Pipeline",
+            icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>,
         },
         {
             id: "dialer" as DashboardTab, label: "Dialer",
@@ -48,15 +55,13 @@ export default function Dashboard() {
         },
     ];
 
-    const switchTab = (tab: DashboardTab) => { setActiveTab(tab); setShowDialerPanel(false); };
-
     return (
         <div className="flex flex-col h-[100dvh] bg-surface-base text-text-primary overflow-hidden font-sans">
             <TopBar deviceStatus={deviceStatus} callStatus={callStatus} />
 
             <div className="flex-1 flex overflow-hidden">
                 {/* Desktop Sidebar */}
-                <nav className="hidden md:flex w-20 bg-surface-panel border-r border-border-subtle flex-col items-center py-6 space-y-8 z-30 shadow-[5px_0_20px_rgba(0,0,0,0.3)]">
+                <nav className="hidden md:flex w-20 bg-surface-panel border-r border-border-subtle flex-col items-center py-6 space-y-6 z-30 shadow-[5px_0_20px_rgba(0,0,0,0.3)] flex-shrink-0">
                     {navItems.map((item) => (
                         <button key={item.id} onClick={() => switchTab(item.id)}
                             className={`p-3 rounded-xl transition-all duration-300 relative ${activeTab === item.id ? "bg-brand-accent/10 text-brand-accent shadow-[0_0_15px_rgba(0,240,255,0.1)]" : "text-text-secondary hover:text-white hover:bg-white/5"}`}
@@ -70,30 +75,53 @@ export default function Dashboard() {
                 {/* Main Content */}
                 <main className="flex-1 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-surface-panel/20 via-surface-base to-surface-base h-full relative overflow-hidden">
 
+                    {/* ── LEADS TAB ── */}
                     {activeTab === "leads" && (
-                        <div className="flex flex-col md:flex-row h-full animate-in fade-in duration-300">
-                            {/* Lead List */}
-                            <div className={`${showDialerPanel ? "hidden md:flex" : "flex"} flex-col w-full md:w-[380px] lg:w-[420px] flex-shrink-0 h-full`}>
-                                <LeadList leads={leads} isLoading={isLoading} error={leadsError}
-                                    activeLeadId={activeLead?.id || null} isCallActive={isCallActive}
-                                    onSelectLead={handleSelectLead} onCallLead={handleCallLead} onRefresh={refreshLeads} />
+                        <div className="flex flex-col h-full animate-in fade-in duration-300">
+                            {/* Mini stats bar */}
+                            <div className="flex gap-4 px-4 py-2 border-b border-border-subtle bg-surface-panel/30 flex-shrink-0 overflow-x-auto">
+                                {[
+                                    { label: "Total Leads", value: leads.length, color: "text-white" },
+                                    { label: "Connected", value: callStatus === "connected" ? "Active" : "—", color: "text-green-400" },
+                                    { label: "Status", value: callStatus === "idle" ? "Ready" : callStatus.charAt(0).toUpperCase() + callStatus.slice(1), color: "text-brand-accent" },
+                                ].map((s) => (
+                                    <div key={s.label} className="flex items-center gap-2 whitespace-nowrap py-1 px-3 rounded-lg bg-surface-panel border border-border-subtle">
+                                        <span className="text-[10px] text-text-secondary uppercase tracking-wider font-semibold">{s.label}</span>
+                                        <span className={`text-sm font-bold ${s.color}`}>{s.value}</span>
+                                    </div>
+                                ))}
                             </div>
 
-                            {/* Dialer Panel */}
-                            <div className={`${showDialerPanel ? "flex" : "hidden md:flex"} flex-col flex-1 h-full`}>
-                                <div className="md:hidden flex items-center px-4 pt-4">
-                                    <button onClick={() => setShowDialerPanel(false)}
-                                        className="flex items-center gap-2 text-text-secondary hover:text-white text-sm transition-colors">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                                        Back to Leads
-                                    </button>
+                            {/* List + Dialer */}
+                            <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+                                <div className={`${showDialerPanel ? "hidden md:flex" : "flex"} flex-col w-full md:w-[380px] lg:w-[420px] flex-shrink-0 h-full`}>
+                                    <LeadList leads={leads} isLoading={isLoading} error={leadsError}
+                                        activeLeadId={activeLead?.id || null} isCallActive={isCallActive}
+                                        onSelectLead={handleSelectLead} onCallLead={handleCallLead} onRefresh={refreshLeads} />
                                 </div>
-                                <DialerPanel activeLead={activeLead} callStatus={callStatus} callDuration={callDuration}
-                                    isMuted={isMuted} onHangUp={hangUp} onMuteToggle={toggleMute} />
+                                <div className={`${showDialerPanel ? "flex" : "hidden md:flex"} flex-col flex-1 h-full`}>
+                                    <div className="md:hidden flex items-center px-4 pt-4">
+                                        <button onClick={() => setShowDialerPanel(false)} className="flex items-center gap-2 text-text-secondary hover:text-white text-sm transition-colors">
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                                            Back to Leads
+                                        </button>
+                                    </div>
+                                    <DialerPanel activeLead={activeLead} callStatus={callStatus} callDuration={callDuration}
+                                        isMuted={isMuted} onHangUp={hangUp} onMuteToggle={toggleMute} />
+                                </div>
                             </div>
                         </div>
                     )}
 
+                    {/* ── PIPELINE TAB ── */}
+                    {activeTab === "pipeline" && (
+                        <div className="h-full animate-in fade-in duration-300">
+                            <PipelineBoard leads={leads} isCallActive={isCallActive}
+                                onCallLead={handleCallLead} onLeadsChange={refreshLeads} />
+                        </div>
+                    )}
+
+                    {/* ── DIALER TAB ── */}
                     {activeTab === "dialer" && (
                         <div className="flex h-full items-center justify-center p-4 animate-in fade-in zoom-in-95 duration-500">
                             <DirectDialer callStatus={callStatus} callDuration={callDuration} isMuted={isMuted}
@@ -101,6 +129,7 @@ export default function Dashboard() {
                         </div>
                     )}
 
+                    {/* ── ANALYTICS TAB ── */}
                     {activeTab === "analysis" && (
                         <div className="h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <CallStats />

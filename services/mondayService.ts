@@ -6,11 +6,12 @@ const LOST_GROUP_ID = process.env.MONDAY_LOST_GROUP_ID || "";
 
 export interface Lead {
   id: string;
-  name: string; // Lead Name
-  phone: string; // Phone Number
-  email: string; // Email
-  status: string; // Status
-  createdDate: string; // Created Date
+  name: string;
+  phone: string;
+  email: string;
+  status: string;
+  createdDate: string;
+  pipeline_stage?: string;
 }
 
 export const getLostLeads = async (): Promise<Lead[]> => {
