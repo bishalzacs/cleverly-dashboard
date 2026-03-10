@@ -66,7 +66,7 @@ export const getLostLeads = async (): Promise<Lead[]> => {
         status: getColumnText("status__1"), // Re-Schedule, Gold etc.
         createdDate: item.created_at,
       };
-    });
+    }).filter((lead: Lead) => lead.phone && lead.phone.trim() !== "");
 
     return leads;
   } catch (error) {

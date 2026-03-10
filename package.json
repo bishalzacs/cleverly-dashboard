@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.99.0",
     "@twilio/voice-sdk": "^2.18.0",
     "axios": "^1.13.6",
     "date-fns": "^4.1.0",

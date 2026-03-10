@@ -18,14 +18,14 @@ export const useLeads = (): UseLeadsReturn => {
     const fetchLeads = useCallback(async () => {
         try {
             setError(null);
-            const response = await fetch("/api/monday/lost-leads");
+            const response = await fetch("/api/leads?limit=500");
             const data = await response.json();
 
             if (!response.ok || !data.success) {
                 throw new Error(data.error || "Failed to fetch leads");
             }
 
-            setLeads(data.leads || []);
+            setLeads(data.data || []);
         } catch (err: any) {
             setError(err.message);
         } finally {

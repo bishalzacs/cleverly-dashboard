@@ -31,33 +31,55 @@ export const LeadList = ({
                     <h2 className="text-lg font-semibold tracking-tight text-white flex items-center gap-2">
                         Lost Leads
                         <span className="bg-brand-accent/10 text-brand-accent text-xs px-2 py-0.5 rounded-full border border-brand-accent/20">
-                            {leads.length}
+                            {leads.length}+
                         </span>
                     </h2>
-                    <p className="text-xs text-text-secondary mt-1 font-medium tracking-wide uppercase">Ready to dial</p>
+                    <p className="text-xs text-text-secondary mt-1 font-medium tracking-wide uppercase">Stored in Supabase</p>
                 </div>
 
-                <button
-                    onClick={onRefresh}
-                    disabled={isLoading}
-                    className="p-2 rounded-lg bg-surface-panel border border-border-subtle hover:bg-white/5 hover:border-white/10 text-text-secondary hover:text-white transition-all shadow-sm active:scale-95"
-                    title="Refresh Leads"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2}
-                        stroke="currentColor"
-                        className={`w-4 h-4 ${isLoading ? "animate-spin text-brand-accent" : ""}`}
+                <div className="flex gap-2">
+                    <button
+                        onClick={async () => {
+                            const btn = document.getElementById("sync-btn");
+                            if (btn) btn.classList.add("animate-pulse", "text-brand-accent");
+                            try {
+                                await fetch("/api/sync-leads", { method: "POST" });
+                                onRefresh(); // Refresh the list after syncing
+                            } catch (e) {
+                                console.error(e);
+                            } finally {
+                                if (btn) btn.classList.remove("animate-pulse", "text-brand-accent");
+                            }
+                        }}
+                        id="sync-btn"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-accent/10 border border-brand-accent/20 hover:bg-brand-accent/20 text-brand-accent transition-all shadow-sm active:scale-95 text-xs font-semibold uppercase tracking-wider"
+                        title="Sync from Monday.com"
                     >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-                        />
-                    </svg>
-                </button>
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" /></svg>
+                        Sync
+                    </button>
+                    <button
+                        onClick={onRefresh}
+                        disabled={isLoading}
+                        className="p-2 rounded-lg bg-surface-panel border border-border-subtle hover:bg-white/5 hover:border-white/10 text-text-secondary hover:text-white transition-all shadow-sm active:scale-95"
+                        title="Refresh Leads"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                            className={`w-4 h-4 ${isLoading ? "animate-spin text-brand-accent" : ""}`}
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+                            />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-3">
