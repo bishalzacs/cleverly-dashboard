@@ -30,6 +30,7 @@ export async function POST(_request: Request) {
             sales_call_date: lead.sales_call_date || null,
             deal_value: lead.deal_value ?? null,
             plan_type: lead.plan_type || null,
+            group_id: lead.group_id || null,
         }));
 
         // Upsert in batches of 200 to avoid payload limits

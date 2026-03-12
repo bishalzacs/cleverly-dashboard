@@ -23,6 +23,7 @@ export interface Lead {
   deal_value?: number;
   plan_type?: string;
   monday_created_at?: string;
+  group_id?: string;
 }
 
 export const getLostLeads = async (): Promise<Lead[]> => {
@@ -110,8 +111,11 @@ export const getLostLeads = async (): Promise<Lead[]> => {
             page = data.boards[0]?.groups[0]?.items_page;
         }
         
+        
         const items = page?.items || [];
-        allItems.push(...items);
+        // Tag items with their source group before pushing them to the global array
+        const itemsWithGroup = items.map((item: any) => ({ ...item, group_id: groupId }));
+        allItems.push(...itemsWithGroup);
         cursor = page?.cursor || null;
       } while (cursor);
     }
@@ -172,6 +176,7 @@ export const getLostLeads = async (): Promise<Lead[]> => {
         sales_call_date: parseDateCol("date4"),
         deal_value: dealValue,
         plan_type: getColumnText("status4__1"),
+        group_id: item.group_id,
       };
     }).filter((lead: Lead) => lead.phone && lead.phone.trim() !== "");
 
