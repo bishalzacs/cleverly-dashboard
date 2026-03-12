@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Lead } from "@/services/mondayService";
 import { LeadCard } from "./LeadCard";
 import { LeadEditModal } from "./LeadEditModal";
@@ -19,6 +19,7 @@ interface LeadListProps {
 export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, onSelectLead, onCallLead, onRefresh }: LeadListProps) => {
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
     const [localLeads, setLocalLeads] = useState<Lead[]>(leads);
+    const [activeSection, setActiveSection] = useState<"Lost" | "No-Show" | "Cancel">("Lost");
 
     if (leads !== localLeads && leads.length !== localLeads.length) setLocalLeads(leads);
 
@@ -37,17 +38,28 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
         await fetch(`/api/leads/${id}`, { method: "DELETE" });
     };
 
-    const displayLeads = localLeads.length > 0 ? localLeads : leads;
+    const baseLeads = localLeads.length > 0 ? localLeads : leads;
+
+    const displayLeads = useMemo(() => {
+        return baseLeads.filter(lead => {
+            const s = (lead.status || "").toLowerCase();
+            if (activeSection === "Lost") return s.includes("lost");
+            if (activeSection === "No-Show") return s.includes("no show") || s.includes("no-show");
+            if (activeSection === "Cancel") return s.includes("cancel");
+            return true;
+        });
+    }, [baseLeads, activeSection]);
 
     return (
         <div className="flex flex-col h-full bg-surface-base border-r border-border-subtle shadow-[10px_0_30px_rgba(0,0,0,0.5)] z-20 relative">
-            <div className="p-5 border-b border-border-subtle flex justify-between items-center sticky top-0 glass z-10">
-                <h2 className="text-lg font-semibold tracking-tight text-white flex items-center gap-2">
-                    Lost Leads
-                    <span className="bg-brand-accent/10 text-brand-accent text-xs px-2 py-0.5 rounded-full border border-brand-accent/20">
-                        {displayLeads.length}
-                    </span>
-                </h2>
+            <div className="p-5 border-b border-border-subtle flex flex-col gap-4 sticky top-0 glass z-10">
+                <div className="flex justify-between items-center w-full">
+                    <h2 className="text-lg font-semibold tracking-tight text-white flex items-center gap-2">
+                        Leads
+                        <span className="bg-brand-accent/10 text-brand-accent text-xs px-2 py-0.5 rounded-full border border-brand-accent/20">
+                            {baseLeads.length} Total
+                        </span>
+                    </h2>
                 <div className="flex gap-2">
                     <button
                         onClick={async () => {
@@ -73,6 +85,22 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                     </button>
                 </div>
             </div>
+
+            {/* Status Tabs */}
+            <div className="flex items-center gap-2 bg-surface-panel p-1 rounded-lg border border-border-subtle">
+                {(["Lost", "No-Show", "Cancel"] as const).map(section => (
+                    <button
+                        key={section}
+                        onClick={() => setActiveSection(section)}
+                        className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${activeSection === section 
+                            ? "bg-surface-base text-brand-accent shadow-sm border border-border-subtle" 
+                            : "text-text-secondary hover:text-white"}`}
+                    >
+                        {section}
+                    </button>
+                ))}
+            </div>
+        </div>
 
             <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-3">
                 {error ? (

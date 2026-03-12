@@ -3,6 +3,8 @@ import { gql } from "graphql-request";
 
 const BOARD_ID = process.env.MONDAY_BOARD_ID || "";
 const LOST_GROUP_ID = process.env.MONDAY_LOST_GROUP_ID || "";
+const NOSHOW_GROUP_ID = process.env.MONDAY_NOSHOW_GROUP_ID || "";
+const CANCEL_GROUP_ID = process.env.MONDAY_CANCEL_GROUP_ID || "";
 
 export interface Lead {
   id: string;
@@ -24,14 +26,16 @@ export interface Lead {
 }
 
 export const getLostLeads = async (): Promise<Lead[]> => {
-  if (!BOARD_ID || !LOST_GROUP_ID) {
-    throw new Error("Missing MONDAY_BOARD_ID or MONDAY_LOST_GROUP_ID");
+  const targetGroupIds = [LOST_GROUP_ID, NOSHOW_GROUP_ID, CANCEL_GROUP_ID].filter(Boolean);
+
+  if (!BOARD_ID || targetGroupIds.length === 0) {
+    throw new Error("Missing MONDAY_BOARD_ID or Monday Group IDs");
   }
 
   const query = gql`
-    query getLostLeads($boardId: [ID!], $groupId: String!) {
+    query getLostLeads($boardId: [ID!], $groupIds: [String!]) {
       boards(ids: $boardId) {
-        groups(ids: [$groupId]) {
+        groups(ids: $groupIds) {
           items_page(limit: 500) {
             cursor
             items {
@@ -50,7 +54,7 @@ export const getLostLeads = async (): Promise<Lead[]> => {
     }
   `;
 
-  const variables = { boardId: [BOARD_ID], groupId: LOST_GROUP_ID };
+  const variables = { boardId: [BOARD_ID], groupIds: targetGroupIds };
 
   try {
     const allItems: any[] = [];
@@ -61,9 +65,9 @@ export const getLostLeads = async (): Promise<Lead[]> => {
     do {
       const paginatedQuery = cursor
         ? gql`
-          query getLostLeadsCursor($boardId: [ID!], $groupId: String!, $cursor: String!) {
+          query getLostLeadsCursor($boardId: [ID!], $groupIds: [String!], $cursor: String!) {
             boards(ids: $boardId) {
-              groups(ids: [$groupId]) {
+              groups(ids: $groupIds) {
                 items_page(limit: 500, cursor: $cursor) {
                   cursor
                   items {
@@ -85,10 +89,20 @@ export const getLostLeads = async (): Promise<Lead[]> => {
 
       const pageVars = cursor ? { ...variables, cursor } : variables;
       const data: any = await mondayClient.request(paginatedQuery, pageVars);
-      const page = data.boards[0]?.groups[0]?.items_page;
-      const items = page?.items || [];
-      allItems.push(...items);
-      cursor = page?.cursor || null;
+      // Handle pagination array since we might have multiple groups returned
+      const groups = data.boards[0]?.groups || [];
+      let foundCursor = null;
+
+      groups.forEach((group: any) => {
+        const page = group.items_page;
+        const items = page?.items || [];
+        allItems.push(...items);
+        if (page?.cursor) {
+          foundCursor = page.cursor;
+        }
+      });
+      
+      cursor = foundCursor;
     } while (cursor);
 
     const leads: Lead[] = allItems.map((item: any) => {

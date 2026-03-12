@@ -1,6 +1,7 @@
 "use client";
 
 import { Lead } from "@/services/mondayService";
+import { subDays, subMonths, subYears, format } from "date-fns";
 
 export interface FilterState {
     owner: string;
@@ -23,6 +24,47 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
     const set = (key: keyof FilterState, value: string) =>
         onFiltersChange({ ...filters, [key]: value });
 
+    const handlePresetChange = (preset: string) => {
+        const today = new Date();
+        const to = format(today, "yyyy-MM-dd");
+        let from = "";
+
+        switch (preset) {
+            case "3days":
+                from = format(subDays(today, 3), "yyyy-MM-dd");
+                break;
+            case "1month":
+                from = format(subMonths(today, 1), "yyyy-MM-dd");
+                break;
+            case "6months":
+                from = format(subMonths(today, 6), "yyyy-MM-dd");
+                break;
+            case "1year":
+                from = format(subYears(today, 1), "yyyy-MM-dd");
+                break;
+            default:
+                onFiltersChange({ ...filters, from: "", to: "" }); // handles "custom" or clear
+                return;
+        }
+
+        onFiltersChange({ ...filters, from, to });
+    };
+
+    // Determine current preset based on dates
+    let currentPreset = "";
+    if (filters.from && filters.to) {
+        const todayStr = format(new Date(), "yyyy-MM-dd");
+        if (filters.to === todayStr) {
+            if (filters.from === format(subDays(new Date(), 3), "yyyy-MM-dd")) currentPreset = "3days";
+            else if (filters.from === format(subMonths(new Date(), 1), "yyyy-MM-dd")) currentPreset = "1month";
+            else if (filters.from === format(subMonths(new Date(), 6), "yyyy-MM-dd")) currentPreset = "6months";
+            else if (filters.from === format(subYears(new Date(), 1), "yyyy-MM-dd")) currentPreset = "1year";
+            else currentPreset = "custom";
+        } else {
+            currentPreset = "custom";
+        }
+    }
+
     const hasFilters = filters.owner || filters.from || filters.to;
 
     return (
@@ -44,8 +86,27 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                 </select>
             </div>
 
-            {/* Date range */}
-            <div className="flex items-center gap-1.5">
+            {/* Date range presets */}
+            <div className="flex items-center gap-1.5 ml-2">
+                <svg className="w-3.5 h-3.5 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <select
+                    value={currentPreset}
+                    onChange={(e) => handlePresetChange(e.target.value)}
+                    className="bg-surface-panel border border-border-subtle rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-brand-accent/50 transition-all min-w-[120px]"
+                >
+                    <option value="">All Time</option>
+                    <option value="3days">Last 3 Days</option>
+                    <option value="1month">Past Month</option>
+                    <option value="6months">Last 6 Months</option>
+                    <option value="1year">Last 1 Year</option>
+                    <option value="custom">Custom Range</option>
+                </select>
+            </div>
+
+            {/* Manual Date range */}
+            <div className="flex items-center gap-1.5 ml-1 opacity-80 hover:opacity-100 transition-opacity">
                 <svg className="w-3.5 h-3.5 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
