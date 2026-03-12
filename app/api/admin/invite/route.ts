@@ -42,10 +42,17 @@ export async function POST(request: Request) {
     )
 
     // 5. Send Invite
-    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email)
+    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+      data: { role: 'user' },
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/update-password`
+    })
 
     if (inviteError) {
-      console.error("Invite Error:", inviteError)
+      console.error("Invite Error:", inviteError.message)
+      // Check for user already exists error
+      if (inviteError.message.includes('already been registered')) {
+        return NextResponse.json({ error: 'This user has already been registered.' }, { status: 400 })
+      }
       return NextResponse.json({ error: inviteError.message }, { status: 500 })
     }
 
