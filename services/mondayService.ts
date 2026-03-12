@@ -116,16 +116,18 @@ export const getLostLeads = async (): Promise<Lead[]> => {
         return col?.value || null;
       };
 
-      // Parse owner from people column JSON: {"personsAndTeams":[{"id":...,"name":"...","kind":"person"}]}
-      let ownerName = "";
-      try {
-        const ownerVal = getColumnValue("person");
-        if (ownerVal) {
-          const parsed = JSON.parse(ownerVal);
-          const persons = parsed?.personsAndTeams || [];
-          ownerName = persons.map((p: any) => p.name).join(", ");
-        }
-      } catch { /* ignored */ }
+      // Parse owner from people column - it appears in getColumnText instead of the raw JSON value
+      let ownerName = getColumnText("person");
+      if (!ownerName) {
+        try {
+            const ownerVal = getColumnValue("person");
+            if (ownerVal) {
+              const parsed = JSON.parse(ownerVal);
+              const persons = parsed?.personsAndTeams || [];
+              ownerName = persons.map((p: any) => p.name).join(", ");
+            }
+        } catch { /* ignored */ }
+      }
 
       // Parse date columns: {"date":"2025-03-01","changed_at":"..."}
       const parseDateCol = (id: string): string => {

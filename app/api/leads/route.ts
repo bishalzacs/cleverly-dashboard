@@ -23,8 +23,8 @@ export async function GET(request: Request) {
             .range(offset, offset + limit - 1);
 
         if (owner) query = query.eq("owner", owner);
-        if (from) query = query.gte("created_date", from);
-        if (to) query = query.lte("created_date", to + "T23:59:59Z");
+        if (from) query = query.gte("created_date", from + " 00:00:00");
+        if (to) query = query.lte("created_date", to + " 23:59:59");
 
         const { data: leads, error, count } = await query;
 
