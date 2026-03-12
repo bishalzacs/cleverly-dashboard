@@ -59,51 +59,62 @@ export const getLostLeads = async (): Promise<Lead[]> => {
   try {
     const allItems: any[] = [];
 
-    // Paginate through all Monday.com pages
-    let cursor: string | null = null;
-
-    do {
-      const paginatedQuery = cursor
-        ? gql`
-          query getLostLeadsCursor($boardId: [ID!], $groupIds: [String!], $cursor: String!) {
-            boards(ids: $boardId) {
-              groups(ids: $groupIds) {
-                items_page(limit: 500, cursor: $cursor) {
-                  cursor
-                  items {
-                    id
-                    name
-                    created_at
-                    column_values {
+    // Paginate through each group individually to avoid cursor validation mismatch on Monday.com
+    for (const groupId of targetGroupIds) {
+      let cursor: string | null = null;
+      do {
+        const query = cursor ? gql`
+            query($cursor: String!) {
+                next_items_page(limit: 500, cursor: $cursor) {
+                    cursor
+                    items {
                       id
-                      text
-                      value
+                      name
+                      created_at
+                      column_values {
+                        id
+                        text
+                        value
+                      }
                     }
-                  }
                 }
-              }
             }
-          }
-        `
-        : query;
-
-      const pageVars = cursor ? { ...variables, cursor } : variables;
-      const data: any = await mondayClient.request(paginatedQuery, pageVars);
-      // Handle pagination array since we might have multiple groups returned
-      const groups = data.boards[0]?.groups || [];
-      let foundCursor = null;
-
-      groups.forEach((group: any) => {
-        const page = group.items_page;
+        ` : gql`
+            query($boardId: [ID!], $groupId: [String!]) {
+                boards(ids: $boardId) {
+                    groups(ids: $groupId) {
+                        items_page(limit: 500) {
+                            cursor
+                            items {
+                              id
+                              name
+                              created_at
+                              column_values {
+                                id
+                                text
+                                value
+                              }
+                            }
+                        }
+                    }
+                }
+            }
+        `;
+        const vars: any = cursor ? { cursor } : { boardId: [BOARD_ID], groupId: [groupId] };
+        const data: any = await mondayClient.request(query, vars);
+        
+        let page;
+        if (cursor) {
+            page = data.next_items_page;
+        } else {
+            page = data.boards[0]?.groups[0]?.items_page;
+        }
+        
         const items = page?.items || [];
         allItems.push(...items);
-        if (page?.cursor) {
-          foundCursor = page.cursor;
-        }
-      });
-      
-      cursor = foundCursor;
-    } while (cursor);
+        cursor = page?.cursor || null;
+      } while (cursor);
+    }
 
     const leads: Lead[] = allItems.map((item: any) => {
       const getColumnText = (exactId: string) => {
@@ -165,8 +176,8 @@ export const getLostLeads = async (): Promise<Lead[]> => {
     }).filter((lead: Lead) => lead.phone && lead.phone.trim() !== "");
 
     return leads;
-  } catch (error) {
-    console.error("Error fetching Monday leads:", error);
-    throw new Error("Failed to fetch leads from Monday.com");
+  } catch (error: any) {
+    console.error("Error fetching Monday leads details:", error?.response?.errors || error.message || error);
+    throw new Error("Failed to fetch leads from Monday.com: " + (error?.message || "Unknown error"));
   }
 };
