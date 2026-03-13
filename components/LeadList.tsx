@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Lead } from "@/services/mondayService";
 import { LeadCard } from "./LeadCard";
 import { LeadEditModal } from "./LeadEditModal";
+import { subDays, subMonths, subYears, isAfter, parseISO } from "date-fns";
 
 interface LeadListProps {
     leads: Lead[];
@@ -39,8 +40,12 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
 
     const baseLeads = localLeads.length > 0 ? localLeads : leads;
 
+    const owners = Array.from(new Set(baseLeads.map((l) => l.owner).filter(Boolean) as string[])).sort();
+
     const groups = ["Lost", "No-Show", "Cancel"] as const;
     const [columnSearch, setColumnSearch] = useState<Record<string, string>>({});
+    const [columnOwner, setColumnOwner] = useState<Record<string, string>>({});
+    const [columnDate, setColumnDate] = useState<Record<string, string>>({});
 
     const getGroupLeads = (group: typeof groups[number]) => {
         let filtered = baseLeads.filter(lead => {
@@ -52,6 +57,31 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
             if (group === "Cancel") return s.includes("cancel");
             return true;
         });
+
+        const ownerStr = columnOwner[group];
+        if (ownerStr) {
+            filtered = filtered.filter(lead => lead.owner === ownerStr);
+        }
+
+        const datePreset = columnDate[group];
+        if (datePreset && datePreset !== "all") {
+            const today = new Date();
+            let limitDate: Date | null = null;
+            if (datePreset === "3days") limitDate = subDays(today, 3);
+            else if (datePreset === "1month") limitDate = subMonths(today, 1);
+            else if (datePreset === "6months") limitDate = subMonths(today, 6);
+            else if (datePreset === "1year") limitDate = subYears(today, 1);
+
+            if (limitDate) {
+                filtered = filtered.filter(lead => {
+                    if (!lead.createdDate) return false;
+                    try {
+                        const cur = parseISO(lead.createdDate);
+                        return isAfter(cur, limitDate!);
+                    } catch { return false; }
+                });
+            }
+        }
 
         const searchStr = columnSearch[group]?.toLowerCase();
         if (searchStr) {
@@ -125,7 +155,7 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                                         {groupLeads.length}
                                     </span>
                                 </div>
-                                <div className="p-2 border-b border-border-subtle bg-surface-base/50">
+                                <div className="p-2 border-b border-border-subtle bg-surface-base/50 flex flex-col gap-2">
                                     <div className="relative">
                                         <svg className="w-3.5 h-3.5 text-text-secondary absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -137,6 +167,27 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                                             onChange={(e) => setColumnSearch({...columnSearch, [group]: e.target.value})}
                                             className="w-full bg-surface-panel border border-border-subtle rounded-md pl-8 pr-3 py-1.5 text-xs text-white placeholder-text-secondary focus:outline-none focus:border-brand-accent/50 transition-all font-sans"
                                         />
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <select
+                                            value={columnOwner[group] || ""}
+                                            onChange={(e) => setColumnOwner({...columnOwner, [group]: e.target.value})}
+                                            className="flex-1 bg-surface-panel border border-border-subtle rounded-md px-2 py-1.5 text-xs text-text-secondary hover:text-white focus:outline-none focus:border-brand-accent/50 transition-all cursor-pointer"
+                                        >
+                                            <option value="">All Reps</option>
+                                            {owners.map(o => <option key={o} value={o}>{o}</option>)}
+                                        </select>
+                                        <select
+                                            value={columnDate[group] || "all"}
+                                            onChange={(e) => setColumnDate({...columnDate, [group]: e.target.value})}
+                                            className="flex-1 bg-surface-panel border border-border-subtle rounded-md px-2 py-1.5 text-xs text-text-secondary hover:text-white focus:outline-none focus:border-brand-accent/50 transition-all cursor-pointer"
+                                        >
+                                            <option value="all">All Time</option>
+                                            <option value="3days">Last 3 Days</option>
+                                            <option value="1month">Past Month</option>
+                                            <option value="6months">Last 6 Months</option>
+                                            <option value="1year">Last 1 Year</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
