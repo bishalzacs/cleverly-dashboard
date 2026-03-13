@@ -34,23 +34,31 @@ export async function GET(request: Request) {
         }
 
         // Map Supabase snake_case back to Lead interface (camelCase where needed)
-        const mapped = (leads || []).map((row: any) => ({
-            id: row.id,
-            name: row.name,
-            phone: row.phone,
-            email: row.email,
-            status: row.status,
-            createdDate: row.created_date,
-            pipeline_stage: row.pipeline_stage,
-            owner: row.owner,
-            interested_in: row.interested_in,
-            notes: row.notes,
-            company: row.company,
-            sales_call_date: row.sales_call_date,
-            deal_value: row.deal_value,
-            plan_type: row.plan_type,
-            monday_created_at: row.monday_created_at,
-        }));
+        const mapped = (leads || []).map((row: any) => {
+            let groupName = "Lost";
+            if (row.group_id === "new_group64021__1") groupName = "No-Show";
+            else if (row.group_id === "new_group54376__1") groupName = "Cancel";
+
+            return {
+                id: row.id,
+                name: row.name,
+                phone: row.phone,
+                email: row.email,
+                status: row.status,
+                createdDate: row.created_date,
+                pipeline_stage: row.pipeline_stage,
+                owner: row.owner,
+                interested_in: row.interested_in,
+                notes: row.notes,
+                company: row.company,
+                sales_call_date: row.sales_call_date,
+                deal_value: row.deal_value,
+                plan_type: row.plan_type,
+                monday_created_at: row.monday_created_at,
+                group_id: row.group_id,
+                group_name: groupName,
+            };
+        });
 
         return NextResponse.json({ success: true, data: mapped, count });
     } catch (error: any) {

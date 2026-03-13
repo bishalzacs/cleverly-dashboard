@@ -83,19 +83,19 @@ export default function Dashboard() {
                             {/* Filter bar shared across leads + dialer panel */}
                             <FilterBar leads={leads} filters={filters} onFiltersChange={setFilters} />
 
-                            <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+                            <div className="flex flex-col md:flex-row flex-1 overflow-hidden relative">
                                 {/* Lead List */}
-                                <div className={`${showDialerPanel ? "hidden md:flex" : "flex"} flex-col w-full md:w-[380px] lg:w-[420px] flex-shrink-0 h-full`}>
+                                <div className={`flex flex-col flex-1 h-full min-w-0 overflow-hidden`}>
                                     <LeadList leads={leads} isLoading={isLoading} error={leadsError}
                                         activeLeadId={activeLead?.id || null} isCallActive={isCallActive}
                                         onSelectLead={handleSelectLead} onCallLead={handleCallLead} onRefresh={refreshLeads} />
                                 </div>
                                 {/* Dialer Panel */}
-                                <div className={`${showDialerPanel ? "flex" : "hidden md:flex"} flex-col flex-1 h-full`}>
-                                    <div className="md:hidden flex items-center px-4 pt-4">
-                                        <button onClick={() => setShowDialerPanel(false)} className="flex items-center gap-2 text-text-secondary hover:text-white text-sm transition-colors">
+                                <div className={`${showDialerPanel ? "flex" : "hidden"} flex-col w-full md:w-[400px] lg:w-[460px] flex-shrink-0 h-full border-l border-border-subtle bg-surface-base shadow-[-10px_0_30px_rgba(0,0,0,0.5)] z-20 animate-in slide-in-from-right-4 duration-300`}>
+                                    <div className="flex items-center px-4 pt-4 pb-2 border-b border-border-subtle">
+                                        <button onClick={() => setShowDialerPanel(false)} className="flex items-center gap-2 text-text-secondary hover:text-white text-sm transition-colors font-medium">
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                                            Back to Leads
+                                            Close Dialer
                                         </button>
                                     </div>
                                     <DialerPanel activeLead={activeLead} callStatus={callStatus} callDuration={callDuration}
