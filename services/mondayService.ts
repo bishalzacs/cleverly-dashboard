@@ -24,6 +24,7 @@ export interface Lead {
   plan_type?: string;
   monday_created_at?: string;
   group_id?: string;
+  group_name?: "Lost" | "No-Show" | "Cancel";
 }
 
 export const getLostLeads = async (): Promise<Lead[]> => {
@@ -161,6 +162,10 @@ export const getLostLeads = async (): Promise<Lead[]> => {
         if (dv) dealValue = parseFloat(JSON.parse(dv));
       } catch { /* ignored */ }
 
+      let internalGroupLabel: "Lost" | "No-Show" | "Cancel" = "Lost";
+      if (item.group_id === NOSHOW_GROUP_ID) internalGroupLabel = "No-Show";
+      else if (item.group_id === CANCEL_GROUP_ID) internalGroupLabel = "Cancel";
+
       return {
         id: item.id,
         name: item.name,
@@ -177,6 +182,7 @@ export const getLostLeads = async (): Promise<Lead[]> => {
         deal_value: dealValue,
         plan_type: getColumnText("status4__1"),
         group_id: item.group_id,
+        group_name: internalGroupLabel,
       };
     }).filter((lead: Lead) => lead.phone && lead.phone.trim() !== "");
 

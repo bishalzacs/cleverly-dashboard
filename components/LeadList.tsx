@@ -42,6 +42,10 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
 
     const displayLeads = useMemo(() => {
         return baseLeads.filter(lead => {
+            if (lead.group_name) {
+                return lead.group_name === activeSection;
+            }
+            // fallback for legacy leads
             const s = (lead.status || "").toLowerCase();
             if (activeSection === "Lost") return s.includes("lost");
             if (activeSection === "No-Show") return s.includes("no show") || s.includes("no-show");
