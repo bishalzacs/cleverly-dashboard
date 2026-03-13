@@ -201,23 +201,10 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
 
             {/* Active filter count badge */}
             {hasFilters && (
-                <span className="hidden md:inline-flex items-center justify-center ml-2 text-[10px] text-brand-accent bg-brand-accent/10 border border-brand-accent/20 px-2 
-py-0.5 rounded-full font-semibold shadow-[0_0_10px_rgba(0,240,255,0.1)]">
+                <span className="hidden md:inline-flex items-center justify-center ml-2 text-[10px] text-brand-accent bg-brand-accent/10 border border-brand-accent/20 px-2 py-0.5 rounded-full font-semibold shadow-[0_0_10px_rgba(0,240,255,0.1)]">
                     Active
                 </span>
             )}
-            
-            {/* Inline styles for custom calendar picker invert */}
-            <style jsx>{`
-                .custom-calendar-icon::-webkit-calendar-picker-indicator {
-                    filter: invert(1) opacity(0.5);
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                }
-                .custom-calendar-icon::-webkit-calendar-picker-indicator:hover {
-                    filter: invert(1) opacity(1) drop-shadow(0 0 3px rgba(0, 240, 255, 0.4));
-                }
-            `}</style>
         </div>
     );
 };
