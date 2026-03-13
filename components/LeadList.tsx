@@ -40,9 +40,10 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
     const baseLeads = localLeads.length > 0 ? localLeads : leads;
 
     const groups = ["Lost", "No-Show", "Cancel"] as const;
+    const [columnSearch, setColumnSearch] = useState<Record<string, string>>({});
 
     const getGroupLeads = (group: typeof groups[number]) => {
-        return baseLeads.filter(lead => {
+        let filtered = baseLeads.filter(lead => {
             if (lead.group_name) return lead.group_name === group;
             // fallback
             const s = (lead.status || "").toLowerCase();
@@ -51,6 +52,18 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
             if (group === "Cancel") return s.includes("cancel");
             return true;
         });
+
+        const searchStr = columnSearch[group]?.toLowerCase();
+        if (searchStr) {
+            filtered = filtered.filter(lead => 
+                (lead.name || "").toLowerCase().includes(searchStr) ||
+                (lead.company || "").toLowerCase().includes(searchStr) ||
+                (lead.phone || "").toLowerCase().includes(searchStr) ||
+                (lead.email || "").toLowerCase().includes(searchStr)
+            );
+        }
+        
+        return filtered;
     };
 
     return (
@@ -112,7 +125,20 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                                         {groupLeads.length}
                                     </span>
                                 </div>
-                                
+                                <div className="p-2 border-b border-border-subtle bg-surface-base/50">
+                                    <div className="relative">
+                                        <svg className="w-3.5 h-3.5 text-text-secondary absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                        <input 
+                                            type="text" 
+                                            placeholder={`Search ${group}...`}
+                                            value={columnSearch[group] || ""}
+                                            onChange={(e) => setColumnSearch({...columnSearch, [group]: e.target.value})}
+                                            className="w-full bg-surface-panel border border-border-subtle rounded-md pl-8 pr-3 py-1.5 text-xs text-white placeholder-text-secondary focus:outline-none focus:border-brand-accent/50 transition-all font-sans"
+                                        />
+                                    </div>
+                                </div>
                                 <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
                                     {isLoading && baseLeads.length === 0 ? (
                                         <div className="space-y-4">
