@@ -25,6 +25,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="selection:bg-brand-primary/10 selection:text-brand-primary">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const theme = localStorage.getItem('theme') || 'light';
+                  document.documentElement.setAttribute('data-theme', theme);
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${outfit.variable} ${inter.variable} antialiased font-inter bg-surface-base text-text-primary custom-scrollbar min-h-screen`}
       >

@@ -1,25 +1,43 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-primary: #3B1CD9;
-  --color-brand-accent: #FF782D;
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-accent: var(--brand-accent);
   --color-brand-teal: #10B981;
-  --color-surface-base: #FFFFFF;
-  --color-surface-panel: #F8FAFC;
-  --color-surface-panel-hover: #F1F5F9;
-  --color-border-subtle: #E2E8F0;
-  --color-text-primary: #0F172A;
-  --color-text-secondary: #64748B;
+  --color-surface-base: var(--surface-base);
+  --color-surface-panel: var(--surface-panel);
+  --color-surface-panel-hover: var(--surface-panel-hover);
+  --color-border-subtle: var(--border-subtle);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
 }
 
 :root {
+  /* Cleverly Branding */
+  --brand-primary: #3B1CD9;
+  --brand-accent: #FF782D;
+
+  /* Light Theme (Default) */
+  --surface-base: #FFFFFF;
+  --surface-panel: #F8FAFC;
+  --surface-panel-hover: #F1F5F9;
+  --border-subtle: #E2E8F0;
+  --text-primary: #0F172A;
+  --text-secondary: #64748B;
   --background: #FFFFFF;
   --foreground: #0F172A;
-  --brand-purple: #3B1CD9;
-  --brand-orange: #FF782D;
-  --surface-100: #F8FAFC;
-  --surface-200: #F1F5F9;
-  --border-200: #E2E8F0;
+}
+
+[data-theme='dark'] {
+  /* Dark Theme */
+  --surface-base: #0B0E14;
+  --surface-panel: #141820;
+  --surface-panel-hover: #1C222D;
+  --border-subtle: #2D3748;
+  --text-primary: #F7FAFC;
+  --text-secondary: #A0AEC0;
+  --background: #0B0E14;
+  --foreground: #F7FAFC;
 }
 
 
