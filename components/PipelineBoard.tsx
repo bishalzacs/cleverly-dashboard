@@ -95,13 +95,13 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
     };
 
     return (
-        <div className="h-full flex flex-col bg-surface-base">
+        <div className="h-full flex flex-col bg-white">
             {/* Header */}
-            <div className="border-b border-border-subtle sticky top-0 glass z-10">
+            <div className="border-b border-slate-200 sticky top-0 bg-white/80 backdrop-blur-md z-10">
                 <div className="px-6 py-3 flex items-center justify-between">
                     <div>
-                        <h2 className="text-lg font-semibold text-white">Pipeline</h2>
-                        <p className="text-xs text-text-secondary mt-0.5">Drag leads between stages to track progress</p>
+                        <h2 className="text-lg font-bold text-slate-900 font-outfit uppercase">Pipeline</h2>
+                        <p className="text-xs text-slate-500 mt-0.5 font-medium">Drag leads between stages to track progress</p>
                     </div>
                     <span className="text-xs text-brand-primary bg-brand-primary/10 border border-brand-primary/20 px-3 py-1 rounded-full shadow-[0_0_10px_rgba(59,28,217,0.1)]">
                         {localLeads.length} leads
@@ -111,7 +111,7 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
             </div>
 
             {/* Kanban board */}
-            <div className="flex-1 overflow-x-auto overflow-y-hidden">
+            <div className="flex-1 overflow-x-auto overflow-y-hidden bg-[#F8FAFC]">
                 <div className="flex h-full gap-4 p-6 min-w-max">
                     {PIPELINE_STAGES.map((stage) => {
                         const stageLeads = getLeadsByStage(stage.id);
@@ -124,15 +124,15 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
                                 onDragLeave={() => setDragOverStage(null)}
                                 onDrop={(e) => handleDrop(e, stage.id)}
                                 className={`flex flex-col w-64 flex-shrink-0 rounded-2xl border transition-all duration-200 ${isOver
-                                    ? `${stage.color} bg-white/5 shadow-lg scale-[1.01]`
-                                    : "border-border-subtle bg-surface-panel/40"
+                                    ? `${stage.color} bg-white shadow-lg scale-[1.01]`
+                                    : "border-slate-200 bg-white shadow-sm"
                                     }`}
                             >
                                 {/* Column header */}
-                                <div className="p-4 border-b border-border-subtle flex items-center justify-between">
+                                <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
                                     <div className="flex items-center gap-2">
                                         <div className={`w-2 h-2 rounded-full ${stage.dot}`} />
-                                        <span className="text-sm font-semibold text-white">{stage.label}</span>
+                                        <span className="text-sm font-bold text-slate-800">{stage.label}</span>
                                     </div>
                                     <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${stage.badge}`}>
                                         {stageLeads.length}
@@ -142,7 +142,7 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
                                 {/* Cards */}
                                 <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar min-h-[100px]">
                                     {stageLeads.length === 0 ? (
-                                        <div className={`h-16 rounded-xl border-2 border-dashed flex items-center justify-center text-xs text-text-secondary transition-colors ${isOver ? "border-brand-primary/40 text-brand-primary bg-brand-primary/5" : "border-border-subtle"}`}>
+                                        <div className={`h-16 rounded-xl border-2 border-dashed flex items-center justify-center text-xs text-slate-400 transition-colors ${isOver ? "border-brand-primary/40 text-brand-primary bg-brand-primary/5" : "border-slate-100"}`}>
                                             {isOver ? "Drop here" : "Empty"}
                                         </div>
                                     ) : (

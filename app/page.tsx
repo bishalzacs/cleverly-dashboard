@@ -63,10 +63,10 @@ export default function Dashboard() {
 
             <div className="flex-1 flex overflow-hidden">
                 {/* Desktop Sidebar */}
-                <nav className="hidden md:flex w-20 bg-surface-base border-r border-border-subtle flex-col items-center py-6 space-y-6 z-30 shadow-[5px_0_20px_rgba(0,0,0,0.3)] flex-shrink-0">
+                <nav className="hidden md:flex w-20 bg-white border-r border-slate-200 flex-col items-center py-6 space-y-6 z-30 shadow-[5px_0_20px_rgba(0,0,0,0.02)] flex-shrink-0">
                     {navItems.map((item) => (
                         <button key={item.id} onClick={() => switchTab(item.id)}
-                            className={`p-3 rounded-xl transition-all duration-300 relative ${activeTab === item.id ? "bg-brand-primary/10 text-brand-primary shadow-[0_0_15px_rgba(59,28,217,0.1)]" : "text-text-secondary hover:text-white hover:bg-white/5"}`}
+                            className={`p-3 rounded-xl transition-all duration-300 relative ${activeTab === item.id ? "bg-brand-primary/10 text-brand-primary shadow-[0_4px_12px_rgba(59,28,217,0.1)]" : "text-slate-400 hover:text-brand-primary hover:bg-slate-50"}`}
                             title={item.label}>
                             {activeTab === item.id && <div className="absolute left-0 top-2 bottom-2 w-1 bg-brand-primary rounded-r" />}
                             {item.icon}
@@ -75,7 +75,7 @@ export default function Dashboard() {
                 </nav>
 
                 {/* Main Content */}
-                <main className="flex-1 bg-[radial-gradient(ellipse_at_top,_#0F0A3C_0%,_#080424_100%)] h-full relative overflow-hidden">
+                <main className="flex-1 bg-[#F8FAFC] h-full relative overflow-hidden">
 
                     {/* ── LEADS TAB ── */}
                     {activeTab === "leads" && (
@@ -91,9 +91,9 @@ export default function Dashboard() {
                                         onSelectLead={handleSelectLead} onCallLead={handleCallLead} onRefresh={refreshLeads} />
                                 </div>
                                 {/* Dialer Panel */}
-                                <div className={`${showDialerPanel ? "flex" : "hidden"} flex-col w-full md:w-[400px] lg:w-[460px] flex-shrink-0 h-full border-l border-border-subtle bg-surface-base shadow-[-10px_0_30px_rgba(0,0,0,0.5)] z-20 animate-in slide-in-from-right-4 duration-300`}>
-                                    <div className="flex items-center px-4 pt-4 pb-2 border-b border-border-subtle">
-                                        <button onClick={() => setShowDialerPanel(false)} className="flex items-center gap-2 text-text-secondary hover:text-white text-sm transition-colors font-medium">
+                                <div className={`${showDialerPanel ? "flex" : "hidden"} flex-col w-full md:w-[400px] lg:w-[460px] flex-shrink-0 h-full border-l border-slate-200 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.03)] z-20 animate-in slide-in-from-right-4 duration-300`}>
+                                    <div className="flex items-center px-4 pt-4 pb-2 border-b border-slate-100">
+                                        <button onClick={() => setShowDialerPanel(false)} className="flex items-center gap-2 text-slate-500 hover:text-brand-primary text-sm transition-colors font-medium">
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                                             Close Dialer
                                         </button>
@@ -132,10 +132,10 @@ export default function Dashboard() {
             </div>
 
             {/* Mobile Bottom Nav */}
-            <nav className="md:hidden flex items-center border-t border-border-subtle bg-surface-panel z-50">
+            <nav className="md:hidden flex items-center border-t border-slate-200 bg-white z-50">
                 {navItems.map((item) => (
                     <button key={item.id} onClick={() => switchTab(item.id)}
-                        className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-all duration-200 relative ${activeTab === item.id ? "text-brand-primary" : "text-text-secondary"}`}>
+                        className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-all duration-200 relative ${activeTab === item.id ? "text-brand-primary" : "text-slate-400"}`}>
                         {item.icon}
                         <span className="text-[10px] font-semibold tracking-wider uppercase">{item.label}</span>
                         {activeTab === item.id && <div className="absolute bottom-0 w-8 h-0.5 bg-brand-primary rounded-t" />}

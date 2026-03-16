@@ -33,8 +33,8 @@ export const LeadCard = ({
             className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden
                 ${draggable ? "cursor-grab active:cursor-grabbing" : ""}
                 ${isActive
-                    ? "bg-surface-panel-hover border-brand-primary/40 shadow-[0_0_30px_rgba(59,28,217,0.05)]"
-                    : "bg-surface-panel border-border-subtle hover:border-white/20 hover:bg-surface-panel-hover hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:-translate-y-0.5"
+                    ? "bg-brand-primary/5 border-brand-primary/40 shadow-[0_4px_20px_rgba(59,28,217,0.08)]"
+                    : "bg-white border-slate-200 hover:border-brand-primary/30 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:-translate-y-0.5"
                 }`}
         >
             {isActive && <div className="absolute top-0 left-0 w-1 h-full bg-brand-primary shadow-[0_0_20px_rgba(59,28,217,0.8)] z-10" />}
@@ -42,23 +42,23 @@ export const LeadCard = ({
             {/* Header row */}
             <div className="flex justify-between items-start mb-2">
                 <div className="pr-2 flex-1 min-w-0">
-                    <h3 className={`font-semibold text-sm leading-tight tracking-tight mb-0.5 truncate ${isActive ? "text-white" : "text-white/90 group-hover:text-white"}`}>
+                    <h3 className={`font-bold text-sm leading-tight tracking-tight mb-0.5 truncate ${isActive ? "text-brand-primary" : "text-slate-900"}`}>
                         {lead.name || "Unknown Lead"}
                     </h3>
                     {lead.company && (
-                        <p className="text-[10px] text-text-secondary truncate">{lead.company}</p>
+                        <p className="text-[10px] text-slate-500 font-medium truncate">{lead.company}</p>
                     )}
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0 ml-1">
                     {lead.status && (
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider border ${isActive ? "bg-brand-primary/10 text-brand-primary border-brand-primary/20" : "bg-white/5 text-text-secondary border-white/5"}`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider border ${isActive ? "bg-brand-primary/10 text-brand-primary border-brand-primary/20" : "bg-slate-100 text-slate-500 border-slate-200"}`}>
                             {lead.status}
                         </span>
                     )}
                     {onEdit && (
                         <button
                             onClick={(e) => { e.stopPropagation(); onEdit(lead); }}
-                            className="p-1 rounded-md hover:bg-white/10 text-text-secondary hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                            className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition-colors opacity-0 group-hover:opacity-100"
                             title="Edit / Delete"
                         >
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
@@ -68,7 +68,7 @@ export const LeadCard = ({
             </div>
 
             {/* Meta row */}
-            <div className="space-y-1 mb-3 text-[11px] text-text-secondary font-medium">
+            <div className="space-y-1 mb-3 text-[11px] text-slate-500 font-medium">
                 <div className="flex items-center gap-1.5 truncate">
                     <svg className="w-3 h-3 opacity-70 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                     <span className="font-mono tracking-wider">{lead.phone || "No phone"}</span>
@@ -99,7 +99,7 @@ export const LeadCard = ({
 
             {/* Notes snippet */}
             {lead.notes && (
-                <p className="text-[10px] text-text-secondary italic bg-white/5 rounded-lg px-2.5 py-1.5 mb-3 line-clamp-2 border border-border-subtle">
+                <p className="text-[10px] text-slate-500 italic bg-slate-50 rounded-lg px-2.5 py-1.5 mb-3 line-clamp-2 border border-slate-100">
                     {lead.notes}
                 </p>
             )}
@@ -110,8 +110,8 @@ export const LeadCard = ({
                 disabled={isCallingDisabled || !lead.phone}
                 className={`w-full py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center space-x-2 border
                     ${isCallingDisabled || !lead.phone
-                        ? "bg-white/5 text-text-secondary border-transparent cursor-not-allowed"
-                        : "bg-surface-panel border-border-subtle text-white hover:border-brand-accent/50 hover:text-brand-accent hover:bg-brand-accent/5 hover:shadow-[0_0_20px_rgba(255,120,45,0.15)]"
+                        ? "bg-slate-50 text-slate-300 border-transparent cursor-not-allowed"
+                        : "bg-white border-slate-200 text-slate-700 hover:border-brand-primary/50 hover:text-brand-primary hover:bg-brand-primary/5 hover:shadow-sm shadow-sm"
                     }`}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">

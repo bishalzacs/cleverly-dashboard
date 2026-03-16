@@ -42,15 +42,15 @@ export const TopBar = ({ deviceStatus, callStatus }: TopBarProps) => {
         window.location.href = "/login";
     };
     return (
-        <header className="h-16 glass border-b border-border-subtle flex items-center justify-between px-8 sticky top-0 z-50">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-50">
             <div className="flex items-center space-x-6">
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-primary/10 border border-brand-primary/30 shadow-md">
                     <span className="text-brand-primary font-bold text-xs tracking-widest">CL</span>
                 </div>
-                <h1 className="text-lg font-bold tracking-tight text-white font-outfit uppercase">
-                    Cleverly<span className="text-text-secondary font-normal ml-1 normal-case">Dialer</span>
+                <h1 className="text-lg font-bold tracking-tight text-slate-900 font-outfit uppercase">
+                    Cleverly<span className="text-slate-500 font-normal ml-1 normal-case">Dialer</span>
                 </h1>
-                <div className="h-4 w-px bg-border-subtle mx-2" />
+                <div className="h-4 w-px bg-slate-200 mx-2" />
                 <StatusIndicator deviceStatus={deviceStatus} callStatus={callStatus} />
             </div>
 
@@ -68,16 +68,16 @@ export const TopBar = ({ deviceStatus, callStatus }: TopBarProps) => {
 
                 <div 
                     onClick={handleLogout}
-                    className="flex items-center space-x-2 glass-pill px-3 py-1.5 rounded-full cursor-pointer hover:bg-red-500/10 hover:border-red-500/20 group transition-colors"
+                    className="flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full cursor-pointer hover:bg-red-50 hover:border-red-200 group transition-all"
                     title="Sign Out"
                 >
-                    <div className="w-6 h-6 rounded-full bg-brand-accent/20 flex items-center justify-center text-xs font-semibold text-brand-accent border border-brand-accent/30 group-hover:bg-red-500/20 group-hover:text-red-400 group-hover:border-red-500/30 transition-all">
+                    <div className="w-6 h-6 rounded-full bg-brand-accent/10 flex items-center justify-center text-xs font-semibold text-brand-accent border border-brand-accent/20 group-hover:bg-red-100 group-hover:text-red-500 group-hover:border-red-200 transition-all">
                         {userEmail ? userEmail.charAt(0).toUpperCase() : "?"}
                     </div>
-                    <span className="text-sm font-medium text-text-primary pr-1 max-w-[120px] truncate group-hover:text-red-400 transition-colors">
+                    <span className="text-sm font-medium text-slate-700 pr-1 max-w-[120px] truncate group-hover:text-red-600 transition-colors">
                         {userEmail || "Loading..."}
                     </span>
-                    <svg className="w-3.5 h-3.5 text-text-secondary opacity-50 group-hover:opacity-100 group-hover:text-red-400 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                    <svg className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-500 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                 </div>
             </div>
 

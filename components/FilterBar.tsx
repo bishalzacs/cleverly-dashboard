@@ -100,7 +100,7 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
     const hasFilters = filters.owner || filters.from || filters.to;
 
     return (
-        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-border-subtle bg-surface-panel/40 relative z-40">
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-slate-200 bg-white relative z-40">
             {/* Owner filter */}
             <div className="flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -109,11 +109,11 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                 <select
                     value={filters.owner}
                     onChange={(e) => set("owner", e.target.value)}
-                    className="bg-surface-panel border border-border-subtle rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-brand-accent/50 transition-all min-w-[130px] shadow-sm cursor-pointer hover:border-text-secondary/30"
+                    className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-brand-primary/50 transition-all min-w-[130px] shadow-sm cursor-pointer hover:border-slate-300"
                 >
-                    <option value="">All Reps</option>
+                    <option value="" className="text-slate-900 bg-white">All Reps</option>
                     {owners.map((o) => (
-                        <option key={o} value={o}>{o}</option>
+                        <option key={o} value={o} className="text-slate-900 bg-white">{o}</option>
                     ))}
                 </select>
             </div>
@@ -122,7 +122,7 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
             <div className="relative" ref={dateRef}>
                 <button
                     onClick={() => setIsDateOpen(!isDateOpen)}
-                    className="flex items-center justify-between gap-2 bg-surface-panel border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-white hover:border-brand-accent/50 transition-all min-w-[160px] shadow-sm"
+                    className="flex items-center justify-between gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 hover:border-brand-primary/50 transition-all min-w-[160px] shadow-sm"
                 >
                     <div className="flex items-center gap-1.5 overflow-hidden">
                         <svg className="w-3.5 h-3.5 text-text-secondary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -136,9 +136,9 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                 </button>
 
                 {isDateOpen && (
-                    <div className="absolute top-full left-0 mt-2 origin-top-left bg-surface-panel border border-border-subtle rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-50 w-[280px] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    <div className="absolute top-full left-0 mt-2 origin-top-left bg-white border border-slate-200 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)] z-50 w-[280px] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                         {/* Presets List */}
-                        <div className="flex flex-col p-1.5 border-b border-border-subtle">
+                        <div className="flex flex-col p-1.5 border-b border-slate-100">
                             {[
                                 { val: "", label: "All Time" },
                                 { val: "3days", label: "Last 3 Days" },
@@ -151,8 +151,8 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                                     onClick={() => { handlePresetChange(preset.val); setIsDateOpen(false); }}
                                     className={`px-3 py-2 text-xs text-left rounded-md transition-colors ${
                                         (preset.val === "" && !filters.from && !filters.to) || currentPreset === preset.val
-                                            ? "bg-brand-primary/10 text-brand-primary font-medium shadow-[inset_0_0_10px_rgba(59,28,217,0.05)]"
-                                            : "text-text-secondary hover:bg-white/5 hover:text-white"
+                                            ? "bg-brand-primary/10 text-brand-primary font-medium"
+                                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                                     }`}
                                 >
                                     {preset.label}
@@ -161,25 +161,25 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                         </div>
 
                         {/* Custom Date Range */}
-                        <div className="p-3 bg-surface-base/50">
-                            <span className="text-[10px] uppercase font-bold text-text-secondary/70 tracking-widest mb-2 block">Custom Range</span>
+                        <div className="p-3 bg-slate-50/50">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-2 block">Custom Range</span>
                             <div className="flex items-center gap-2">
                                 <div className="flex flex-col flex-1 gap-1">
-                                    <label className="text-[10px] text-text-secondary">From</label>
+                                    <label className="text-[10px] text-slate-500">From</label>
                                     <input
                                         type="date"
                                         value={filters.from}
                                         onChange={(e) => set("from", e.target.value)}
-                                        className="bg-surface-panel w-full border border-border-subtle rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-brand-accent/50 transition-all shadow-inner custom-calendar-icon"
+                                        className="bg-white w-full border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-brand-primary/50 transition-all shadow-sm custom-calendar-icon"
                                     />
                                 </div>
                                 <div className="flex flex-col flex-1 gap-1">
-                                    <label className="text-[10px] text-text-secondary">To</label>
+                                    <label className="text-[10px] text-slate-500">To</label>
                                     <input
                                         type="date"
                                         value={filters.to}
                                         onChange={(e) => set("to", e.target.value)}
-                                        className="bg-surface-panel w-full border border-border-subtle rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-brand-accent/50 transition-all shadow-inner custom-calendar-icon"
+                                        className="bg-white w-full border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-brand-primary/50 transition-all shadow-sm custom-calendar-icon"
                                     />
                                 </div>
                             </div>

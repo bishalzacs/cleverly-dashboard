@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark selection:bg-brand-accent/30 selection:text-white">
+    <html lang="en" className="selection:bg-brand-primary/10 selection:text-brand-primary">
       <body
         className={`${outfit.variable} ${inter.variable} antialiased font-inter bg-surface-base text-text-primary custom-scrollbar min-h-screen`}
       >

@@ -3,20 +3,23 @@
 @theme {
   --color-brand-primary: #3B1CD9;
   --color-brand-accent: #FF782D;
-  --color-brand-teal: #22C55E;
-  --color-surface-base: #080424;
-  --color-surface-panel: rgba(255, 255, 255, 0.03);
-  --color-surface-panel-hover: rgba(255, 255, 255, 0.06);
-  --color-border-subtle: rgba(255, 255, 255, 0.08);
-  --color-text-primary: #FFFFFF;
-  --color-text-secondary: #A1A1AA;
+  --color-brand-teal: #10B981;
+  --color-surface-base: #FFFFFF;
+  --color-surface-panel: #F8FAFC;
+  --color-surface-panel-hover: #F1F5F9;
+  --color-border-subtle: #E2E8F0;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #64748B;
 }
 
 :root {
-  --background: #080424;
-  --foreground: #FFFFFF;
+  --background: #FFFFFF;
+  --foreground: #0F172A;
   --brand-purple: #3B1CD9;
   --brand-orange: #FF782D;
+  --surface-100: #F8FAFC;
+  --surface-200: #F1F5F9;
+  --border-200: #E2E8F0;
 }
 
 
@@ -31,25 +34,25 @@ body {
 }
 
 /* Glassmorphism Utilities */
+/* Glassmorphism Utilities - Light Mode */
 .glass {
-  background: rgba(10, 10, 10, 0.6);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .glass-panel {
-  background: linear-gradient(145deg, rgba(20, 20, 20, 0.7) 0%, rgba(10, 10, 10, 0.9) 100%);
+  background: white;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 .glass-pill {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
 }
 
 /* Animations */
@@ -72,21 +75,21 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(59, 28, 217, 0.1);
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(59, 28, 217, 0.2);
 }
 
 /* Custom Calendar Picker Icon Styles */
 .custom-calendar-icon::-webkit-calendar-picker-indicator {
-  filter: invert(1) opacity(0.5);
+  filter: none;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .custom-calendar-icon::-webkit-calendar-picker-indicator:hover {
-  filter: invert(1) opacity(1) drop-shadow(0 0 3px rgba(0, 240, 255, 0.4));
+  filter: drop-shadow(0 0 2px rgba(59, 28, 217, 0.2));
 }
