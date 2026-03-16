@@ -102,7 +102,7 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                 <div className="flex justify-between items-center w-full">
                     <h2 className="text-lg font-semibold tracking-tight text-white flex items-center gap-2">
                         Leads
-                        <span className="bg-brand-accent/10 text-brand-accent text-xs px-2 py-0.5 rounded-full border border-brand-accent/20">
+                        <span className="bg-brand-primary/10 text-brand-primary text-xs px-2 py-0.5 rounded-full border border-brand-primary/20">
                             {baseLeads.length} Total
                         </span>
                     </h2>
@@ -125,7 +125,7 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                         <button onClick={onRefresh} disabled={isLoading}
                             className="p-2 rounded-lg bg-surface-panel border border-border-subtle hover:bg-white/5 text-text-secondary hover:text-white transition-all"
                         >
-                            <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={`w-4 h-4 ${isLoading ? "animate-spin text-brand-accent" : ""}`}>
+                            <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={`w-4 h-4 ${isLoading ? "animate-spin text-brand-primary" : ""}`}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                             </svg>
                         </button>
@@ -165,14 +165,14 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                                             placeholder={`Search ${group}...`}
                                             value={columnSearch[group] || ""}
                                             onChange={(e) => setColumnSearch({...columnSearch, [group]: e.target.value})}
-                                            className="w-full bg-surface-panel border border-border-subtle rounded-md pl-8 pr-3 py-1.5 text-xs text-white placeholder-text-secondary focus:outline-none focus:border-brand-accent/50 transition-all font-sans"
+                                            className="w-full bg-surface-panel border border-border-subtle rounded-md pl-8 pr-3 py-1.5 text-xs text-white placeholder-text-secondary focus:outline-none focus:border-brand-primary/50 transition-all font-sans"
                                         />
                                     </div>
                                     <div className="flex gap-2">
                                         <select
                                             value={columnOwner[group] || ""}
                                             onChange={(e) => setColumnOwner({...columnOwner, [group]: e.target.value})}
-                                            className="flex-1 bg-surface-panel border border-border-subtle rounded-md px-2 py-1.5 text-xs text-text-secondary hover:text-white focus:outline-none focus:border-brand-accent/50 transition-all cursor-pointer"
+                                            className="flex-1 bg-surface-panel border border-border-subtle rounded-md px-2 py-1.5 text-xs text-text-secondary hover:text-white focus:outline-none focus:border-brand-primary/50 transition-all cursor-pointer"
                                         >
                                             <option value="">All Reps</option>
                                             {owners.map(o => <option key={o} value={o}>{o}</option>)}
@@ -180,7 +180,7 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                                         <select
                                             value={columnDate[group] || "all"}
                                             onChange={(e) => setColumnDate({...columnDate, [group]: e.target.value})}
-                                            className="flex-1 bg-surface-panel border border-border-subtle rounded-md px-2 py-1.5 text-xs text-text-secondary hover:text-white focus:outline-none focus:border-brand-accent/50 transition-all cursor-pointer"
+                                            className="flex-1 bg-surface-panel border border-border-subtle rounded-md px-2 py-1.5 text-xs text-text-secondary hover:text-white focus:outline-none focus:border-brand-primary/50 transition-all cursor-pointer"
                                         >
                                             <option value="all">All Time</option>
                                             <option value="3days">Last 3 Days</option>

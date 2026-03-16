@@ -67,7 +67,7 @@ export const DirectDialer = ({
                 <div className="absolute inset-0 bg-gradient-to-b from-brand-accent/5 to-transparent pointer-events-none" />
 
                 <h2 className={`text-3xl font-mono tracking-widest h-10 flex items-center justify-center
-                    ${isCallActive ? "text-brand-accent shadow-brand-accent drop-shadow-[0_0_10px_rgba(0,240,255,0.5)]" : "text-white"}`}>
+                    ${isCallActive ? "text-brand-primary shadow-brand-primary drop-shadow-[0_0_10px_rgba(59,28,217,0.5)]" : "text-white"}`}>
                     {phoneNumber || "Enter Number..."}
                 </h2>
 
@@ -92,7 +92,7 @@ export const DirectDialer = ({
                     <button
                         key={key}
                         onClick={() => handleNumberClick(key)}
-                        className="h-16 rounded-xl bg-surface-panel border border-border-subtle text-xl text-white font-medium hover:bg-white/10 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(0,0,0,0.3)] transition-all active:scale-95 flex items-center justify-center"
+                        className="h-16 rounded-xl bg-surface-panel border border-border-subtle text-xl text-white font-medium hover:bg-brand-primary/10 hover:border-brand-primary/30 hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(59,28,217,0.15)] transition-all active:scale-95 flex items-center justify-center"
                     >
                         {key}
                     </button>

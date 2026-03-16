@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
+
 
 export const metadata: Metadata = {
   title: "Cleverly | Sales Dialer",
@@ -25,8 +26,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark selection:bg-brand-accent/30 selection:text-white">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-surface-base text-text-primary custom-scrollbar min-h-screen`}
+        className={`${outfit.variable} ${inter.variable} antialiased font-inter bg-surface-base text-text-primary custom-scrollbar min-h-screen`}
       >
+
         {children}
       </body>
     </html>

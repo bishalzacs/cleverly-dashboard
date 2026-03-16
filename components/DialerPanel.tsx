@@ -79,13 +79,13 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
                 {/* Hero section */}
                 <div className="relative overflow-hidden px-8 py-10 border-b border-border-subtle">
                     {/* Background gradient orb */}
-                    <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-brand-accent/5 blur-3xl pointer-events-none" />
-                    <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-purple-500/5 blur-2xl pointer-events-none" />
+                    <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-brand-primary/5 blur-3xl pointer-events-none" />
+                    <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-brand-primary/5 blur-2xl pointer-events-none" />
 
                     <div className="relative flex items-center gap-6">
                         {/* Avatar */}
                         <div className="flex-shrink-0 relative">
-                            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-accent/20 to-purple-500/20 border border-brand-accent/20 flex items-center justify-center text-3xl font-bold text-brand-accent shadow-[0_0_30px_rgba(0,240,255,0.1)]">
+                            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-primary/20 to-brand-primary/10 border border-brand-primary/20 flex items-center justify-center text-3xl font-bold text-brand-primary shadow-[0_0_30px_rgba(59,28,217,0.1)]">
                                 {initials}
                             </div>
                             {isCallActive && (
@@ -101,7 +101,7 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
                             )}
                             <div className="flex flex-wrap items-center gap-2 mt-2">
                                 {activeLead.status && (
-                                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-brand-accent/10 text-brand-accent border border-brand-accent/20 uppercase tracking-wider">
+                                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-brand-primary/10 text-brand-primary border border-brand-primary/20 uppercase tracking-wider">
                                         {activeLead.status}
                                     </span>
                                 )}

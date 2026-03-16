@@ -33,11 +33,11 @@ export const LeadCard = ({
             className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden
                 ${draggable ? "cursor-grab active:cursor-grabbing" : ""}
                 ${isActive
-                    ? "bg-surface-panel-hover border-brand-accent/40 shadow-[0_0_30px_rgba(0,240,255,0.05)]"
+                    ? "bg-surface-panel-hover border-brand-primary/40 shadow-[0_0_30px_rgba(59,28,217,0.05)]"
                     : "bg-surface-panel border-border-subtle hover:border-white/20 hover:bg-surface-panel-hover hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:-translate-y-0.5"
                 }`}
         >
-            {isActive && <div className="absolute top-0 left-0 w-1 h-full bg-brand-accent shadow-[0_0_20px_rgba(0,240,255,0.8)] z-10" />}
+            {isActive && <div className="absolute top-0 left-0 w-1 h-full bg-brand-primary shadow-[0_0_20px_rgba(59,28,217,0.8)] z-10" />}
 
             {/* Header row */}
             <div className="flex justify-between items-start mb-2">
@@ -51,7 +51,7 @@ export const LeadCard = ({
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0 ml-1">
                     {lead.status && (
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider border ${isActive ? "bg-brand-accent/10 text-brand-accent border-brand-accent/20" : "bg-white/5 text-text-secondary border-white/5"}`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider border ${isActive ? "bg-brand-primary/10 text-brand-primary border-brand-primary/20" : "bg-white/5 text-text-secondary border-white/5"}`}>
                             {lead.status}
                         </span>
                     )}
@@ -76,7 +76,7 @@ export const LeadCard = ({
                 {lead.owner && (
                     <div className="flex items-center gap-1.5 truncate">
                         <svg className="w-3 h-3 opacity-70 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                        <span className="text-brand-accent/80">{lead.owner}</span>
+                        <span className="text-brand-primary/80">{lead.owner}</span>
                     </div>
                 )}
                 {lead.interested_in && (
@@ -111,7 +111,7 @@ export const LeadCard = ({
                 className={`w-full py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center space-x-2 border
                     ${isCallingDisabled || !lead.phone
                         ? "bg-white/5 text-text-secondary border-transparent cursor-not-allowed"
-                        : "bg-surface-panel border-border-subtle text-white hover:border-brand-accent/50 hover:text-brand-accent hover:bg-brand-accent/5 hover:shadow-[0_0_20px_rgba(0,240,255,0.15)]"
+                        : "bg-surface-panel border-border-subtle text-white hover:border-brand-accent/50 hover:text-brand-accent hover:bg-brand-accent/5 hover:shadow-[0_0_20px_rgba(255,120,45,0.15)]"
                     }`}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">

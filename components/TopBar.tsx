@@ -44,11 +44,11 @@ export const TopBar = ({ deviceStatus, callStatus }: TopBarProps) => {
     return (
         <header className="h-16 glass border-b border-border-subtle flex items-center justify-between px-8 sticky top-0 z-50">
             <div className="flex items-center space-x-6">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-accent/10 border border-brand-accent/30 shadow-md">
-                    <span className="text-brand-accent font-bold text-xs tracking-widest">CL</span>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-primary/10 border border-brand-primary/30 shadow-md">
+                    <span className="text-brand-primary font-bold text-xs tracking-widest">CL</span>
                 </div>
-                <h1 className="text-lg font-semibold tracking-wide text-text-primary">
-                    Cleverly<span className="text-text-secondary font-normal ml-1">Dialer</span>
+                <h1 className="text-lg font-bold tracking-tight text-white font-outfit uppercase">
+                    Cleverly<span className="text-text-secondary font-normal ml-1 normal-case">Dialer</span>
                 </h1>
                 <div className="h-4 w-px bg-border-subtle mx-2" />
                 <StatusIndicator deviceStatus={deviceStatus} callStatus={callStatus} />
@@ -58,12 +58,13 @@ export const TopBar = ({ deviceStatus, callStatus }: TopBarProps) => {
                 {isAdmin && (
                     <button 
                         onClick={() => setShowInviteModal(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-brand-accent/10 hover:bg-brand-accent/20 text-brand-accent border border-brand-accent/20 rounded-lg transition-all"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary border border-brand-primary/20 rounded-lg transition-all"
                     >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                         Invite User
                     </button>
                 )}
+
 
                 <div 
                     onClick={handleLogout}

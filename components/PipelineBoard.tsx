@@ -103,7 +103,7 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
                         <h2 className="text-lg font-semibold text-white">Pipeline</h2>
                         <p className="text-xs text-text-secondary mt-0.5">Drag leads between stages to track progress</p>
                     </div>
-                    <span className="text-xs text-text-secondary bg-surface-panel border border-border-subtle px-3 py-1 rounded-full">
+                    <span className="text-xs text-brand-primary bg-brand-primary/10 border border-brand-primary/20 px-3 py-1 rounded-full shadow-[0_0_10px_rgba(59,28,217,0.1)]">
                         {localLeads.length} leads
                     </span>
                 </div>
@@ -142,7 +142,7 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
                                 {/* Cards */}
                                 <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar min-h-[100px]">
                                     {stageLeads.length === 0 ? (
-                                        <div className={`h-16 rounded-xl border-2 border-dashed flex items-center justify-center text-xs text-text-secondary transition-colors ${isOver ? "border-brand-accent/40 text-brand-accent" : "border-border-subtle"}`}>
+                                        <div className={`h-16 rounded-xl border-2 border-dashed flex items-center justify-center text-xs text-text-secondary transition-colors ${isOver ? "border-brand-primary/40 text-brand-primary bg-brand-primary/5" : "border-border-subtle"}`}>
                                             {isOver ? "Drop here" : "Empty"}
                                         </div>
                                     ) : (

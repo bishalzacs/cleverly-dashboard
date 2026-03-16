@@ -151,7 +151,7 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                                     onClick={() => { handlePresetChange(preset.val); setIsDateOpen(false); }}
                                     className={`px-3 py-2 text-xs text-left rounded-md transition-colors ${
                                         (preset.val === "" && !filters.from && !filters.to) || currentPreset === preset.val
-                                            ? "bg-brand-accent/10 text-brand-accent font-medium shadow-[inset_0_0_10px_rgba(0,240,255,0.05)]"
+                                            ? "bg-brand-primary/10 text-brand-primary font-medium shadow-[inset_0_0_10px_rgba(59,28,217,0.05)]"
                                             : "text-text-secondary hover:bg-white/5 hover:text-white"
                                     }`}
                                 >

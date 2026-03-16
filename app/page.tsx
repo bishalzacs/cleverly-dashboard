@@ -63,19 +63,19 @@ export default function Dashboard() {
 
             <div className="flex-1 flex overflow-hidden">
                 {/* Desktop Sidebar */}
-                <nav className="hidden md:flex w-20 bg-surface-panel border-r border-border-subtle flex-col items-center py-6 space-y-6 z-30 shadow-[5px_0_20px_rgba(0,0,0,0.3)] flex-shrink-0">
+                <nav className="hidden md:flex w-20 bg-surface-base border-r border-border-subtle flex-col items-center py-6 space-y-6 z-30 shadow-[5px_0_20px_rgba(0,0,0,0.3)] flex-shrink-0">
                     {navItems.map((item) => (
                         <button key={item.id} onClick={() => switchTab(item.id)}
-                            className={`p-3 rounded-xl transition-all duration-300 relative ${activeTab === item.id ? "bg-brand-accent/10 text-brand-accent shadow-[0_0_15px_rgba(0,240,255,0.1)]" : "text-text-secondary hover:text-white hover:bg-white/5"}`}
+                            className={`p-3 rounded-xl transition-all duration-300 relative ${activeTab === item.id ? "bg-brand-primary/10 text-brand-primary shadow-[0_0_15px_rgba(59,28,217,0.1)]" : "text-text-secondary hover:text-white hover:bg-white/5"}`}
                             title={item.label}>
-                            {activeTab === item.id && <div className="absolute left-0 top-2 bottom-2 w-1 bg-brand-accent rounded-r" />}
+                            {activeTab === item.id && <div className="absolute left-0 top-2 bottom-2 w-1 bg-brand-primary rounded-r" />}
                             {item.icon}
                         </button>
                     ))}
                 </nav>
 
                 {/* Main Content */}
-                <main className="flex-1 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-surface-panel/20 via-surface-base to-surface-base h-full relative overflow-hidden">
+                <main className="flex-1 bg-[radial-gradient(ellipse_at_top,_#0F0A3C_0%,_#080424_100%)] h-full relative overflow-hidden">
 
                     {/* ── LEADS TAB ── */}
                     {activeTab === "leads" && (
@@ -135,13 +135,14 @@ export default function Dashboard() {
             <nav className="md:hidden flex items-center border-t border-border-subtle bg-surface-panel z-50">
                 {navItems.map((item) => (
                     <button key={item.id} onClick={() => switchTab(item.id)}
-                        className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-all duration-200 relative ${activeTab === item.id ? "text-brand-accent" : "text-text-secondary"}`}>
+                        className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-all duration-200 relative ${activeTab === item.id ? "text-brand-primary" : "text-text-secondary"}`}>
                         {item.icon}
                         <span className="text-[10px] font-semibold tracking-wider uppercase">{item.label}</span>
-                        {activeTab === item.id && <div className="absolute bottom-0 w-8 h-0.5 bg-brand-accent rounded-t" />}
+                        {activeTab === item.id && <div className="absolute bottom-0 w-8 h-0.5 bg-brand-primary rounded-t" />}
                     </button>
                 ))}
             </nav>
+
 
             {/* Error Toast */}
             {twilioError && (
