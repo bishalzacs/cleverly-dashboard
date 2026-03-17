@@ -107,44 +107,44 @@ export const CallStats = () => {
     ];
 
     return (
-        <div className="flex flex-col h-full bg-[#f3f4f6] dark:bg-surface-base overflow-hidden font-sans">
+        <div className="flex flex-col h-full bg-surface-base overflow-hidden font-sans">
             {/* Top Toolbar - Power BI Style */}
-            <div className="h-16 bg-white dark:bg-surface-panel border-b border-gray-200 dark:border-border-subtle flex items-center justify-between px-6 shrink-0 z-10 shadow-sm">
+            <div className="h-16 bg-surface-panel border-b border-border-subtle flex items-center justify-between px-6 shrink-0 z-10 shadow-sm transition-colors">
                 <div className="flex items-center gap-3">
                     <div className="w-1 h-8 bg-brand-primary rounded-full" />
                     <div>
-                        <h2 className="text-lg font-black text-gray-900 dark:text-white font-outfit tracking-tight uppercase leading-none">Intelligence Dashboard</h2>
-                        <p className="text-[9px] text-gray-500 dark:text-text-secondary mt-1 font-bold uppercase tracking-[0.15em] opacity-60">Neural Sales Performance Ecosystem</p>
+                        <h2 className="text-lg font-black text-text-primary font-outfit tracking-tight uppercase leading-none">Intelligence Dashboard</h2>
+                        <p className="text-[9px] text-text-secondary mt-1 font-bold uppercase tracking-[0.15em] opacity-60">Neural Sales Performance Ecosystem</p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-4">
                     {/* Filter Group */}
-                    <div className="flex items-center bg-gray-100 dark:bg-surface-base rounded-lg p-1 border border-gray-200 dark:border-border-subtle">
-                        <div className="flex items-center px-3 gap-2 border-r border-gray-300 dark:border-border-subtle">
-                            <span className="text-[10px] font-black text-gray-400 uppercase">Agent</span>
+                    <div className="flex items-center bg-surface-base rounded-lg p-1 border border-border-subtle transition-colors">
+                        <div className="flex items-center px-3 gap-2 border-r border-border-subtle">
+                            <span className="text-[10px] font-black text-text-secondary uppercase opacity-60">Agent</span>
                             <select 
                                 value={selectedAgent}
                                 onChange={(e) => setSelectedAgent(e.target.value)}
-                                className="bg-transparent text-[11px] font-bold text-gray-700 dark:text-text-primary focus:outline-none cursor-pointer min-w-[140px]"
+                                className="bg-transparent text-[11px] font-bold text-text-primary focus:outline-none cursor-pointer min-w-[140px] appearance-none"
                             >
-                                <option value="all">All Representatives</option>
+                                <option value="all" className="bg-surface-panel">All Representatives</option>
                                 {data?.agentList.map(agent => (
-                                    <option key={agent.id} value={agent.id}>{agent.email}</option>
+                                    <option key={agent.id} value={agent.id} className="bg-surface-panel">{agent.email}</option>
                                 ))}
                             </select>
                         </div>
                         <div className="flex items-center px-3 gap-2">
-                            <span className="text-[10px] font-black text-gray-400 uppercase">Period</span>
+                            <span className="text-[10px] font-black text-text-secondary uppercase opacity-60">Period</span>
                             <select 
                                 value={selectedRange}
                                 onChange={(e) => setSelectedRange(e.target.value)}
-                                className="bg-transparent text-[11px] font-bold text-gray-700 dark:text-text-primary focus:outline-none cursor-pointer"
+                                className="bg-transparent text-[11px] font-bold text-text-primary focus:outline-none cursor-pointer appearance-none"
                             >
-                                <option value="today">Today</option>
-                                <option value="week">7 Days</option>
-                                <option value="month">30 Days</option>
-                                <option value="all">Lifetime</option>
+                                <option value="today" className="bg-surface-panel">Today</option>
+                                <option value="week" className="bg-surface-panel">7 Days</option>
+                                <option value="month" className="bg-surface-panel">30 Days</option>
+                                <option value="all" className="bg-surface-panel">Lifetime</option>
                             </select>
                         </div>
                     </div>
@@ -163,15 +163,15 @@ export const CallStats = () => {
                 {/* KPI Cards Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {cards.map((card, i) => (
-                        <div key={i} className="bg-white dark:bg-surface-panel rounded-xl p-5 border border-gray-200 dark:border-border-subtle shadow-sm hover:shadow-lg transition-all border-l-4 group" style={{ borderLeftColor: card.color }}>
+                        <div key={i} className="bg-surface-panel rounded-xl p-5 border border-border-subtle shadow-sm hover:shadow-lg transition-all border-l-4 group" style={{ borderLeftColor: card.color }}>
                             <div className="flex justify-between items-start mb-2">
-                                <span className="text-[10px] font-black text-gray-500 dark:text-text-secondary uppercase tracking-wider">{card.label}</span>
-                                <div className={`p-2 rounded-lg bg-gray-50 dark:bg-surface-base group-hover:scale-110 transition-transform`} style={{ color: card.color }}>
+                                <span className="text-[10px] font-black text-text-secondary uppercase tracking-wider">{card.label}</span>
+                                <div className={`p-2 rounded-lg bg-surface-base group-hover:scale-110 transition-transform`} style={{ color: card.color }}>
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d={card.icon} /></svg>
                                 </div>
                             </div>
                             <div className="flex items-baseline gap-2">
-                                <span className="text-2xl font-black text-gray-900 dark:text-text-primary font-outfit tracking-tight">
+                                <span className="text-2xl font-black text-text-primary font-outfit tracking-tight">
                                     {isLoading ? "..." : card.value}
                                 </span>
                                 <span className={`text-[9px] font-bold ${card.trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
@@ -183,18 +183,18 @@ export const CallStats = () => {
                 </div>
 
                 {/* Pipeline Board (Kanban Style) */}
-                <div className="bg-white dark:bg-surface-panel rounded-xl border border-gray-200 dark:border-border-subtle shadow-sm overflow-hidden flex flex-col min-h-[400px]">
-                    <div className="px-6 py-4 border-b border-gray-100 dark:border-border-subtle flex items-center justify-between bg-gray-50 dark:bg-surface-panel/50">
+                <div className="bg-surface-panel rounded-xl border border-border-subtle shadow-sm overflow-hidden flex flex-col min-h-[400px]">
+                    <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between bg-surface-base/30">
                         <div className="flex items-center gap-2">
-                            <h3 className="text-sm font-black text-gray-900 dark:text-text-primary uppercase tracking-tight font-outfit">Pipeline Funnel Board</h3>
+                            <h3 className="text-sm font-black text-text-primary uppercase tracking-tight font-outfit">Pipeline Funnel Board</h3>
                             <span className="text-[10px] bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded-full font-black border border-brand-primary/20">{data?.totalLeads ?? 0} Total</span>
                         </div>
                         <div className="flex gap-1">
-                            {[1, 2, 3].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-border-subtle" />)}
+                            {[1, 2, 3].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-border-subtle" />)}
                         </div>
                     </div>
                     
-                    <div className="flex-1 overflow-x-auto p-4 flex gap-4 custom-scrollbar bg-gray-50/50 dark:bg-transparent">
+                    <div className="flex-1 overflow-x-auto p-4 flex gap-4 custom-scrollbar bg-surface-base/10">
                         {PIPELINE_STAGES.map((stage) => {
                             const count = data?.pipelineDistribution[stage.id] ?? 0;
                             const percentage = data?.totalLeads ? (count / data.totalLeads) * 100 : 0;
@@ -203,20 +203,20 @@ export const CallStats = () => {
                                 <div key={stage.id} className="w-[200px] shrink-0 flex flex-col gap-3 group">
                                     <div className="flex items-center justify-between px-1">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-2.5 h-2.5 rounded-full border shadow-sm" style={{ backgroundColor: stage.color, borderColor: 'rgba(255,255,255,0.2)' }} />
-                                            <span className="text-[10px] font-black text-gray-600 dark:text-text-secondary uppercase tracking-widest truncate max-w-[120px]">{stage.label}</span>
+                                            <div className="w-2.5 h-2.5 rounded-full border shadow-sm" style={{ backgroundColor: stage.color, borderColor: 'rgba(255,255,255,0.1)' }} />
+                                            <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest truncate max-w-[120px]">{stage.label}</span>
                                         </div>
-                                        <span className="text-[11px] font-bold text-gray-900 dark:text-text-primary font-mono">{count}</span>
+                                        <span className="text-[11px] font-bold text-text-primary font-mono">{count}</span>
                                     </div>
 
                                     {/* Kanban Column Card */}
-                                    <div className="flex-1 bg-white dark:bg-surface-base rounded-2xl border border-gray-200 dark:border-border-subtle p-4 flex flex-col shadow-sm group-hover:border-brand-primary/30 transition-all hover:shadow-md cursor-default border-t-[6px]" style={{ borderTopColor: stage.color }}>
+                                    <div className="flex-1 bg-surface-base rounded-2xl border border-border-subtle p-4 flex flex-col shadow-sm group-hover:border-brand-primary/30 transition-all hover:shadow-md cursor-default border-t-[6px]" style={{ borderTopColor: stage.color }}>
                                         <div className="flex-1 flex flex-col justify-center items-center text-center py-6">
-                                            <div className="text-2xl font-black text-gray-900 dark:text-text-primary font-outfit mb-1">{count}</div>
-                                            <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{percentage.toFixed(0)}% SHARE</div>
+                                            <div className="text-2xl font-black text-text-primary font-outfit mb-1">{count}</div>
+                                            <div className="text-[10px] font-black text-text-secondary/40 uppercase tracking-widest">{percentage.toFixed(0)}% SHARE</div>
                                         </div>
-                                        <div className="pt-4 border-t border-gray-50 dark:border-border-subtle/30">
-                                            <div className="h-2 w-full bg-gray-100 dark:bg-surface-panel rounded-full overflow-hidden shadow-inner">
+                                        <div className="pt-4 border-t border-border-subtle/20">
+                                            <div className="h-2 w-full bg-surface-panel rounded-full overflow-hidden shadow-inner">
                                                 <div 
                                                     className="h-full rounded-full transition-all duration-1000 ease-out"
                                                     style={{ width: `${isLoading ? 0 : Math.max(5, percentage)}%`, backgroundColor: stage.color }}
@@ -232,11 +232,11 @@ export const CallStats = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-6">
                     {/* Representative Listing */}
-                    <div className="lg:col-span-4 bg-white dark:bg-surface-panel rounded-xl p-6 border border-gray-200 dark:border-border-subtle shadow-sm flex flex-col">
+                    <div className="lg:col-span-4 bg-surface-panel rounded-xl p-6 border border-border-subtle shadow-sm flex flex-col">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h3 className="text-sm font-black text-gray-900 dark:text-text-primary uppercase tracking-tight font-outfit">Regional Sales Reps</h3>
-                                <p className="text-[9px] text-gray-400 uppercase font-bold mt-1 tracking-widest">Global Network Status</p>
+                                <h3 className="text-sm font-black text-text-primary uppercase tracking-tight font-outfit">Regional Sales Reps</h3>
+                                <p className="text-[9px] text-text-secondary uppercase font-bold mt-1 tracking-widest opacity-60">Global Network Status</p>
                             </div>
                             <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
                         </div>
@@ -248,15 +248,15 @@ export const CallStats = () => {
                                 </div>
                             ) : (
                                 data.agentList.map((agent) => (
-                                    <div key={agent.id} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-surface-base/50 border border-gray-100 dark:border-border-subtle hover:border-brand-primary/30 transition-all cursor-pointer group">
+                                    <div key={agent.id} className="flex items-center gap-3 p-3 rounded-xl bg-surface-base/50 border border-border-subtle hover:border-brand-primary/30 transition-all cursor-pointer group">
                                         <div className="w-8 h-8 rounded-lg bg-brand-primary/10 flex items-center justify-center text-[10px] font-black text-brand-primary border border-brand-primary/20 group-hover:bg-brand-primary group-hover:text-white transition-all">
                                             {agent.email.charAt(0).toUpperCase()}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-[10px] font-black text-gray-900 dark:text-text-primary truncate uppercase tracking-tighter">{agent.email}</p>
-                                            <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest opacity-60">Verified Representative</p>
+                                            <p className="text-[10px] font-black text-text-primary truncate uppercase tracking-tighter">{agent.email}</p>
+                                            <p className="text-[8px] font-bold text-text-secondary uppercase tracking-widest opacity-40">Verified Representative</p>
                                         </div>
-                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 opacity-40 group-hover:opacity-100" />
+                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 opacity-20 group-hover:opacity-100 transition-opacity" />
                                     </div>
                                 ))
                             )}
@@ -264,11 +264,11 @@ export const CallStats = () => {
                     </div>
 
                     {/* Data Signal Matrix */}
-                    <div className="lg:col-span-8 bg-white dark:bg-surface-panel rounded-xl p-6 border border-gray-200 dark:border-border-subtle shadow-sm flex flex-col">
+                    <div className="lg:col-span-8 bg-surface-panel rounded-xl p-6 border border-border-subtle shadow-sm flex flex-col">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h3 className="text-sm font-black text-gray-900 dark:text-text-primary uppercase tracking-tight font-outfit">Neural Signal Feed</h3>
-                                <p className="text-[9px] text-gray-400 uppercase font-bold mt-1 tracking-widest">XAI Telephonic Matrix </p>
+                                <h3 className="text-sm font-black text-text-primary uppercase tracking-tight font-outfit">Neural Signal Feed</h3>
+                                <p className="text-[9px] text-text-secondary uppercase font-bold mt-1 tracking-widest opacity-60">XAI Telephonic Matrix </p>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="flex h-2 w-2 relative">
@@ -282,33 +282,33 @@ export const CallStats = () => {
                         <div className="flex-1 relative">
                             {(!data?.recentCalls || data.recentCalls.length === 0) ? (
                                 <div className="h-64 flex flex-col items-center justify-center text-center opacity-30">
-                                    <p className="text-lg font-black text-gray-400 uppercase font-outfit">Matrix Empty</p>
+                                    <p className="text-lg font-black text-text-secondary uppercase font-outfit">Matrix Empty</p>
                                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2">Initial signal pending</p>
                                 </div>
                             ) : (
-                                <div className="space-y-0 border border-gray-100 dark:border-border-subtle rounded-xl overflow-hidden shadow-inner bg-gray-50/20">
+                                <div className="space-y-0 border border-border-subtle/30 rounded-xl overflow-hidden shadow-inner bg-surface-base/20">
                                     {data.recentCalls.map((call, idx) => (
-                                        <div key={call.id} className={`p-4 flex items-center justify-between border-b last:border-0 border-gray-50 dark:border-border-subtle/30 bg-white dark:bg-surface-panel/30 hover:bg-brand-primary/[0.03] transition-all group`}>
+                                        <div key={call.id} className={`p-4 flex items-center justify-between border-b last:border-0 border-border-subtle/10 bg-surface-panel/30 hover:bg-brand-primary/[0.03] transition-all group`}>
                                             <div className="flex items-center gap-4 flex-1">
-                                                <div className="w-10 h-10 rounded-2xl bg-gray-50 dark:bg-surface-base flex items-center justify-center border border-gray-100 dark:border-border-subtle shadow-sm group-hover:border-brand-primary/20">
-                                                    <svg className="w-4 h-4 text-gray-400 group-hover:text-brand-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                                                <div className="w-10 h-10 rounded-2xl bg-surface-base flex items-center justify-center border border-border-subtle shadow-sm group-hover:border-brand-primary/20 transition-colors">
+                                                    <svg className="w-4 h-4 text-text-secondary group-hover:text-brand-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-xs font-black text-gray-900 dark:text-text-primary group-hover:text-brand-primary transition-colors uppercase tracking-tight truncate max-w-[200px]">{call.lead_name || "Unknown Identity"}</p>
-                                                    <p className="text-[10px] text-gray-400 font-mono tracking-tighter mt-0.5">{call.phone}</p>
+                                                    <p className="text-xs font-black text-text-primary group-hover:text-brand-primary transition-colors uppercase tracking-tight truncate max-w-[200px]">{call.lead_name || "Unknown Identity"}</p>
+                                                    <p className="text-[10px] text-text-secondary font-mono tracking-tighter mt-0.5 opacity-60">{call.phone}</p>
                                                 </div>
                                             </div>
 
                                             <div className="flex items-center gap-10 pr-4">
                                                 <div className="hidden md:flex flex-col items-end">
-                                                    <span className="text-[9px] font-black text-gray-900 dark:text-text-primary uppercase tracking-widest">{call.agent_email?.split('@')[0] || "SYSTEM"}</span>
+                                                    <span className="text-[9px] font-black text-text-primary uppercase tracking-widest">{call.agent_email?.split('@')[0] || "SYSTEM"}</span>
                                                     <span className="text-[8px] text-brand-primary font-black uppercase tracking-[0.2em] opacity-40">REP ID</span>
                                                 </div>
                                                 <div className="flex flex-col items-end w-24">
                                                     <span className={`text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border border-current mb-1 shadow-sm ${getStatusStyle(call.status)}`}>
                                                         {call.status}
                                                     </span>
-                                                    <span className="text-[7.5px] font-black text-gray-400 uppercase tracking-tighter">{formatDistanceToNow(new Date(call.created_at), { addSuffix: true })}</span>
+                                                    <span className="text-[7.5px] font-black text-text-secondary uppercase tracking-tighter opacity-40">{formatDistanceToNow(new Date(call.created_at), { addSuffix: true })}</span>
                                                 </div>
                                             </div>
                                         </div>
