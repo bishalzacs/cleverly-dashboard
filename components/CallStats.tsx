@@ -319,13 +319,6 @@ export const CallStats = () => {
                     </div>
                 </div>
             </div>
-
-            <style jsx>{`
-                .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
-                .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
-            `}</style>
         </div>
     );
 };
