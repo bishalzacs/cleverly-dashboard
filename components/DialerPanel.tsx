@@ -19,12 +19,12 @@ const InfoRow = ({ icon, label, value, accent }: { icon: React.ReactNode; label:
     if (!value && value !== 0) return null;
     return (
         <div className="flex items-start gap-3 group">
-            <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mt-0.5 transition-colors ${accent ? "bg-brand-primary/5 text-brand-primary" : "bg-slate-50 text-slate-400 group-hover:text-slate-600"}`}>
+            <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mt-0.5 transition-colors ${accent ? "bg-brand-primary/10 text-brand-primary" : "bg-surface-panel text-text-secondary group-hover:bg-surface-panel-hover group-hover:text-text-primary"}`}>
                 {icon}
             </div>
             <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">{label}</p>
-                <p className={`text-sm font-semibold break-words ${accent ? "text-brand-primary" : "text-slate-700"}`}>{value}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary mb-0.5 opacity-70">{label}</p>
+                <p className={`text-sm font-black break-words ${accent ? "text-brand-primary underline decoration-brand-primary/30 underline-offset-4" : "text-text-primary"}`}>{value}</p>
             </div>
         </div>
     );
@@ -35,15 +35,15 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
 
     if (!activeLead) {
         return (
-            <div className="flex-1 flex items-center justify-center p-8 bg-white">
-                <div className="text-center animate-in fade-in duration-500">
-                    <div className="w-24 h-24 mx-auto mb-6 rounded-full border-2 border-dashed border-slate-100 flex items-center justify-center">
-                        <svg fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-10 h-10 text-slate-200">
+            <div className="flex-1 flex items-center justify-center p-8 bg-surface-base animate-fade-in">
+                <div className="text-center">
+                    <div className="w-24 h-24 mx-auto mb-6 rounded-full border-2 border-dashed border-border-subtle flex items-center justify-center bg-surface-panel/50">
+                        <svg fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-10 h-10 text-text-secondary opacity-30">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                         </svg>
                     </div>
-                    <h2 className="text-xl font-bold text-slate-300 mb-2 font-outfit uppercase">Select a Lead</h2>
-                    <p className="text-slate-300 text-sm max-w-xs mx-auto">Click any lead card to view full details and make a call.</p>
+                    <h2 className="text-xl font-black text-text-secondary opacity-40 mb-2 font-outfit uppercase tracking-tighter">Select a Lead</h2>
+                    <p className="text-text-secondary opacity-30 text-sm max-w-xs mx-auto font-medium">Click any lead card to view full details and make a call.</p>
                 </div>
             </div>
         );
@@ -58,11 +58,11 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
         : null;
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-white animate-in slide-in-from-right-4 fade-in duration-300">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-surface-base animate-fade-in">
 
             {/* Active call banner */}
             {isCallActive && (
-                <div className="flex-shrink-0 border-b border-slate-100 bg-slate-50/50 px-6 py-3">
+                <div className="flex-shrink-0 border-b border-border-subtle bg-surface-panel/50 px-6 py-4">
                     <CallControls
                         callStatus={callStatus}
                         callDuration={callDuration}
@@ -77,15 +77,15 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
             <div className="flex-1 overflow-y-auto custom-scrollbar">
 
                 {/* Hero section */}
-                <div className="relative overflow-hidden px-8 py-10 border-b border-slate-100">
+                <div className="relative overflow-hidden px-8 py-12 border-b border-border-subtle">
                     {/* Background gradient orb */}
                     <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-brand-primary/5 blur-3xl pointer-events-none" />
                     <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-brand-primary/5 blur-2xl pointer-events-none" />
 
                     <div className="relative flex items-center gap-6">
                         {/* Avatar */}
-                        <div className="flex-shrink-0 relative">
-                            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-primary/20 to-brand-primary/10 border border-brand-primary/20 flex items-center justify-center text-3xl font-bold text-brand-primary shadow-[0_0_30px_rgba(59,28,217,0.1)]">
+                        <div className="flex-shrink-0 relative animate-scale-in">
+                            <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-brand-primary/30 to-brand-primary/10 border border-brand-primary/30 flex items-center justify-center text-4xl font-black text-brand-primary shadow-[0_12px_40px_rgba(59,28,217,0.25)]">
                                 {initials}
                             </div>
                             {isCallActive && (
@@ -94,10 +94,10 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
                         </div>
 
                         {/* Name & status */}
-                        <div className="flex-1 min-w-0">
-                            <h2 className="text-2xl font-bold text-slate-900 tracking-tight truncate font-outfit uppercase">{activeLead.name || "Unknown Lead"}</h2>
+                        <div className="flex-1 min-w-0 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                            <h2 className="text-3xl font-black text-text-primary tracking-tight truncate font-outfit uppercase">{activeLead.name || "Unknown Lead"}</h2>
                             {activeLead.company && (
-                                <p className="text-slate-500 font-medium text-sm mt-0.5 truncate">{activeLead.company}</p>
+                                <p className="text-text-secondary font-black text-xs uppercase tracking-widest mt-1.5 truncate opacity-70">{activeLead.company}</p>
                             )}
                             <div className="flex flex-wrap items-center gap-2 mt-2">
                                 {activeLead.status && (
@@ -124,11 +124,11 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
                 <div className="p-6 space-y-4">
 
                     {/* Contact section */}
-                    <div>
-                        <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
-                            <div className="h-px flex-1 bg-slate-100" />
-                            Contact
-                            <div className="h-px flex-1 bg-slate-100" />
+                    <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary mb-4 flex items-center gap-4 opacity-50">
+                            <div className="h-px flex-1 bg-border-subtle" />
+                            Contact Details
+                            <div className="h-px flex-1 bg-border-subtle" />
                         </h3>
                         <div className="space-y-3">
                             <InfoRow
@@ -150,11 +150,11 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
 
                     {/* Sales section */}
                     {(activeLead.interested_in || callDateStr || activeLead.deal_value) && (
-                        <div>
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
-                                <div className="h-px flex-1 bg-slate-100" />
-                                Sales
-                                <div className="h-px flex-1 bg-slate-100" />
+                        <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary mb-4 flex items-center gap-4 opacity-50">
+                                <div className="h-px flex-1 bg-border-subtle" />
+                                Sales Data
+                                <div className="h-px flex-1 bg-border-subtle" />
                             </h3>
                             <div className="space-y-3">
                                 {activeLead.interested_in && (
@@ -181,13 +181,13 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
 
                     {/* Notes section */}
                     {activeLead.notes && (
-                        <div>
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
-                                <div className="h-px flex-1 bg-slate-100" />
-                                Notes
-                                <div className="h-px flex-1 bg-slate-100" />
+                        <div className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary mb-4 flex items-center gap-4 opacity-50">
+                                <div className="h-px flex-1 bg-border-subtle" />
+                                Custom Notes
+                                <div className="h-px flex-1 bg-border-subtle" />
                             </h3>
-                            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-sm text-slate-600 leading-relaxed whitespace-pre-wrap italic">
+                            <div className="bg-surface-panel/40 border border-border-subtle rounded-2xl p-6 text-sm text-text-secondary leading-relaxed whitespace-pre-wrap italic font-medium shadow-inner">
                                 {activeLead.notes}
                             </div>
                         </div>
@@ -197,12 +197,12 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
 
             {/* Call button (when not active) */}
             {!isCallActive && onCall && activeLead.phone && (
-                <div className="flex-shrink-0 p-6 border-t border-slate-100">
+                <div className="flex-shrink-0 p-8 border-t border-border-subtle bg-surface-base">
                     <button
                         onClick={() => onCall(activeLead)}
-                        className="w-full py-4 rounded-xl font-bold text-sm uppercase tracking-widest bg-brand-primary text-white hover:bg-brand-primary/90 hover:shadow-[0_10px_25px_rgba(59,28,217,0.2)] transition-all duration-300 flex items-center justify-center gap-3 group active:scale-[0.98]"
+                        className="w-full py-5 rounded-2xl font-black text-sm uppercase tracking-[0.1em] bg-brand-primary text-white hover:bg-brand-primary/90 hover:shadow-[0_20px_40px_rgba(59,28,217,0.4)] hover:-translate-y-1 transition-all duration-500 flex items-center justify-center gap-4 group active:scale-[0.96] shadow-xl"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 group-hover:rotate-12 transition-transform duration-500">
                             <path fillRule="evenodd" d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z" clipRule="evenodd" />
                         </svg>
                         Call {activeLead.name?.split(" ")[0] || "Now"}

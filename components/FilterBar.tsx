@@ -100,7 +100,7 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
     const hasFilters = filters.owner || filters.from || filters.to;
 
     return (
-        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-slate-200 bg-white relative z-40">
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-border-subtle bg-surface-base relative z-40">
             {/* Owner filter */}
             <div className="flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -109,11 +109,11 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                 <select
                     value={filters.owner}
                     onChange={(e) => set("owner", e.target.value)}
-                    className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-brand-primary/50 transition-all min-w-[130px] shadow-sm cursor-pointer hover:border-slate-300"
+                    className="bg-surface-panel border border-border-subtle rounded-xl px-2.5 py-1.5 text-xs text-text-primary focus:outline-none focus:border-brand-primary/50 transition-all min-w-[130px] shadow-sm cursor-pointer hover:border-brand-primary/30"
                 >
-                    <option value="" className="text-slate-900 bg-white">All Reps</option>
+                    <option value="" className="text-text-primary bg-surface-panel">All Reps</option>
                     {owners.map((o) => (
-                        <option key={o} value={o} className="text-slate-900 bg-white">{o}</option>
+                        <option key={o} value={o} className="text-text-primary bg-surface-panel">{o}</option>
                     ))}
                 </select>
             </div>
@@ -122,13 +122,13 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
             <div className="relative" ref={dateRef}>
                 <button
                     onClick={() => setIsDateOpen(!isDateOpen)}
-                    className="flex items-center justify-between gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 hover:border-brand-primary/50 transition-all min-w-[160px] shadow-sm"
+                    className="flex items-center justify-between gap-2 bg-surface-panel border border-border-subtle rounded-xl px-3 py-1.5 text-xs text-text-primary hover:border-brand-primary/50 transition-all min-w-[170px] shadow-sm"
                 >
                     <div className="flex items-center gap-1.5 overflow-hidden">
                         <svg className="w-3.5 h-3.5 text-text-secondary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <span className="font-medium truncate max-w-[180px]">{getDisplayDate()}</span>
+                        <span className="font-bold truncate max-w-[180px] text-text-primary">{getDisplayDate()}</span>
                     </div>
                     <svg className={`w-3.5 h-3.5 text-text-secondary transition-transform duration-300 flex-shrink-0 ${isDateOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -136,9 +136,9 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                 </button>
 
                 {isDateOpen && (
-                    <div className="absolute top-full left-0 mt-2 origin-top-left bg-white border border-slate-200 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)] z-50 w-[280px] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    <div className="absolute top-full left-0 mt-3 origin-top-left bg-surface-panel border border-border-subtle rounded-2xl shadow-2xl z-50 w-[280px] overflow-hidden animate-scale-in">
                         {/* Presets List */}
-                        <div className="flex flex-col p-1.5 border-b border-slate-100">
+                        <div className="flex flex-col p-2 border-b border-border-subtle">
                             {[
                                 { val: "", label: "All Time" },
                                 { val: "3days", label: "Last 3 Days" },
@@ -149,10 +149,10 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                                 <button
                                     key={preset.val}
                                     onClick={() => { handlePresetChange(preset.val); setIsDateOpen(false); }}
-                                    className={`px-3 py-2 text-xs text-left rounded-md transition-colors ${
+                                    className={`px-3 py-2.5 text-xs text-left rounded-xl transition-all ${
                                         (preset.val === "" && !filters.from && !filters.to) || currentPreset === preset.val
-                                            ? "bg-brand-primary/10 text-brand-primary font-medium"
-                                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                                            ? "bg-brand-primary/20 text-brand-primary font-black"
+                                            : "text-text-secondary hover:bg-surface-base hover:text-text-primary font-bold"
                                     }`}
                                 >
                                     {preset.label}
@@ -161,25 +161,25 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                         </div>
 
                         {/* Custom Date Range */}
-                        <div className="p-3 bg-slate-50/50">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-2 block">Custom Range</span>
-                            <div className="flex items-center gap-2">
-                                <div className="flex flex-col flex-1 gap-1">
-                                    <label className="text-[10px] text-slate-500">From</label>
+                        <div className="p-4 bg-surface-base/30">
+                            <span className="text-[10px] uppercase font-black text-text-secondary tracking-[0.2em] mb-3 block opacity-40">Custom Range</span>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-[10px] text-text-secondary font-bold uppercase opacity-60">From</label>
                                     <input
                                         type="date"
                                         value={filters.from}
                                         onChange={(e) => set("from", e.target.value)}
-                                        className="bg-white w-full border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-brand-primary/50 transition-all shadow-sm custom-calendar-icon"
+                                        className="bg-surface-panel w-full border border-border-subtle rounded-xl px-2 py-2 text-[11px] text-text-primary focus:outline-none focus:border-brand-primary/50 transition-all shadow-inner custom-calendar-icon font-bold"
                                     />
                                 </div>
-                                <div className="flex flex-col flex-1 gap-1">
-                                    <label className="text-[10px] text-slate-500">To</label>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-[10px] text-text-secondary font-bold uppercase opacity-60">To</label>
                                     <input
                                         type="date"
                                         value={filters.to}
                                         onChange={(e) => set("to", e.target.value)}
-                                        className="bg-white w-full border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-brand-primary/50 transition-all shadow-sm custom-calendar-icon"
+                                        className="bg-surface-panel w-full border border-border-subtle rounded-xl px-2 py-2 text-[11px] text-text-primary focus:outline-none focus:border-brand-primary/50 transition-all shadow-inner custom-calendar-icon font-bold"
                                     />
                                 </div>
                             </div>

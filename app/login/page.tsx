@@ -29,29 +29,29 @@ export default async function LoginPage({
   }
 
   return (
-    <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2 m-auto mt-20 relative z-10 p-10 bg-white border border-slate-200 shadow-xl rounded-2xl">
+    <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2 m-auto mt-20 relative z-10 p-10 bg-surface-panel border border-border-subtle shadow-xl rounded-2xl">
       <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/5 to-transparent rounded-2xl pointer-events-none" />
       <form className="animate-in flex-1 flex flex-col w-full justify-center gap-2 text-foreground relative z-10" action={signIn}>
         <div className="mb-6 flex flex-col gap-2 text-center">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 font-outfit uppercase">Welcome Back</h1>
-            <p className="text-sm text-slate-500 font-medium font-inter">Sign in to your dashboard</p>
+            <h1 className="text-3xl font-bold tracking-tight text-text-primary font-outfit uppercase">Welcome Back</h1>
+            <p className="text-sm text-text-secondary font-medium font-inter">Sign in to your dashboard</p>
         </div>
         
-        <label className="text-sm text-slate-600 font-bold uppercase tracking-wider mb-1" htmlFor="email">
+        <label className="text-sm text-text-secondary font-bold uppercase tracking-wider mb-1" htmlFor="email">
           Email
         </label>
         <input
-          className="rounded-lg px-4 py-3 bg-white border border-slate-200 mb-6 text-slate-900 placeholder-slate-300 focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium shadow-sm"
+          className="rounded-lg px-4 py-3 bg-surface-base border border-border-subtle mb-6 text-text-primary placeholder-text-secondary/30 focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium shadow-sm"
           name="email"
           placeholder="you@example.com"
           required
         />
         
-        <label className="text-sm text-slate-600 font-bold uppercase tracking-wider mb-1" htmlFor="password">
+        <label className="text-sm text-text-secondary font-bold uppercase tracking-wider mb-1" htmlFor="password">
           Password
         </label>
         <input
-          className="rounded-lg px-4 py-3 bg-white border border-slate-200 mb-6 text-slate-900 placeholder-slate-300 focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium shadow-sm"
+          className="rounded-lg px-4 py-3 bg-surface-base border border-border-subtle mb-6 text-text-primary placeholder-text-secondary/30 focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium shadow-sm"
           type="password"
           name="password"
           placeholder="••••••••"
@@ -63,7 +63,7 @@ export default async function LoginPage({
         </button>
         
         {message && (
-          <p className="mt-4 p-4 bg-red-50 border border-red-100 text-red-600 text-center text-sm rounded-lg font-bold">
+          <p className="mt-4 p-4 bg-red-500/10 border border-red-500/20 text-red-500 text-center text-sm rounded-lg font-bold">
             {message}
           </p>
         )}

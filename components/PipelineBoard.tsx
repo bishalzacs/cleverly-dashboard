@@ -95,24 +95,24 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
     };
 
     return (
-        <div className="h-full flex flex-col bg-white">
+        <div className="h-full flex flex-col bg-surface-base animate-fade-in">
             {/* Header */}
-            <div className="border-b border-slate-200 sticky top-0 bg-white/80 backdrop-blur-md z-10">
-                <div className="px-6 py-3 flex items-center justify-between">
+            <div className="border-b border-border-subtle sticky top-0 bg-surface-base/80 backdrop-blur-md z-10">
+                <div className="px-6 py-4 flex items-center justify-between">
                     <div>
-                        <h2 className="text-lg font-bold text-slate-900 font-outfit uppercase">Pipeline</h2>
-                        <p className="text-xs text-slate-500 mt-0.5 font-medium">Drag leads between stages to track progress</p>
+                        <h2 className="text-xl font-black text-text-primary font-outfit uppercase tracking-tight">Pipeline Control</h2>
+                        <p className="text-[10px] text-text-secondary mt-1 font-bold uppercase tracking-widest opacity-60">Workflow Management & Lead Velocity</p>
                     </div>
-                    <span className="text-xs text-brand-primary bg-brand-primary/10 border border-brand-primary/20 px-3 py-1 rounded-full shadow-[0_0_10px_rgba(59,28,217,0.1)]">
-                        {localLeads.length} leads
+                    <span className="text-[10px] font-black text-brand-primary bg-brand-primary/10 border border-brand-primary/20 px-4 py-1.5 rounded-full shadow-lg uppercase tracking-widest">
+                        {localLeads.length} leads in funnel
                     </span>
                 </div>
                 <FilterBar leads={leads} filters={filters} onFiltersChange={onFiltersChange} />
             </div>
 
             {/* Kanban board */}
-            <div className="flex-1 overflow-x-auto overflow-y-hidden bg-[#F8FAFC]">
-                <div className="flex h-full gap-4 p-6 min-w-max">
+            <div className="flex-1 overflow-x-auto overflow-y-hidden bg-surface-base">
+                <div className="flex h-full gap-6 p-8 min-w-max">
                     {PIPELINE_STAGES.map((stage) => {
                         const stageLeads = getLeadsByStage(stage.id);
                         const isOver = dragOverStage === stage.id;
@@ -123,27 +123,27 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
                                 onDragOver={(e) => handleDragOver(e, stage.id)}
                                 onDragLeave={() => setDragOverStage(null)}
                                 onDrop={(e) => handleDrop(e, stage.id)}
-                                className={`flex flex-col w-64 flex-shrink-0 rounded-2xl border transition-all duration-200 ${isOver
-                                    ? `${stage.color} bg-white shadow-lg scale-[1.01]`
-                                    : "border-slate-200 bg-white shadow-sm"
+                                className={`flex flex-col w-[300px] flex-shrink-0 rounded-3xl border transition-all duration-300 animate-scale-in ${isOver
+                                    ? `${stage.color} bg-surface-panel shadow-2xl scale-[1.02] border-opacity-100`
+                                    : "border-border-subtle bg-surface-panel/40 shadow-sm"
                                     }`}
                             >
                                 {/* Column header */}
-                                <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
-                                    <div className="flex items-center gap-2">
-                                        <div className={`w-2 h-2 rounded-full ${stage.dot}`} />
-                                        <span className="text-sm font-bold text-slate-800">{stage.label}</span>
+                                <div className="p-5 border-b border-border-subtle flex items-center justify-between bg-surface-panel sticky top-0 z-10 rounded-t-3xl">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-2.5 h-2.5 rounded-full shadow-[0_0_10px_currentColor] ${stage.dot}`} />
+                                        <span className="text-xs font-black text-text-primary uppercase tracking-widest">{stage.label}</span>
                                     </div>
-                                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${stage.badge}`}>
+                                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border ${stage.badge} shadow-sm`}>
                                         {stageLeads.length}
                                     </span>
                                 </div>
 
                                 {/* Cards */}
-                                <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar min-h-[100px]">
+                                <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar min-h-[100px]">
                                     {stageLeads.length === 0 ? (
-                                        <div className={`h-16 rounded-xl border-2 border-dashed flex items-center justify-center text-xs text-slate-400 transition-colors ${isOver ? "border-brand-primary/40 text-brand-primary bg-brand-primary/5" : "border-slate-100"}`}>
-                                            {isOver ? "Drop here" : "Empty"}
+                                        <div className={`h-24 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-[10px] uppercase tracking-widest font-black transition-all duration-500 ${isOver ? "border-brand-primary text-brand-primary bg-brand-primary/10 shadow-2xl" : "border-border-subtle text-text-secondary opacity-20"}`}>
+                                            {isOver ? "Release to Drop" : "No Leads"}
                                         </div>
                                     ) : (
                                         stageLeads.map((lead) => (

@@ -63,19 +63,20 @@ export default function Dashboard() {
 
             <div className="flex-1 flex overflow-hidden">
                 {/* Desktop Sidebar */}
-                <nav className="hidden md:flex w-20 bg-white border-r border-slate-200 flex-col items-center py-6 space-y-6 z-30 shadow-[5px_0_20px_rgba(0,0,0,0.02)] flex-shrink-0">
-                    {navItems.map((item) => (
+                <nav className="hidden md:flex w-24 bg-surface-panel border-r border-border-subtle flex-col items-center py-10 space-y-8 z-30 shadow-[10px_0_40px_rgba(0,0,0,0.5)] flex-shrink-0 animate-fade-in">
+                    {navItems.map((item, idx) => (
                         <button key={item.id} onClick={() => switchTab(item.id)}
-                            className={`p-3 rounded-xl transition-all duration-300 relative ${activeTab === item.id ? "bg-brand-primary/10 text-brand-primary shadow-[0_4px_12px_rgba(59,28,217,0.1)]" : "text-slate-400 hover:text-brand-primary hover:bg-slate-50"}`}
+                            className={`p-4 rounded-2xl transition-all duration-500 relative group animate-scale-in ${activeTab === item.id ? "bg-brand-primary text-white shadow-[0_0_25px_rgba(59,28,217,0.5)] scale-110" : "text-text-secondary opacity-40 hover:opacity-100 hover:bg-surface-base"}`}
+                            style={{ animationDelay: `${idx * 0.1}s` }}
                             title={item.label}>
-                            {activeTab === item.id && <div className="absolute left-0 top-2 bottom-2 w-1 bg-brand-primary rounded-r" />}
-                            {item.icon}
+                            <div className="relative z-10">{item.icon}</div>
+                            {activeTab === item.id && <div className="absolute inset-0 bg-brand-primary rounded-2xl animate-pulse -z-10 blur-md opacity-50" />}
                         </button>
                     ))}
                 </nav>
 
                 {/* Main Content */}
-                <main className="flex-1 bg-[#F8FAFC] h-full relative overflow-hidden">
+                <main className="flex-1 bg-surface-base h-full relative overflow-hidden">
 
                     {/* ── LEADS TAB ── */}
                     {activeTab === "leads" && (
@@ -90,16 +91,18 @@ export default function Dashboard() {
                                         activeLeadId={activeLead?.id || null} isCallActive={isCallActive}
                                         onSelectLead={handleSelectLead} onCallLead={handleCallLead} onRefresh={refreshLeads} />
                                 </div>
-                                {/* Dialer Panel */}
-                                <div className={`${showDialerPanel ? "flex" : "hidden"} flex-col w-full md:w-[400px] lg:w-[460px] flex-shrink-0 h-full border-l border-slate-200 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.03)] z-20 animate-in slide-in-from-right-4 duration-300`}>
-                                    <div className="flex items-center px-4 pt-4 pb-2 border-b border-slate-100">
-                                        <button onClick={() => setShowDialerPanel(false)} className="flex items-center gap-2 text-slate-500 hover:text-brand-primary text-sm transition-colors font-medium">
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                                            Close Dialer
+                                {/* Dialer Panel Container */}
+                                <div className={`${showDialerPanel ? "flex" : "hidden"} flex-col w-full md:w-[450px] lg:w-[500px] flex-shrink-0 h-full border-l border-border-subtle bg-surface-panel shadow-[-20px_0_60px_rgba(0,0,0,0.6)] z-20 animate-in slide-in-from-right-8 duration-500`}>
+                                    <div className="flex items-center px-6 pt-6 pb-4 border-b border-border-subtle bg-surface-base/50">
+                                        <button onClick={() => setShowDialerPanel(false)} className="flex items-center gap-3 text-text-secondary hover:text-brand-primary text-[10px] font-black uppercase tracking-widest transition-all group">
+                                            <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+                                            Collapse Intel
                                         </button>
                                     </div>
-                                    <DialerPanel activeLead={activeLead} callStatus={callStatus} callDuration={callDuration}
-                                        isMuted={isMuted} onHangUp={hangUp} onMuteToggle={toggleMute} onCall={handleCallLead} />
+                                    <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                        <DialerPanel activeLead={activeLead} callStatus={callStatus} callDuration={callDuration}
+                                            isMuted={isMuted} onHangUp={hangUp} onMuteToggle={toggleMute} onCall={handleCallLead} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -131,14 +134,14 @@ export default function Dashboard() {
                 </main>
             </div>
 
-            {/* Mobile Bottom Nav */}
-            <nav className="md:hidden flex items-center border-t border-slate-200 bg-white z-50">
+            {/* Mobile Navigation */}
+            <nav className="md:hidden flex items-center border-t border-border-subtle bg-surface-panel z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] px-4">
                 {navItems.map((item) => (
                     <button key={item.id} onClick={() => switchTab(item.id)}
-                        className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-all duration-200 relative ${activeTab === item.id ? "text-brand-primary" : "text-slate-400"}`}>
-                        {item.icon}
-                        <span className="text-[10px] font-semibold tracking-wider uppercase">{item.label}</span>
-                        {activeTab === item.id && <div className="absolute bottom-0 w-8 h-0.5 bg-brand-primary rounded-t" />}
+                        className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-4 transition-all duration-300 relative ${activeTab === item.id ? "text-brand-primary" : "text-text-secondary opacity-40"}`}>
+                        <div className={`${activeTab === item.id ? "scale-110" : "scale-100"} transition-transform`}>{item.icon}</div>
+                        <span className="text-[9px] font-black tracking-[0.2em] uppercase">{item.label}</span>
+                        {activeTab === item.id && <div className="absolute bottom-0 w-10 h-1 bg-brand-primary rounded-t shadow-[0_0_15px_rgba(59,28,217,0.8)]" />}
                     </button>
                 ))}
             </nav>

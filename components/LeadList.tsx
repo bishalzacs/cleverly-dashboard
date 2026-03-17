@@ -97,12 +97,12 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
     };
 
     return (
-        <div className="flex flex-col h-full bg-white border-r border-slate-200 shadow-[10px_0_30px_rgba(0,0,0,0.02)] z-20 relative overflow-hidden">
-            <div className="p-5 border-b border-slate-200 flex flex-col gap-4 sticky top-0 bg-white/80 backdrop-blur-md z-10 shrink-0">
+        <div className="flex flex-col h-full bg-surface-base border-r border-border-subtle shadow-[10px_0_30px_rgba(0,0,0,0.4)] z-20 relative overflow-hidden animate-fade-in">
+            <div className="p-5 border-b border-border-subtle flex flex-col gap-4 sticky top-0 bg-surface-base/80 backdrop-blur-md z-10 shrink-0">
                 <div className="flex justify-between items-center w-full">
-                    <h2 className="text-lg font-bold tracking-tight text-slate-900 flex items-center gap-2 font-outfit uppercase">
+                    <h2 className="text-lg font-black tracking-tight text-text-primary flex items-center gap-2 font-outfit uppercase">
                         Leads
-                        <span className="bg-brand-primary/5 text-brand-primary text-[10px] px-2.5 py-1 rounded-full border border-brand-primary/10 font-bold">
+                        <span className="bg-brand-primary/10 text-brand-primary text-[10px] px-3 py-1 rounded-full border border-brand-primary/20 font-black shadow-sm">
                             {baseLeads.length} Total
                         </span>
                     </h2>
@@ -123,9 +123,9 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                             Sync
                         </button>
                         <button onClick={onRefresh} disabled={isLoading}
-                            className="p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-all shadow-sm"
+                            className="p-2.5 rounded-xl bg-surface-panel border border-border-subtle hover:bg-surface-panel-hover text-text-secondary hover:text-text-primary transition-all shadow-sm"
                         >
-                            <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={`w-4 h-4 ${isLoading ? "animate-spin text-brand-primary" : ""}`}>
+                            <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={`w-4 h-4 ${isLoading ? "animate-spin text-brand-primary" : ""}`}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                             </svg>
                         </button>
@@ -143,20 +143,20 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                 </div>
             )}
 
-            <div className="flex-1 overflow-x-auto overflow-y-hidden bg-[#F8FAFC]">
+            <div className="flex-1 overflow-x-auto overflow-y-hidden bg-surface-base">
                 <div className="flex h-full gap-4 p-4 min-w-max">
                     {groups.map((group) => {
                         const groupLeads = getGroupLeads(group);
                         return (
-                            <div key={group} className="flex flex-col w-[320px] md:w-[350px] flex-shrink-0 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden h-full mb-4">
-                                <div className="p-3 border-b border-slate-200 flex items-center justify-between bg-white sticky top-0 z-10">
-                                    <span className="text-sm font-bold text-slate-800">{group}</span>
-                                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-500">
+                            <div key={group} className="flex flex-col w-[320px] md:w-[350px] flex-shrink-0 rounded-2xl border border-border-subtle bg-surface-panel shadow-2xl overflow-hidden h-full mb-4 animate-scale-in">
+                                <div className="p-4 border-b border-border-subtle flex items-center justify-between bg-surface-panel sticky top-0 z-10">
+                                    <span className="text-sm font-black text-text-primary tracking-wide">{group}</span>
+                                    <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary shadow-sm">
                                         {groupLeads.length}
                                     </span>
                                 </div>
-                                <div className="p-2 border-b border-slate-100 bg-slate-50/50 flex flex-col gap-2">
-                                    <div className="relative">
+                                <div className="p-2 border-b border-border-subtle bg-surface-base/50 flex flex-col gap-2">
+                                     <div className="relative">
                                         <svg className="w-3.5 h-3.5 text-text-secondary absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                         </svg>
@@ -165,28 +165,28 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                                             placeholder={`Search ${group}...`}
                                             value={columnSearch[group] || ""}
                                             onChange={(e) => setColumnSearch({...columnSearch, [group]: e.target.value})}
-                                            className="w-full bg-white border border-slate-200 rounded-md pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-primary/50 transition-all font-sans shadow-sm"
+                                            className="w-full bg-surface-base border border-border-subtle rounded-xl pl-9 pr-3 py-2 text-xs text-text-primary placeholder-text-secondary focus:outline-none focus:border-brand-primary/50 transition-all font-sans shadow-inner"
                                         />
                                     </div>
                                     <div className="flex gap-2">
                                         <select
                                             value={columnOwner[group] || ""}
                                             onChange={(e) => setColumnOwner({...columnOwner, [group]: e.target.value})}
-                                            className="flex-1 bg-white border border-slate-200 rounded-md px-2 py-1.5 text-xs text-slate-600 hover:text-slate-900 focus:outline-none focus:border-brand-primary/50 transition-all cursor-pointer shadow-sm"
+                                            className="flex-1 bg-surface-base border border-border-subtle rounded-xl px-2 py-2 text-xs text-text-secondary hover:text-text-primary focus:outline-none focus:border-brand-primary/50 transition-all cursor-pointer shadow-inner"
                                         >
-                                            <option value="" className="bg-white text-slate-900">All Reps</option>
-                                            {owners.map(o => <option key={o} value={o} className="bg-white text-slate-900">{o}</option>)}
+                                            <option value="" className="bg-surface-panel text-text-primary">All Reps</option>
+                                            {owners.map(o => <option key={o} value={o} className="bg-surface-panel text-text-primary">{o}</option>)}
                                         </select>
-                                        <select
+                                         <select
                                             value={columnDate[group] || "all"}
                                             onChange={(e) => setColumnDate({...columnDate, [group]: e.target.value})}
-                                            className="flex-1 bg-white border border-slate-200 rounded-md px-2 py-1.5 text-xs text-slate-600 hover:text-slate-900 focus:outline-none focus:border-brand-primary/50 transition-all cursor-pointer shadow-sm"
+                                            className="flex-1 bg-surface-base border border-border-subtle rounded-xl px-2 py-2 text-xs text-text-secondary hover:text-text-primary focus:outline-none focus:border-brand-primary/50 transition-all cursor-pointer shadow-inner"
                                         >
-                                            <option value="all" className="bg-white text-slate-900">All Time</option>
-                                            <option value="3days" className="bg-white text-slate-900">Last 3 Days</option>
-                                            <option value="1month" className="bg-white text-slate-900">Past Month</option>
-                                            <option value="6months" className="bg-white text-slate-900">Last 6 Months</option>
-                                            <option value="1year" className="bg-white text-slate-900">Last 1 Year</option>
+                                            <option value="all" className="bg-surface-panel text-text-primary">All Time</option>
+                                            <option value="3days" className="bg-surface-panel text-text-primary">Last 3 Days</option>
+                                            <option value="1month" className="bg-surface-panel text-text-primary">Past Month</option>
+                                            <option value="6months" className="bg-surface-panel text-text-primary">Last 6 Months</option>
+                                            <option value="1year" className="bg-surface-panel text-text-primary">Last 1 Year</option>
                                         </select>
                                     </div>
                                 </div>

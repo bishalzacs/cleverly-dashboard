@@ -14,7 +14,7 @@ interface TopBarProps {
 export const TopBar = ({ deviceStatus, callStatus }: TopBarProps) => {
     const [userEmail, setUserEmail] = useState<string | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
-    const [theme, setTheme] = useState<'light' | 'dark'>('light');
+    const [theme, setTheme] = useState<'light' | 'dark'>('dark');
     const [showInviteModal, setShowInviteModal] = useState(false);
     const supabase = createClient();
 
@@ -57,15 +57,15 @@ export const TopBar = ({ deviceStatus, callStatus }: TopBarProps) => {
         window.location.href = "/login";
     };
     return (
-        <header className="h-16 bg-surface-base border-b border-border-subtle flex items-center justify-between px-8 sticky top-0 z-50">
+        <header className="h-16 bg-surface-base border-b border-border-subtle flex items-center justify-between px-8 sticky top-0 z-50 animate-fade-in">
             <div className="flex items-center space-x-6">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-primary/10 border border-brand-primary/30 shadow-md">
-                    <span className="text-brand-primary font-bold text-xs tracking-widest">CL</span>
+                <div className="flex items-center justify-center p-1 rounded-lg bg-surface-panel border border-border-subtle shadow-xl hover:scale-105 transition-transform cursor-pointer">
+                    <img src="/logo.png" alt="Cleverly Logo" className="h-8 w-auto object-contain" />
                 </div>
-                <h1 className="text-lg font-bold tracking-tight text-slate-900 font-outfit uppercase">
-                    Cleverly<span className="text-slate-500 font-normal ml-1 normal-case">Dialer</span>
+                <h1 className="text-lg font-bold tracking-tight text-text-primary font-outfit uppercase">
+                    Cleverly<span className="text-text-secondary font-normal ml-1 normal-case">Dialer</span>
                 </h1>
-                <div className="h-4 w-px bg-slate-200 mx-2" />
+                <div className="h-4 w-px bg-border-subtle mx-2" />
                 <StatusIndicator deviceStatus={deviceStatus} callStatus={callStatus} />
             </div>
 

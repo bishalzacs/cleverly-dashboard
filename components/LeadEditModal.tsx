@@ -11,10 +11,10 @@ interface LeadEditModalProps {
 }
 
 const Field = ({ label, icon, children }: { label: string; icon: string; children: React.ReactNode }) => (
-    <div>
-        <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">{label}</label>
-        <div className="relative">
-            <svg className="absolute left-3 top-3 w-4 h-4 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div className="space-y-2">
+        <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1 opacity-50 block">{label}</label>
+        <div className="relative group">
+            <svg className="absolute left-3.5 top-3.5 w-4 h-4 text-text-secondary transition-colors group-focus-within:text-brand-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
             </svg>
             {children}
@@ -52,26 +52,26 @@ export const LeadEditModal = ({ lead, onClose, onSave, onDelete }: LeadEditModal
         finally { setIsDeleting(false); }
     };
 
-    const inputCls = "w-full bg-surface-panel border border-border-subtle rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-text-secondary focus:outline-none focus:border-brand-accent/50 focus:ring-1 focus:ring-brand-accent/30 transition-all";
-    const textareaCls = "w-full bg-surface-panel border border-border-subtle rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-text-secondary focus:outline-none focus:border-brand-accent/50 focus:ring-1 focus:ring-brand-accent/30 transition-all resize-none";
+    const inputCls = "w-full bg-surface-base border border-border-subtle rounded-xl pl-11 pr-4 py-3 text-sm text-text-primary placeholder-text-secondary/40 focus:outline-none focus:border-brand-accent/60 focus:ring-4 focus:ring-brand-accent/10 transition-all font-bold shadow-inner";
+    const textareaCls = "w-full bg-surface-base border border-border-subtle rounded-xl pl-11 pr-4 py-3 text-sm text-text-primary placeholder-text-secondary/40 focus:outline-none focus:border-brand-accent/60 focus:ring-4 focus:ring-brand-accent/10 transition-all resize-none font-bold shadow-inner";
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-            <div className="relative w-full max-w-lg glass-panel rounded-2xl border border-border-subtle shadow-[0_24px_80px_rgba(0,0,0,0.8)] animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
+            <div className="relative w-full max-w-lg bg-surface-panel rounded-[2.5rem] border border-border-subtle shadow-[0_40px_100px_rgba(0,0,0,0.8)] animate-scale-in max-h-[90vh] flex flex-col overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-border-subtle flex-shrink-0">
+                <div className="flex items-center justify-between p-8 border-b border-border-subtle flex-shrink-0 bg-surface-base/30">
                     <div>
-                        <h2 className="text-lg font-semibold text-white">Edit Contact</h2>
-                        <p className="text-xs text-text-secondary mt-0.5">{lead.name}</p>
+                        <h2 className="text-2xl font-black text-text-primary tracking-tight font-outfit uppercase">Lead Metadata</h2>
+                        <p className="text-[10px] text-text-secondary font-black uppercase tracking-[0.2em] mt-1.5 opacity-60">Record Identification & Updates</p>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/5 text-text-secondary hover:text-white transition-colors">
+                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-surface-panel-hover text-text-secondary hover:text-text-primary transition-colors">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
 
                 {/* Scrollable form */}
-                <div className="p-6 space-y-4 overflow-y-auto custom-scrollbar">
+                <div className="p-8 space-y-6 overflow-y-auto custom-scrollbar bg-surface-panel">
                     <div className="grid grid-cols-2 gap-4">
                         <Field label="Full Name" icon="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
                             <input type="text" value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} />
@@ -101,17 +101,17 @@ export const LeadEditModal = ({ lead, onClose, onSave, onDelete }: LeadEditModal
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-between p-6 pt-4 border-t border-border-subtle gap-3 flex-shrink-0">
+                <div className="flex items-center justify-between p-8 border-t border-border-subtle gap-4 flex-shrink-0 bg-surface-base/30">
                     <button onClick={handleDelete} disabled={isDeleting}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all border ${confirmDelete ? "bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30" : "bg-surface-panel text-text-secondary border-border-subtle hover:text-red-400 hover:border-red-500/30"}`}
+                        className={`flex items-center gap-2.5 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${confirmDelete ? "bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30" : "bg-surface-base text-text-secondary border-border-subtle hover:text-red-400 hover:border-red-500/30"}`}
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        {confirmDelete ? "Confirm Delete?" : "Delete"}
+                        {confirmDelete ? "Execute Delete?" : "Delete Lead"}
                     </button>
-                    <div className="flex gap-2">
-                        <button onClick={onClose} className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-surface-panel border border-border-subtle text-text-secondary hover:text-white transition-all">Cancel</button>
-                        <button onClick={handleSave} disabled={isSaving} className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-brand-accent/10 border border-brand-accent/30 text-brand-accent hover:bg-brand-accent/20 transition-all disabled:opacity-50">
-                            {isSaving ? "Saving..." : "Save Changes"}
+                    <div className="flex gap-3">
+                        <button onClick={onClose} className="px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-surface-base border border-border-subtle text-text-secondary hover:text-text-primary transition-all">Dismiss</button>
+                        <button onClick={handleSave} disabled={isSaving} className="px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-brand-accent text-white hover:bg-brand-accent/90 hover:shadow-[0_10px_30px_rgba(0,240,255,0.3)] transition-all disabled:opacity-50">
+                            {isSaving ? "Synchronizing..." : "Update Details"}
                         </button>
                     </div>
                 </div>

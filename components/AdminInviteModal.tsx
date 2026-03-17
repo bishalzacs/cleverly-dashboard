@@ -39,33 +39,34 @@ export const AdminInviteModal = ({ onClose }: AdminInviteModalProps) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-surface-base border border-border-subtle rounded-2xl w-full max-w-md shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
+            <div className="relative w-full max-w-md bg-surface-panel rounded-[2.5rem] border border-border-subtle shadow-[0_40px_100px_rgba(0,0,0,0.8)] animate-scale-in overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/5 to-transparent pointer-events-none" />
                 
-                <div className="p-6 relative z-10 flex flex-col gap-5">
+                <div className="p-10 relative z-10 flex flex-col gap-8">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                                <svg className="w-5 h-5 text-brand-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-                                Invite New User
+                            <h2 className="text-2xl font-black tracking-tight text-text-primary flex items-center gap-3 font-outfit uppercase">
+                                <svg className="w-6 h-6 text-brand-accent shadow-[0_0_15px_rgba(0,240,255,0.4)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+                                Deploy Invitation
                             </h2>
-                            <p className="text-xs text-text-secondary mt-1">Send an invitation link via email</p>
+                            <p className="text-[10px] text-text-secondary mt-2 font-black uppercase tracking-[0.2em] opacity-50">Authorized Personnel Registration</p>
                         </div>
-                        <button onClick={onClose} className="p-2 -mr-2 text-text-secondary hover:text-white rounded-lg hover:bg-white/5 transition-colors">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        <button onClick={onClose} className="p-2 -mr-2 text-text-secondary hover:text-text-primary rounded-xl hover:bg-surface-panel-hover transition-all">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
 
                     <form onSubmit={handleInvite} className="flex flex-col gap-4">
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-sm font-medium text-text-secondary">Email Address</label>
+                        <div className="flex flex-col gap-2.5">
+                            <label className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em] ml-1 opacity-50">Recipient Email</label>
                             <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="teammate@example.com"
-                                className="w-full bg-surface-panel border border-border-subtle rounded-lg px-4 py-2.5 text-white shadow-inner focus:outline-none focus:border-brand-accent/50 focus:ring-1 focus:ring-brand-accent/50 transition-all text-sm font-medium"
+                                placeholder="nominee@cleverly.ai"
+                                className="w-full bg-surface-base border border-border-subtle rounded-2xl px-5 py-4 text-text-primary shadow-inner focus:outline-none focus:border-brand-accent/60 focus:ring-4 focus:ring-brand-accent/10 transition-all text-sm font-bold placeholder:opacity-30"
                                 required
                             />
                         </div>
@@ -84,20 +85,21 @@ export const AdminInviteModal = ({ onClose }: AdminInviteModalProps) => {
                             </div>
                         )}
 
-                        <div className="flex gap-3 justify-end mt-2">
-                            <button
+                        <div className="flex gap-4 justify-end mt-4">
+                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-5 py-2.5 text-sm font-semibold rounded-lg text-text-secondary bg-surface-panel hover:bg-white/5 border border-border-subtle hover:text-white transition-all"
+                                className="px-8 py-4 text-[10px] font-black uppercase tracking-widest rounded-2xl text-text-secondary bg-surface-base hover:bg-surface-panel-hover border border-border-subtle hover:text-text-primary transition-all shadow-sm"
                             >
-                                Cancel
+                                Dismiss
                             </button>
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="px-5 py-2.5 text-sm font-semibold rounded-lg text-white bg-brand-accent hover:bg-brand-accent/90 shadow-[0_0_15px_rgba(0,240,255,0.2)] hover:shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-10 py-4 text-[10px] font-black uppercase tracking-widest rounded-2xl text-white bg-brand-accent hover:bg-brand-accent/90 shadow-xl hover:shadow-[0_10px_30px_rgba(0,240,255,0.4)] transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
                             >
-                                {isLoading ? "Sending..." : "Send Invite"}
+                                {isLoading ? "Transmitting..." : "Issue Signal"}
+                                {!isLoading && <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>}
                             </button>
                         </div>
                     </form>
