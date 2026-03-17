@@ -59,11 +59,12 @@ export const TopBar = ({ deviceStatus, callStatus }: TopBarProps) => {
     return (
         <header className="h-14 bg-surface-base border-b border-border-subtle flex items-center justify-between px-6 sticky top-0 z-50 animate-fade-in">
             <div className="flex items-center space-x-6">
-                <div className="flex items-center justify-center p-1 rounded-lg bg-surface-panel border border-border-subtle shadow-xl hover:scale-105 transition-transform cursor-pointer">
-                    <img src="/logo.png" alt="Cleverly Logo" className="h-7 w-auto object-contain" />
+                <div className="flex items-center justify-center p-1 rounded-lg bg-surface-panel border border-border-subtle shadow-xl hover:scale-110 transition-transform cursor-pointer overflow-hidden">
+                    <img src="/logo-blue.png" alt="Cleverly Logo" className="h-8 w-auto object-contain scale-125" />
                 </div>
-                <h1 className="text-lg font-bold tracking-tight text-text-primary font-outfit uppercase">
-                    Cleverly<span className="text-text-secondary font-normal ml-1 normal-case">Dialer</span>
+                <h1 className="text-lg font-bold tracking-tight font-outfit uppercase">
+                    <span className="text-brand-primary">Cleverly</span>
+                    <span className="text-text-primary ml-1.5 opacity-90">Dialer</span>
                 </h1>
                 <div className="h-4 w-px bg-border-subtle mx-2" />
                 <StatusIndicator deviceStatus={deviceStatus} callStatus={callStatus} />
