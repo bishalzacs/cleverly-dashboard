@@ -58,7 +58,6 @@ export const TopBar = ({ deviceStatus, callStatus }: TopBarProps) => {
     };
     return (
         <header className="h-14 bg-surface-base border-b border-border-subtle flex items-center justify-between px-6 sticky top-0 z-50 animate-fade-in">
-Line 60 typo fixed: flex-items-center to flex items-center.
             <div className="flex items-center space-x-6">
                 <div className="flex items-center justify-center p-1 rounded-lg bg-surface-panel border border-border-subtle shadow-xl hover:scale-105 transition-transform cursor-pointer">
                     <img src="/logo.png" alt="Cleverly Logo" className="h-7 w-auto object-contain" />

@@ -119,7 +119,7 @@ export default function Dashboard() {
 
                     {/* ── DIALER TAB ── */}
                     {activeTab === "dialer" && (
-                        <div className="flex h-full items-center justify-center p-4 animate-in fade-in zoom-in-95 duration-500">
+                        <div className="flex h-full items-center justify-center p-2 animate-in fade-in zoom-in-95 duration-500">
                             <DirectDialer callStatus={callStatus} callDuration={callDuration} isMuted={isMuted}
                                 onCall={makeCall} onHangUp={hangUp} onToggleMute={toggleMute} />
                         </div>

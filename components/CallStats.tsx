@@ -95,7 +95,7 @@ export const CallStats = () => {
     ];
 
     return (
-        <div className="flex flex-col h-full bg-surface-base p-6 md:p-10 space-y-10 overflow-y-auto custom-scrollbar animate-fade-in">
+        <div className="flex flex-col h-full bg-surface-base p-4 md:p-6 space-y-6 overflow-y-auto custom-scrollbar animate-fade-in">
             {/* Header Section */}
             <div className="flex items-center justify-between pb-8 border-b border-border-subtle">
                 <div>
@@ -126,7 +126,7 @@ export const CallStats = () => {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-10">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-6">
                 {/* Secondary Feature Card */}
                 <div className="lg:col-span-1 bg-brand-primary rounded-2xl p-6 text-white flex flex-col justify-between shadow-xl shadow-brand-primary/30 relative overflow-hidden group animate-scale-in" style={{ animationDelay: '0.4s' }}>
                     <div className="absolute top-0 right-0 w-48 h-48 bg-white/20 rounded-full -mr-24 -mt-24 blur-3xl group-hover:bg-white/30 transition-all duration-1000" />
@@ -152,15 +152,15 @@ export const CallStats = () => {
                     </div>
 
                     {(!data?.recentCalls || data.recentCalls.length === 0) ? (
-                        <div className="flex-1 flex flex-col items-center justify-center text-center py-20 grayscale opacity-40">
-                            <svg className="w-16 h-16 text-text-secondary mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                            <p className="text-xl font-bold text-text-primary uppercase font-outfit">No Traffic Detected</p>
-                            <p className="text-text-secondary text-base mt-2 font-medium">Calls will appear here instantly once initiated.</p>
+                        <div className="flex-1 flex flex-col items-center justify-center text-center py-10 grayscale opacity-40">
+                            <svg className="w-12 h-12 text-text-secondary mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                            <p className="text-lg font-bold text-text-primary uppercase font-outfit">No Traffic Detected</p>
+                            <p className="text-text-secondary text-sm mt-1 font-medium">Calls will appear here instantly once initiated.</p>
                         </div>
                     ) : (
                         <div className="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar pr-4">
                             {data.recentCalls.map((call, idx) => (
-                                <div key={call.id} className="p-6 rounded-3xl bg-surface-base border border-border-subtle hover:border-brand-primary/40 transition-all group shadow-inner hover:shadow-2xl animate-fade-in-up" style={{ animationDelay: `${0.6 + idx * 0.05}s` }}>
+                                <div key={call.id} className="p-4 rounded-xl bg-surface-base border border-border-subtle hover:border-brand-primary/40 transition-all group shadow-inner hover:shadow-xl animate-fade-in-up" style={{ animationDelay: `${0.6 + idx * 0.05}s` }}>
                                     <div className="flex justify-between items-start mb-3">
                                         <div>
                                             <p className="text-lg font-bold text-text-primary group-hover:text-brand-primary transition-colors">{call.lead_name || "Unknown Lead"}</p>
@@ -170,7 +170,7 @@ export const CallStats = () => {
                                             {getStatusLabel(call.status)}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between items-center text-sm text-text-secondary mt-5 pt-3 border-t border-border-subtle/50 font-medium">
+                                    <div className="flex justify-between items-center text-xs text-text-secondary mt-4 pt-2 border-t border-border-subtle/50 font-medium">
                                         <span className="flex items-center gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 animate-pulse" />
                                             {formatDuration(call.duration_seconds)} Talk Time
