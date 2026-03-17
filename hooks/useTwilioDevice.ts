@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Device, Call } from "@twilio/voice-sdk";
 
+import { createClient } from "@/utils/supabase/client";
+
 export type DeviceStatus = "offline" | "connecting" | "ready" | "error";
 export type CallStatus = "idle" | "connecting" | "ringing" | "connected" | "ended";
 
@@ -18,6 +20,7 @@ interface UseTwilioDeviceReturn {
 }
 
 export const useTwilioDevice = (): UseTwilioDeviceReturn => {
+    const supabase = createClient();
     const [device, setDevice] = useState<Device | null>(null);
     const [activeCall, setActiveCall] = useState<Call | null>(null);
 
@@ -26,6 +29,8 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
     const [isMuted, setIsMuted] = useState(false);
     const [callDuration, setCallDuration] = useState(0);
     const [error, setError] = useState<string | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
+    const [userEmail, setUserEmail] = useState<string | null>(null);
 
     const durationTimerRef = useRef<NodeJS.Timeout | null>(null);
     const callDurationRef = useRef<number>(0);
@@ -38,6 +43,14 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
         const initDevice = async () => {
             try {
                 setDeviceStatus("connecting");
+                
+                // Fetch user info for logging
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    setUserId(user.id);
+                    setUserEmail(user.email || null);
+                }
+
                 const res = await fetch("/api/twilio/token", { method: "POST" });
                 const data = await res.json();
 
@@ -114,12 +127,20 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
             await fetch("/api/log-call", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone, status, duration_seconds: durationSeconds, lead_id: leadId, lead_name: leadName }),
+                body: JSON.stringify({ 
+                    phone, 
+                    status, 
+                    duration_seconds: durationSeconds, 
+                    lead_id: leadId, 
+                    lead_name: leadName,
+                    agent_id: userId,
+                    agent_email: userEmail
+                }),
             });
         } catch (e) {
             console.warn("Failed to log call:", e);
         }
-    }, []);
+    }, [userId, userEmail]);
 
     const makeCall = useCallback(
         async (phoneNumber: string, leadId?: string, leadName?: string) => {
