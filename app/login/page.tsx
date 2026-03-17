@@ -22,7 +22,7 @@ export default async function LoginPage({
     })
 
     if (error) {
-      return redirect('/login?message=Could not authenticate user')
+      return redirect(`/login?message=${encodeURIComponent(error.message)}`)
     }
 
     return redirect('/')
