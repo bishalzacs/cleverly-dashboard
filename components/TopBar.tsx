@@ -57,10 +57,10 @@ export const TopBar = ({ deviceStatus, callStatus }: TopBarProps) => {
         window.location.href = "/login";
     };
     return (
-        <header className="h-16 bg-surface-base border-b border-border-subtle flex items-center justify-between px-8 sticky top-0 z-50 animate-fade-in">
+        <header className="h-14 bg-surface-base border-b border-border-subtle flex-items-center justify-between px-6 sticky top-0 z-50 animate-fade-in">
             <div className="flex items-center space-x-6">
                 <div className="flex items-center justify-center p-1 rounded-lg bg-surface-panel border border-border-subtle shadow-xl hover:scale-105 transition-transform cursor-pointer">
-                    <img src="/logo.png" alt="Cleverly Logo" className="h-8 w-auto object-contain" />
+                    <img src="/logo.png" alt="Cleverly Logo" className="h-7 w-auto object-contain" />
                 </div>
                 <h1 className="text-lg font-bold tracking-tight text-text-primary font-outfit uppercase">
                     Cleverly<span className="text-text-secondary font-normal ml-1 normal-case">Dialer</span>

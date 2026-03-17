@@ -30,11 +30,11 @@ export const LeadCard = ({
             onClick={() => onSelect(lead)}
             draggable={draggable}
             onDragStart={onDragStart ? (e) => onDragStart(e, lead) : undefined}
-            className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden hover-float
+            className={`p-3 rounded-lg border transition-all duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden hover-float
                 ${draggable ? "cursor-grab active:cursor-grabbing" : ""}
                 ${isActive
-                    ? "bg-brand-primary/10 border-brand-primary/50 shadow-[0_8px_32px_rgba(59,28,217,0.15)]"
-                    : "bg-surface-base border-border-subtle hover:border-brand-primary/40 hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
+                    ? "bg-brand-primary/10 border-brand-primary/50 shadow-[0_6px_24px_rgba(59,28,217,0.15)]"
+                    : "bg-surface-base border-border-subtle hover:border-brand-primary/40 hover:shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
                 }`}
         >
             {isActive && <div className="absolute top-0 left-0 w-1 h-full bg-brand-primary shadow-[0_0_20px_rgba(59,28,217,0.8)] z-10" />}
@@ -42,7 +42,7 @@ export const LeadCard = ({
             {/* Header row */}
             <div className="flex justify-between items-start mb-2">
                 <div className="pr-2 flex-1 min-w-0">
-                    <h3 className={`font-black text-sm leading-tight tracking-tight mb-0.5 truncate ${isActive ? "text-brand-primary" : "text-text-primary"}`}>
+                    <h3 className={`font-black text-xs leading-tight tracking-tight mb-0.5 truncate ${isActive ? "text-brand-primary" : "text-text-primary"}`}>
                         {lead.name || "Unknown Lead"}
                     </h3>
                     {lead.company && (
@@ -51,7 +51,7 @@ export const LeadCard = ({
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0 ml-1">
                     {lead.status && (
-                        <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border ${isActive ? "bg-brand-primary/20 text-brand-primary border-brand-primary/30" : "bg-surface-panel text-text-secondary border-border-subtle"}`}>
+                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest border ${isActive ? "bg-brand-primary/20 text-brand-primary border-brand-primary/30" : "bg-surface-panel text-text-secondary border-border-subtle"}`}>
                             {lead.status}
                         </span>
                     )}
@@ -108,10 +108,10 @@ export const LeadCard = ({
             <button
                 onClick={(e) => { e.stopPropagation(); onCall(lead); }}
                 disabled={isCallingDisabled || !lead.phone}
-                className={`w-full py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 flex items-center justify-center space-x-2 border
+                className={`w-full py-2 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] transition-all duration-500 flex items-center justify-center space-x-2 border
                     ${isCallingDisabled || !lead.phone
                         ? "bg-surface-panel/50 text-text-secondary/20 border-border-subtle/30 cursor-not-allowed"
-                        : "bg-surface-base border-border-subtle text-text-primary hover:border-brand-primary/60 hover:text-brand-primary hover:bg-brand-primary/10 hover:shadow-2xl shadow-sm group-hover:border-brand-primary/30 active:scale-95"
+                        : "bg-surface-base border-border-subtle text-text-primary hover:border-brand-primary/60 hover:text-brand-primary hover:bg-brand-primary/10 hover:shadow-xl shadow-sm group-hover:border-brand-primary/30 active:scale-95"
                     }`}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">

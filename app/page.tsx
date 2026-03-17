@@ -63,14 +63,14 @@ export default function Dashboard() {
 
             <div className="flex-1 flex overflow-hidden">
                 {/* Desktop Sidebar */}
-                <nav className="hidden md:flex w-24 bg-surface-panel border-r border-border-subtle flex-col items-center py-10 space-y-8 z-30 shadow-[10px_0_40px_rgba(0,0,0,0.5)] flex-shrink-0 animate-fade-in">
+                <nav className="hidden md:flex w-20 bg-surface-panel border-r border-border-subtle flex-col items-center py-6 space-y-6 z-30 shadow-[10px_0_40px_rgba(0,0,0,0.5)] flex-shrink-0 animate-fade-in">
                     {navItems.map((item, idx) => (
                         <button key={item.id} onClick={() => switchTab(item.id)}
-                            className={`p-4 rounded-2xl transition-all duration-500 relative group animate-scale-in ${activeTab === item.id ? "bg-brand-primary text-white shadow-[0_0_25px_rgba(59,28,217,0.5)] scale-110" : "text-text-secondary opacity-40 hover:opacity-100 hover:bg-surface-base"}`}
+                            className={`p-3 rounded-xl transition-all duration-500 relative group animate-scale-in ${activeTab === item.id ? "bg-brand-primary text-white shadow-[0_0_25px_rgba(59,28,217,0.5)] scale-110" : "text-text-secondary opacity-40 hover:opacity-100 hover:bg-surface-base"}`}
                             style={{ animationDelay: `${idx * 0.1}s` }}
                             title={item.label}>
                             <div className="relative z-10">{item.icon}</div>
-                            {activeTab === item.id && <div className="absolute inset-0 bg-brand-primary rounded-2xl animate-pulse -z-10 blur-md opacity-50" />}
+                            {activeTab === item.id && <div className="absolute inset-0 bg-brand-primary rounded-xl animate-pulse -z-10 blur-sm opacity-50" />}
                         </button>
                     ))}
                 </nav>

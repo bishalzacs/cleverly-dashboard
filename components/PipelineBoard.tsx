@@ -100,8 +100,8 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
             <div className="border-b border-border-subtle sticky top-0 bg-surface-base/80 backdrop-blur-md z-10">
                 <div className="px-6 py-4 flex items-center justify-between">
                     <div>
-                        <h2 className="text-xl font-black text-text-primary font-outfit uppercase tracking-tight">Pipeline Control</h2>
-                        <p className="text-[10px] text-text-secondary mt-1 font-bold uppercase tracking-widest opacity-60">Workflow Management & Lead Velocity</p>
+                        <h2 className="text-lg font-black text-text-primary font-outfit uppercase tracking-tight">Pipeline Control</h2>
+                        <p className="text-[9px] text-text-secondary mt-1 font-bold uppercase tracking-widest opacity-60">Workflow Management & Lead Velocity</p>
                     </div>
                     <span className="text-[10px] font-black text-brand-primary bg-brand-primary/10 border border-brand-primary/20 px-4 py-1.5 rounded-full shadow-lg uppercase tracking-widest">
                         {localLeads.length} leads in funnel
@@ -112,7 +112,7 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
 
             {/* Kanban board */}
             <div className="flex-1 overflow-x-auto overflow-y-hidden bg-surface-base">
-                <div className="flex h-full gap-6 p-8 min-w-max">
+                <div className="flex h-full gap-4 p-6 min-w-max">
                     {PIPELINE_STAGES.map((stage) => {
                         const stageLeads = getLeadsByStage(stage.id);
                         const isOver = dragOverStage === stage.id;
@@ -123,13 +123,13 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
                                 onDragOver={(e) => handleDragOver(e, stage.id)}
                                 onDragLeave={() => setDragOverStage(null)}
                                 onDrop={(e) => handleDrop(e, stage.id)}
-                                className={`flex flex-col w-[300px] flex-shrink-0 rounded-3xl border transition-all duration-300 animate-scale-in ${isOver
-                                    ? `${stage.color} bg-surface-panel shadow-2xl scale-[1.02] border-opacity-100`
+                                className={`flex flex-col w-[280px] flex-shrink-0 rounded-xl border transition-all duration-300 animate-scale-in ${isOver
+                                    ? `${stage.color} bg-surface-panel shadow-2xl scale-[1.01] border-opacity-100`
                                     : "border-border-subtle bg-surface-panel/40 shadow-sm"
                                     }`}
                             >
                                 {/* Column header */}
-                                <div className="p-5 border-b border-border-subtle flex items-center justify-between bg-surface-panel sticky top-0 z-10 rounded-t-3xl">
+                                <div className="p-4 border-b border-border-subtle flex items-center justify-between bg-surface-panel sticky top-0 z-10 rounded-t-xl">
                                     <div className="flex items-center gap-3">
                                         <div className={`w-2.5 h-2.5 rounded-full shadow-[0_0_10px_currentColor] ${stage.dot}`} />
                                         <span className="text-xs font-black text-text-primary uppercase tracking-widest">{stage.label}</span>

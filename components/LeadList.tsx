@@ -98,11 +98,11 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
 
     return (
         <div className="flex flex-col h-full bg-surface-base border-r border-border-subtle shadow-[10px_0_30px_rgba(0,0,0,0.4)] z-20 relative overflow-hidden animate-fade-in">
-            <div className="p-5 border-b border-border-subtle flex flex-col gap-4 sticky top-0 bg-surface-base/80 backdrop-blur-md z-10 shrink-0">
+            <div className="p-4 border-b border-border-subtle flex flex-col gap-3 sticky top-0 bg-surface-base/80 backdrop-blur-md z-10 shrink-0">
                 <div className="flex justify-between items-center w-full">
-                    <h2 className="text-lg font-black tracking-tight text-text-primary flex items-center gap-2 font-outfit uppercase">
+                    <h2 className="text-sm font-black tracking-tight text-text-primary flex items-center gap-2 font-outfit uppercase">
                         Leads
-                        <span className="bg-brand-primary/10 text-brand-primary text-[10px] px-3 py-1 rounded-full border border-brand-primary/20 font-black shadow-sm">
+                        <span className="bg-brand-primary/10 text-brand-primary text-[9px] px-2 py-0.5 rounded-full border border-brand-primary/20 font-black shadow-sm">
                             {baseLeads.length} Total
                         </span>
                     </h2>
@@ -149,9 +149,9 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                         const groupLeads = getGroupLeads(group);
                         return (
                             <div key={group} className="flex flex-col w-[320px] md:w-[350px] flex-shrink-0 rounded-2xl border border-border-subtle bg-surface-panel shadow-2xl overflow-hidden h-full mb-4 animate-scale-in">
-                                <div className="p-4 border-b border-border-subtle flex items-center justify-between bg-surface-panel sticky top-0 z-10">
-                                    <span className="text-sm font-black text-text-primary tracking-wide">{group}</span>
-                                    <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary shadow-sm">
+                                <div className="p-3 border-b border-border-subtle flex items-center justify-between bg-surface-panel sticky top-0 z-10">
+                                    <span className="text-xs font-black text-text-primary tracking-wide uppercase">{group}</span>
+                                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary shadow-sm">
                                         {groupLeads.length}
                                     </span>
                                 </div>
