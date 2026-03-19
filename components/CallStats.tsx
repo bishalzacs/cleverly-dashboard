@@ -112,6 +112,7 @@ export const CallStats = () => {
         "Connected": { color: "bg-emerald-500", label: "Connected" },
         "No Answer": { color: "bg-amber-500", label: "No Answer" },
         "Busy": { color: "bg-orange-500", label: "Busy" },
+        "Voicemail": { color: "bg-indigo-500", label: "Voicemail" },
         "Wrong Number": { color: "bg-red-500", label: "Wrong Number" }
     };
 

@@ -22,6 +22,7 @@ const OUTCOMES = [
     { id: "Connected", label: "Connected", color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500 hover:text-white" },
     { id: "No Answer", label: "No Answer", color: "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500 hover:text-white" },
     { id: "Busy", label: "Busy", color: "bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500 hover:text-white" },
+    { id: "Voicemail", label: "Voicemail", color: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20 hover:bg-indigo-500 hover:text-white" },
     { id: "Wrong Number", label: "Wrong Number", color: "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500 hover:text-white" },
 ];
 
@@ -222,17 +223,17 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
             {showOutcomeSelection && (
                 <div className="flex-shrink-0 p-8 border-t border-border-subtle bg-surface-panel/90 backdrop-blur-xl animate-in slide-in-from-bottom-5">
                     <h3 className="text-sm font-black text-text-primary uppercase tracking-widest mb-6 text-center">Select Call Outcome</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                        {OUTCOMES.map((outcome) => (
-                            <button
-                                key={outcome.id}
-                                onClick={() => onLogOutcome(outcome.id)}
-                                className={`py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 border ${outcome.color} shadow-lg active:scale-95`}
-                            >
-                                {outcome.label}
-                            </button>
-                        ))}
-                    </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            {OUTCOMES.map((outcome) => (
+                                <button
+                                    key={outcome.id}
+                                    onClick={() => onLogOutcome(outcome.id)}
+                                    className={`p-4 rounded-2xl border transition-all duration-300 font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] active:scale-95 shadow-sm hover:shadow-xl ${outcome.color}`}
+                                >
+                                    {outcome.label}
+                                </button>
+                            ))}
+                        </div>
                 </div>
             )}
 

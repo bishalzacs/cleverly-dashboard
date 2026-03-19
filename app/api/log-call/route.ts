@@ -46,7 +46,8 @@ export async function POST(request: Request) {
             // Using raw SQL for incrementing to avoid race conditions or fetch-then-update
             const { error: updateError } = await supabase.rpc('increment_lead_calls', { 
                 target_lead_id: lead_id,
-                connected: outcome === 'Connected'
+                connected: outcome === 'Connected',
+                is_attempt: outcome !== 'Voicemail'
             });
 
             if (updateError) {
