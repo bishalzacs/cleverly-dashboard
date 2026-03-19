@@ -27,11 +27,6 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Fetch the current user to trigger token refresh if needed
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
   // Protect all routes by default except for specific public routes
   const isAuthPage = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/update-password');
   const isApiRoute = request.nextUrl.pathname.startsWith('/api');
@@ -39,20 +34,29 @@ export async function updateSession(request: NextRequest) {
   // Exclude static files and Next.js internal paths from redirects
   const isStaticFilePattern = request.nextUrl.pathname.match(/\.(.*)$/);
   
-  if (!isStaticFilePattern && !isApiRoute) {
-      if (!user && !isAuthPage) {
-        // no user, potentially respond by redirecting the user to the login page
-        const url = request.nextUrl.clone()
-        url.pathname = '/login'
-        return NextResponse.redirect(url)
-      }
-      
-      if (user && isAuthPage) {
-        // user is already logged in, redirect them away from auth pages
-        const url = request.nextUrl.clone()
-        url.pathname = '/'
-        return NextResponse.redirect(url)
-      }
+  // Optimization: Skip auth check in middleware for API routes and static files.
+  // API routes handle their own authentication, and static files don't need it.
+  if (isStaticFilePattern || isApiRoute) {
+      return supabaseResponse;
+  }
+
+  // Fetch the current user to trigger token refresh if needed
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user && !isAuthPage) {
+    // no user, potentially respond by redirecting the user to the login page
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
+  
+  if (user && isAuthPage) {
+    // user is already logged in, redirect them away from auth pages
+    const url = request.nextUrl.clone()
+    url.pathname = '/'
+    return NextResponse.redirect(url)
   }
 
   return supabaseResponse
