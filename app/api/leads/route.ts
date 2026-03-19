@@ -1,18 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// Enforce strict group restriction at the API layer
-const ALLOWED_GROUP_IDS = [
-    process.env.MONDAY_LOST_GROUP_ID,
-    process.env.MONDAY_NOSHOW_GROUP_ID,
-    process.env.MONDAY_CANCEL_GROUP_ID,
-].filter(Boolean) as string[];
-
-const GROUP_NAME_MAP: Record<string, "Lost" | "No-Show" | "Cancel"> = {
-    [process.env.MONDAY_LOST_GROUP_ID || ""]: "Lost",
-    [process.env.MONDAY_NOSHOW_GROUP_ID || ""]: "No-Show",
-    [process.env.MONDAY_CANCEL_GROUP_ID || ""]: "Cancel",
-};
+// Constants used as fallback if env vars missing
+const DEFAULT_GROUPS = ["Lost", "No-Show", "Cancel"];
 
 export async function GET(request: Request) {
     try {
@@ -28,6 +18,19 @@ export async function GET(request: Request) {
         const owner = searchParams.get("owner") || "";
         const from = searchParams.get("from") || "";
         const to = searchParams.get("to") || "";
+
+        // Get group IDs from env at request time
+        const LOST_ID = process.env.MONDAY_LOST_GROUP_ID || "";
+        const NOSHOW_ID = process.env.MONDAY_NOSHOW_GROUP_ID || "";
+        const CANCEL_ID = process.env.MONDAY_CANCEL_GROUP_ID || "";
+
+        const ALLOWED_GROUP_IDS = [LOST_ID, NOSHOW_ID, CANCEL_ID].filter(Boolean);
+        const GROUP_NAME_MAP: Record<string, string> = {};
+        if (LOST_ID) GROUP_NAME_MAP[LOST_ID] = "Lost";
+        if (NOSHOW_ID) GROUP_NAME_MAP[NOSHOW_ID] = "No-Show";
+        if (CANCEL_ID) GROUP_NAME_MAP[CANCEL_ID] = "Cancel";
+
+        console.log("[Leads API] Using group IDs:", { LOST_ID, NOSHOW_ID, CANCEL_ID });
 
         // ORDER BY monday_created_at DESC — newest leads appear first
         let query = supabase
@@ -70,7 +73,7 @@ export async function GET(request: Request) {
             plan_type: row.plan_type,
             monday_created_at: row.monday_created_at,
             group_id: row.group_id,
-            group_name: GROUP_NAME_MAP[row.group_id] || "Lost",
+            group_name: GROUP_NAME_MAP[row.group_id] || row.group_name || "Lost",
             call_attempts: row.call_attempts,
             last_call_at: row.last_call_at,
             is_connected: row.is_connected,

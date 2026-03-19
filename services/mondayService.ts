@@ -1,13 +1,8 @@
 import { mondayClient } from "@/lib/mondayClient";
 import { gql } from "graphql-request";
 
+// Configuration is read at module level but defaults are provided
 const BOARD_ID = process.env.MONDAY_BOARD_ID || "";
-const LOST_GROUP_ID = process.env.MONDAY_LOST_GROUP_ID || "";
-const NOSHOW_GROUP_ID = process.env.MONDAY_NOSHOW_GROUP_ID || "";
-const CANCEL_GROUP_ID = process.env.MONDAY_CANCEL_GROUP_ID || "";
-
-// The 3 allowed groups — leads from any other group are ignored
-const ALLOWED_GROUPS = [LOST_GROUP_ID, NOSHOW_GROUP_ID, CANCEL_GROUP_ID].filter(Boolean);
 
 const PAGE_SIZE = 500; // Monday.com max per page
 const MAX_RETRIES = 3;
@@ -119,6 +114,11 @@ async function fetchAllItemsFromGroup(groupId: string): Promise<any[]> {
  * Guarantees full pagination, retry logic, and group restriction.
  */
 export const getLostLeads = async (): Promise<Lead[]> => {
+  const LOST_ID = process.env.MONDAY_LOST_GROUP_ID || "";
+  const NOSHOW_ID = process.env.MONDAY_NOSHOW_GROUP_ID || "";
+  const CANCEL_ID = process.env.MONDAY_CANCEL_GROUP_ID || "";
+  const ALLOWED_GROUPS = [LOST_ID, NOSHOW_ID, CANCEL_ID].filter(Boolean);
+
   if (!BOARD_ID || ALLOWED_GROUPS.length === 0) {
     throw new Error("[Monday] Missing MONDAY_BOARD_ID or group environment variables");
   }
@@ -166,8 +166,8 @@ export const getLostLeads = async (): Promise<Lead[]> => {
     } catch { /* ignored */ }
 
     let groupName: "Lost" | "No-Show" | "Cancel" = "Lost";
-    if (item.group_id === NOSHOW_GROUP_ID) groupName = "No-Show";
-    else if (item.group_id === CANCEL_GROUP_ID) groupName = "Cancel";
+    if (item.group_id === NOSHOW_ID) groupName = "No-Show";
+    else if (item.group_id === CANCEL_ID) groupName = "Cancel";
 
     return {
       id: item.id,
