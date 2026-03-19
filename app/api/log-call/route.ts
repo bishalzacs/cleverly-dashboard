@@ -43,7 +43,6 @@ export async function POST(request: Request) {
                 updateProps.is_connected = true;
             }
 
-            // Using raw SQL for incrementing to avoid race conditions or fetch-then-update
             const { error: updateError } = await supabase.rpc('increment_lead_calls', { 
                 target_lead_id: lead_id,
                 connected: outcome === 'Connected',
@@ -52,12 +51,7 @@ export async function POST(request: Request) {
 
             if (updateError) {
                 console.error("Failed to update lead stats via RPC:", updateError);
-                // Fallback to manual update if RPC fails
-                const { data: lead } = await supabase.from('leads').select('call_attempts').eq('id', lead_id).single();
-                await supabase.from('leads').update({
-                    call_attempts: (lead?.call_attempts || 0) + 1,
-                    ...updateProps
-                }).eq('id', lead_id);
+                throw new Error("Lead update failed: " + updateError.message);
             }
         }
 

@@ -1,5 +1,5 @@
 "use client";
-
+import { useState } from "react";
 import { Lead } from "@/services/mondayService";
 import { CallControls } from "./CallControls";
 import { CallStatus } from "@/hooks/useTwilioDevice";
@@ -42,6 +42,7 @@ const InfoRow = ({ icon, label, value, accent }: { icon: React.ReactNode; label:
 };
 
 export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onHangUp, onMuteToggle, onCall, lastCallMeta, onLogOutcome, onClose }: DialerPanelProps) => {
+    const [isLogging, setIsLogging] = useState(false);
     const isCallActive = callStatus !== "idle" && callStatus !== "ended";
     const showOutcomeSelection = callStatus === "ended" && lastCallMeta && onLogOutcome;
 
@@ -227,10 +228,17 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
                             {OUTCOMES.map((outcome) => (
                                 <button
                                     key={outcome.id}
-                                    onClick={() => onLogOutcome(outcome.id)}
-                                    className={`p-4 rounded-2xl border transition-all duration-300 font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] active:scale-95 shadow-sm hover:shadow-xl ${outcome.color}`}
+                                    disabled={isLogging}
+                                    onClick={async () => {
+                                        if (onLogOutcome) {
+                                            setIsLogging(true);
+                                            await onLogOutcome(outcome.id);
+                                            setIsLogging(false);
+                                        }
+                                    }}
+                                    className={`p-4 rounded-2xl border transition-all duration-300 font-black uppercase tracking-widest text-[10px] shadow-sm hover:shadow-xl ${isLogging ? "opacity-50 cursor-not-allowed" : "hover:scale-[1.02] active:scale-95"} ${outcome.color}`}
                                 >
-                                    {outcome.label}
+                                    {isLogging ? "Logging..." : outcome.label}
                                 </button>
                             ))}
                         </div>
