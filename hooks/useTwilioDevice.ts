@@ -24,12 +24,8 @@ interface UseTwilioDeviceReturn {
 export const useTwilioDevice = (): UseTwilioDeviceReturn => {
     const supabase = createClient();
     
-    // 1. Session & Coordination State
+    // 1. Session & State
     const [sessionId] = useState(() => crypto.randomUUID());
-    const [isMaster, setIsMaster] = useState(false);
-    const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
-    const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null);
-
     const [device, setDevice] = useState<Device | null>(null);
     const [activeCall, setActiveCall] = useState<Call | null>(null);
 
@@ -45,70 +41,8 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
     const callDurationRef = useRef<number>(0);
     const activeCallMetaRef = useRef<{ phone: string; leadId?: string; leadName?: string } | null>(null);
 
-    // 2. Session Locking & Multi-Tab Coordination
+    // 2. Initialize Twilio Device (Unique per session/tab)
     useEffect(() => {
-        const channel = new BroadcastChannel("dialer_session_lock");
-        broadcastChannelRef.current = channel;
-
-        // Listen for other tabs claiming the dialer
-        channel.onmessage = (event) => {
-            if (event.data.type === "CLAIM" && event.data.sessionId !== sessionId) {
-                console.warn("[Dialer] Connection stolen by another tab.");
-                setIsMaster(false);
-                setError("Dialer session moved to another tab");
-                setDeviceStatus("offline");
-                if (device) {
-                    device.destroy();
-                    setDevice(null);
-                }
-            }
-        };
-
-        // Broadcast our own claim
-        const claimSessionDB = async () => {
-            try {
-                const { data, error: rpcError } = await supabase.rpc("claim_dialer_session", { 
-                    new_session_id: sessionId,
-                    status_text: "idle" 
-                });
-                
-                if (rpcError) throw rpcError;
-                
-                setIsMaster(true);
-                channel.postMessage({ type: "CLAIM", sessionId });
-                return true;
-            } catch (err: any) {
-                console.error("[Dialer] Failed to claim session:", err);
-                setError("Failed to initialize dialer session");
-                return false;
-            }
-        };
-
-        // Initial claim
-        claimSessionDB().then((success) => {
-            if (success) {
-                // Start heartbeat
-                heartbeatTimerRef.current = setInterval(() => {
-                    supabase.rpc("claim_dialer_session", { 
-                        new_session_id: sessionId,
-                        status_text: callStatus === "idle" ? "idle" : "busy"
-                    }).then(({ error: heartbeatError }) => {
-                        if (heartbeatError) console.error("[Dialer] Heartbeat failed:", heartbeatError);
-                    });
-                }, 20000); // 20s heartbeat
-            }
-        });
-
-        return () => {
-            channel.close();
-            if (heartbeatTimerRef.current) clearInterval(heartbeatTimerRef.current);
-        };
-    }, [sessionId]);
-
-    // 3. Initialize Twilio Device (Only when Master)
-    useEffect(() => {
-        if (!isMaster) return;
-
         let initializedDevice: Device;
         let isDestroyed = false;
 
@@ -148,12 +82,7 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
                 initializedDevice.on("error", (twilioError: any) => {
                     if (isDestroyed) return;
                     setDeviceStatus("error");
-                    // Filter out expected 'Lock broken' error if we just got demoted
-                    if (twilioError?.message?.includes("Lock broken")) {
-                        setError("Connected in another tab");
-                    } else {
-                        setError(twilioError?.message || "Dialer Error");
-                    }
+                    setError(twilioError?.message || "Dialer Error");
                 });
 
                 initializedDevice.register();
@@ -173,7 +102,7 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
                 initializedDevice.destroy();
             }
         };
-    }, [isMaster, sessionId]);
+    }, [sessionId]);
 
     const [lastCallMeta, setLastCallMeta] = useState<{ phone: string; duration: number; leadId?: string; leadName?: string } | null>(null);
 

@@ -17,22 +17,6 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, error: "phone and status are required" }, { status: 400 });
         }
 
-        // 0. Verify Session ID against lock
-        if (sessionId) {
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('active_dialer_session_id')
-                .eq('id', user.id)
-                .single();
-
-            if (profile?.active_dialer_session_id !== sessionId) {
-                return NextResponse.json({ 
-                    success: false, 
-                    error: "Invalid session. Access revoked locally because another tab is active." 
-                }, { status: 403 });
-            }
-        }
-
         // 1. Insert call log
         const { data: callLog, error: logError } = await supabase.from("call_logs").insert({
             lead_id: lead_id || null,

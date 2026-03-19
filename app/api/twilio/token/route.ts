@@ -12,22 +12,15 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
         }
 
-        // Verify session ID against database lock
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('active_dialer_session_id')
-            .eq('id', user.id)
-            .single();
-
-        if (profile?.active_dialer_session_id !== sessionId) {
-            return NextResponse.json({ 
-                success: false, 
-                error: "This session is no longer active. Another tab has taken control of the dialer." 
-            }, { status: 403 });
+        if (!sessionId) {
+            return NextResponse.json({ success: false, error: "Session ID required" }, { status: 400 });
         }
 
-        // Use user email or ID as identity to prevent conflicts between different users
-        const identity = user.email || user.id;
+        // Assign a unique identity PER SESSION (Tab)
+        // This prevents "Lock broken" errors because each tab has its own identity.
+        const baseIdentity = user.email || user.id;
+        const identity = `${baseIdentity}_${sessionId.slice(0, 8)}`; // Use short session suffix
+        
         const token = generateTwilioToken(identity);
 
         return NextResponse.json({ success: true, token });
