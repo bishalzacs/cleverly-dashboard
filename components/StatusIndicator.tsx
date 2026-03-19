@@ -5,13 +5,17 @@ import { DeviceStatus, CallStatus } from "@/hooks/useTwilioDevice";
 interface StatusIndicatorProps {
     deviceStatus: DeviceStatus;
     callStatus: CallStatus;
+    error?: string | null;
 }
 
-export const StatusIndicator = ({ deviceStatus, callStatus }: StatusIndicatorProps) => {
+export const StatusIndicator = ({ deviceStatus, callStatus, error }: StatusIndicatorProps) => {
     let indicatorColor = "bg-gray-500";
     let statusText = "Initializing...";
 
-    if (deviceStatus === "error") {
+    if (error === "Connected in another tab" || error === "Dialer session moved to another tab") {
+        indicatorColor = "bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-pulse";
+        statusText = "Multi-Tab Mode";
+    } else if (deviceStatus === "error") {
         indicatorColor = "bg-red-500";
         statusText = "Device Error";
     } else if (deviceStatus === "ready") {

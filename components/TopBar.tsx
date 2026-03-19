@@ -9,9 +9,10 @@ import { AdminInviteModal } from "./AdminInviteModal";
 interface TopBarProps {
     deviceStatus: DeviceStatus;
     callStatus: CallStatus;
+    error?: string | null;
 }
 
-export const TopBar = ({ deviceStatus, callStatus }: TopBarProps) => {
+export const TopBar = ({ deviceStatus, callStatus, error }: TopBarProps) => {
     const [userEmail, setUserEmail] = useState<string | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
     const [theme, setTheme] = useState<'light' | 'dark'>('dark');
@@ -67,7 +68,7 @@ export const TopBar = ({ deviceStatus, callStatus }: TopBarProps) => {
                     <span className="text-text-primary ml-1.5 opacity-90">Dialer</span>
                 </h1>
                 <div className="h-4 w-px bg-border-subtle mx-2" />
-                <StatusIndicator deviceStatus={deviceStatus} callStatus={callStatus} />
+                <StatusIndicator deviceStatus={deviceStatus} callStatus={callStatus} error={error} />
             </div>
 
             <div className="flex items-center gap-4">

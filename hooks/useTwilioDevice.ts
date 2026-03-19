@@ -23,6 +23,13 @@ interface UseTwilioDeviceReturn {
 
 export const useTwilioDevice = (): UseTwilioDeviceReturn => {
     const supabase = createClient();
+    
+    // 1. Session & Coordination State
+    const [sessionId] = useState(() => crypto.randomUUID());
+    const [isMaster, setIsMaster] = useState(false);
+    const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
+    const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null);
+
     const [device, setDevice] = useState<Device | null>(null);
     const [activeCall, setActiveCall] = useState<Call | null>(null);
 
@@ -38,23 +45,91 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
     const callDurationRef = useRef<number>(0);
     const activeCallMetaRef = useRef<{ phone: string; leadId?: string; leadName?: string } | null>(null);
 
-    // Initialize Twilio Device on mount
+    // 2. Session Locking & Multi-Tab Coordination
     useEffect(() => {
+        const channel = new BroadcastChannel("dialer_session_lock");
+        broadcastChannelRef.current = channel;
+
+        // Listen for other tabs claiming the dialer
+        channel.onmessage = (event) => {
+            if (event.data.type === "CLAIM" && event.data.sessionId !== sessionId) {
+                console.warn("[Dialer] Connection stolen by another tab.");
+                setIsMaster(false);
+                setError("Dialer session moved to another tab");
+                setDeviceStatus("offline");
+                if (device) {
+                    device.destroy();
+                    setDevice(null);
+                }
+            }
+        };
+
+        // Broadcast our own claim
+        const claimSessionDB = async () => {
+            try {
+                const { data, error: rpcError } = await supabase.rpc("claim_dialer_session", { 
+                    new_session_id: sessionId,
+                    status_text: "idle" 
+                });
+                
+                if (rpcError) throw rpcError;
+                
+                setIsMaster(true);
+                channel.postMessage({ type: "CLAIM", sessionId });
+                return true;
+            } catch (err: any) {
+                console.error("[Dialer] Failed to claim session:", err);
+                setError("Failed to initialize dialer session");
+                return false;
+            }
+        };
+
+        // Initial claim
+        claimSessionDB().then((success) => {
+            if (success) {
+                // Start heartbeat
+                heartbeatTimerRef.current = setInterval(() => {
+                    supabase.rpc("claim_dialer_session", { 
+                        new_session_id: sessionId,
+                        status_text: callStatus === "idle" ? "idle" : "busy"
+                    }).then(({ error: heartbeatError }) => {
+                        if (heartbeatError) console.error("[Dialer] Heartbeat failed:", heartbeatError);
+                    });
+                }, 20000); // 20s heartbeat
+            }
+        });
+
+        return () => {
+            channel.close();
+            if (heartbeatTimerRef.current) clearInterval(heartbeatTimerRef.current);
+        };
+    }, [sessionId]);
+
+    // 3. Initialize Twilio Device (Only when Master)
+    useEffect(() => {
+        if (!isMaster) return;
+
         let initializedDevice: Device;
+        let isDestroyed = false;
 
         const initDevice = async () => {
             try {
                 setDeviceStatus("connecting");
                 
-                // Fetch user info for logging
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
                     setUserId(user.id);
                     setUserEmail(user.email || null);
                 }
 
-                const res = await fetch("/api/twilio/token", { method: "POST" });
+                const res = await fetch("/api/twilio/token", { 
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ sessionId }) 
+                });
                 const data = await res.json();
+
+                if (isDestroyed) return;
 
                 if (!res.ok || !data.success || !data.token) {
                     throw new Error(data.error || "Failed to get Twilio token");
@@ -65,27 +140,26 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
                 });
 
                 initializedDevice.on("registered", () => {
-                    console.log("Twilio Device successfully registered.");
+                    if (isDestroyed) return;
                     setDeviceStatus("ready");
                     setError(null);
                 });
 
-                initializedDevice.on("unregistered", () => {
-                    console.log("Twilio Device unregistered.");
-                    setDeviceStatus("offline");
-                });
-
                 initializedDevice.on("error", (twilioError: any) => {
-                    console.error("Twilio Device Error:", twilioError);
+                    if (isDestroyed) return;
                     setDeviceStatus("error");
-                    // Sometimes twilioError is an object with {code, message}
-                    setError(twilioError?.message || JSON.stringify(twilioError) || "Unknown Twilio Error");
+                    // Filter out expected 'Lock broken' error if we just got demoted
+                    if (twilioError?.message?.includes("Lock broken")) {
+                        setError("Connected in another tab");
+                    } else {
+                        setError(twilioError?.message || "Dialer Error");
+                    }
                 });
 
-                // Register the device
                 initializedDevice.register();
                 setDevice(initializedDevice);
             } catch (err: any) {
+                if (isDestroyed) return;
                 setDeviceStatus("error");
                 setError(err.message);
             }
@@ -94,14 +168,12 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
         initDevice();
 
         return () => {
+            isDestroyed = true;
             if (initializedDevice) {
                 initializedDevice.destroy();
             }
-            if (durationTimerRef.current) {
-                clearInterval(durationTimerRef.current);
-            }
         };
-    }, []);
+    }, [isMaster, sessionId]);
 
     const [lastCallMeta, setLastCallMeta] = useState<{ phone: string; duration: number; leadId?: string; leadName?: string } | null>(null);
 
@@ -124,29 +196,33 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
         };
     }, [callStatus]);
 
-    const logCallWithOutcome = useCallback(async (outcome: string) => {
-        if (!lastCallMeta) return;
+    const logCallWithOutcome = useCallback(async (outcome: string, notes?: string) => {
+        if (!activeCallMetaRef.current) return;
+        
         try {
+            const { phone, leadId, leadName } = activeCallMetaRef.current;
             await fetch("/api/log-call", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
-                    phone: lastCallMeta.phone, 
-                    status: "connected", 
-                    duration_seconds: lastCallMeta.duration, 
-                    lead_id: lastCallMeta.leadId, 
-                    lead_name: lastCallMeta.leadName,
+                    phone, 
+                    status: "completed", 
+                    duration_seconds: callDurationRef.current, 
+                    lead_id: leadId, 
+                    lead_name: leadName,
                     agent_id: userId,
                     agent_email: userEmail,
-                    outcome
+                    outcome,
+                    notes,
+                    sessionId // Pass the session ID for backend validation
                 }),
             });
             setLastCallMeta(null);
-            setCallStatus("idle");
+            activeCallMetaRef.current = null;
         } catch (e) {
             console.warn("Failed to log call:", e);
         }
-    }, [userId, userEmail, lastCallMeta]);
+    }, [userId, userEmail, sessionId]); // Added sessionId, removed lastCallMeta
 
     const makeCall = useCallback(
         async (phoneNumber: string, leadId?: string, leadName?: string) => {

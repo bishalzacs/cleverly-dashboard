@@ -59,7 +59,7 @@ export default function Dashboard() {
 
     return (
         <div className="flex flex-col h-[100dvh] bg-surface-base text-text-primary overflow-hidden font-sans">
-            <TopBar deviceStatus={deviceStatus} callStatus={callStatus} />
+            <TopBar deviceStatus={deviceStatus} callStatus={callStatus} error={twilioError} />
 
             <div className="flex-1 flex overflow-hidden">
                 {/* Desktop Sidebar */}

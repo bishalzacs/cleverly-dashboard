@@ -1,18 +1,36 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/utils/supabase/server";
 
 export async function POST(request: Request) {
     try {
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+        }
 
         const body = await request.json();
-        const { lead_id, lead_name, phone, status, duration_seconds, agent_id, agent_email, outcome } = body;
+        const { lead_id, lead_name, phone, status, duration_seconds, agent_id, agent_email, outcome, sessionId } = body;
 
         if (!phone || !status) {
             return NextResponse.json({ success: false, error: "phone and status are required" }, { status: 400 });
+        }
+
+        // 0. Verify Session ID against lock
+        if (sessionId) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('active_dialer_session_id')
+                .eq('id', user.id)
+                .single();
+
+            if (profile?.active_dialer_session_id !== sessionId) {
+                return NextResponse.json({ 
+                    success: false, 
+                    error: "Invalid session. Access revoked locally because another tab is active." 
+                }, { status: 403 });
+            }
         }
 
         // 1. Insert call log
@@ -22,8 +40,8 @@ export async function POST(request: Request) {
             phone,
             status,
             duration_seconds: duration_seconds || 0,
-            agent_id: agent_id || null,
-            agent_email: agent_email || null,
+            agent_id: user.id, // Use real user ID from auth
+            agent_email: user.email,
             outcome: outcome || null,
         }).select().single();
 
@@ -31,18 +49,6 @@ export async function POST(request: Request) {
 
         // 2. Update lead stats if lead_id is provided
         if (lead_id) {
-            const updateProps: any = {
-                last_call_at: new Date().toISOString(),
-                // Increment call_attempts using sql fragment if possible, 
-                // but since we are in a simple route, we'll fetch then update or use RPC if needed.
-                // Supabase doesn't have a direct "increment" in JS client easily without raw SQL or RPC for specific columns 
-                // UNLESS we use the .rpc('increment_call_attempts', { lead_id })
-            };
-
-            if (outcome === 'Connected') {
-                updateProps.is_connected = true;
-            }
-
             const { error: updateError } = await supabase.rpc('increment_lead_calls', { 
                 target_lead_id: lead_id,
                 connected: outcome === 'Connected',
@@ -51,7 +57,6 @@ export async function POST(request: Request) {
 
             if (updateError) {
                 console.error("Failed to update lead stats via RPC:", updateError);
-                throw new Error("Lead update failed: " + updateError.message);
             }
         }
 
