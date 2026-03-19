@@ -42,13 +42,15 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
 
     const owners = Array.from(new Set(baseLeads.map((l) => l.owner).filter(Boolean) as string[])).sort();
 
-    const groups = ["Lost", "No-Show", "Cancel"] as const;
+    const groups = ["New Leads", "Lost", "No-Show", "Cancel"] as const;
     const [columnSearch, setColumnSearch] = useState<Record<string, string>>({});
     const [columnOwner, setColumnOwner] = useState<Record<string, string>>({});
     const [columnDate, setColumnDate] = useState<Record<string, string>>({});
 
     const getGroupLeads = (group: typeof groups[number]) => {
         let filtered = baseLeads.filter(lead => {
+            if (group === "New Leads") return lead.is_in_active_pool === true;
+            
             if (lead.group_name) return lead.group_name === group;
             // fallback
             const s = (lead.status || "").toLowerCase();

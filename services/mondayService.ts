@@ -29,6 +29,7 @@ export interface Lead {
   call_attempts?: number;
   last_call_at?: string;
   is_connected?: boolean;
+  is_in_active_pool?: boolean;
 }
 
 async function retryRequest<T>(fn: () => Promise<T>, retries = MAX_RETRIES): Promise<T> {
