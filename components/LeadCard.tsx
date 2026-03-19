@@ -55,6 +55,20 @@ export const LeadCard = ({
                             {lead.status}
                         </span>
                     )}
+                    {/* Call Attempts Badge */}
+                    {lead.is_connected ? (
+                        <span className="text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+                            Connected
+                        </span>
+                    ) : (
+                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest border ${
+                            (lead.call_attempts || 0) >= 3 
+                                ? "bg-red-500/10 text-red-500 border-red-500/20" 
+                                : "bg-brand-primary/10 text-brand-primary border-brand-primary/20"
+                        }`}>
+                            {Math.max(0, 3 - (lead.call_attempts || 0))} Left
+                        </span>
+                    )}
                     {onEdit && (
                         <button
                             onClick={(e) => { e.stopPropagation(); onEdit(lead); }}

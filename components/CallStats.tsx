@@ -28,6 +28,8 @@ interface AnalyticsData {
         total: number;
         connected: number;
     };
+    avgAttempts: string;
+    outcomeStats: Record<string, number>;
 }
 
 const PIPELINE_STAGES = [
@@ -102,9 +104,16 @@ export const CallStats = () => {
     const cards = [
         { label: "Gross Leads", value: data?.totalLeads ?? 0, trend: "+12%", color: "#3B82F6", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 3a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 6a2 2 0 11-4 0 2 2 0 014 0z" },
         { label: "Outbound Calls", value: data?.callsInPeriod ?? 0, trend: "+5%", color: "#F97316", icon: "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" },
-        { label: "Connectivity", value: data?.answerRate ?? "0%", trend: "-2%", color: "#10B981", icon: "M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.828a5 5 0 117.07 0M12 12h.01" },
         { label: "Talk Time (Avg)", value: data?.avgDuration ?? "0:00", trend: "+30s", color: "#A855F7", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
+        { label: "Avg Attempts", value: data?.avgAttempts ?? "0", trend: "Target: 3", color: "#10B981", icon: "M16 8v8m-4-5v5m-4-2v2" },
     ];
+
+    const outcomeLabels = {
+        "Connected": { color: "bg-emerald-500", label: "Connected" },
+        "No Answer": { color: "bg-amber-500", label: "No Answer" },
+        "Busy": { color: "bg-orange-500", label: "Busy" },
+        "Wrong Number": { color: "bg-red-500", label: "Wrong Number" }
+    };
 
     return (
         <div className="flex flex-col h-full bg-surface-base overflow-hidden font-sans">
@@ -174,12 +183,43 @@ export const CallStats = () => {
                                 <span className="text-2xl font-black text-text-primary font-outfit tracking-tight">
                                     {isLoading ? "..." : card.value}
                                 </span>
-                                <span className={`text-[9px] font-bold ${card.trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
+                                <span className={`text-[9px] font-bold ${card.trend.includes('Target') || card.trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
                                     {card.trend}
                                 </span>
                             </div>
                         </div>
                     ))}
+                </div>
+
+                {/* Outcome Breakdown Section */}
+                <div className="bg-surface-panel rounded-xl border border-border-subtle p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-sm font-black text-text-primary uppercase tracking-tight font-outfit">Call Outcome Distribution</h3>
+                        <div className="text-[10px] font-black text-text-secondary uppercase tracking-widest opacity-60">Frequency Matrix</div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {Object.entries(outcomeLabels).map(([id, config]) => {
+                            const count = data?.outcomeStats?.[id] ?? 0;
+                            const total = Object.values(data?.outcomeStats ?? {}).reduce((a: number, b: number) => a + b, 0) || 1;
+                            const pct = Math.round((Number(count) / Number(total)) * 100);
+                            
+                            return (
+                                <div key={id} className="flex flex-col gap-2">
+                                    <div className="flex justify-between items-end">
+                                        <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest">{config.label}</span>
+                                        <span className="text-sm font-black text-text-primary">{count}</span>
+                                    </div>
+                                    <div className="h-2 w-full bg-surface-base rounded-full overflow-hidden border border-border-subtle">
+                                        <div 
+                                            className={`h-full ${config.color} transition-all duration-1000`} 
+                                            style={{ width: `${pct}%` }}
+                                        />
+                                    </div>
+                                    <span className="text-[9px] font-bold text-text-secondary opacity-40">{pct}% Impact Score</span>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
 
                 {/* Pipeline Board (Kanban Style) */}

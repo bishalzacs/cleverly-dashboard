@@ -51,21 +51,66 @@ export async function GET(request: Request) {
             .from("leads")
             .select("*", { count: "exact", head: true });
 
+        // Helper function for duration formatting
+        const formatDuration = (seconds: number) => {
+            if (seconds === 0) return "—";
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
+        };
+
+        // 4. Get Outcome Distribution
+        const { data: outcomes, error: outcomeError } = await callQuery
+            .select("outcome");
+        
+        const outcomeStats = {
+            "Connected": 0,
+            "No Answer": 0,
+            "Busy": 0,
+            "Wrong Number": 0
+        } as Record<string, number>;
+
+        if (outcomes) {
+            outcomes.forEach(log => {
+                if (log.outcome && outcomeStats[log.outcome] !== undefined) {
+                    outcomeStats[log.outcome]++;
+                }
+            });
+        }
+
+        // 5. Get Lead Stats (for attempts)
+        const { data: leadStats, error: leadStatsError } = await supabase
+            .from("leads")
+            .select("call_attempts, is_connected");
+
+        const totalAttempts = leadStats?.reduce((sum, l) => sum + (l.call_attempts || 0), 0) || 0;
+        const avgAttempts = leadStats?.length ? (totalAttempts / leadStats.length).toFixed(1) : "0";
+
+        // Prepare variables for the new return structure
+        const leadsCount = totalLeads;
+        const callsCount = allCalls.length;
+        const connectedCount = connectedCalls.length;
+        const recentCalls = allCalls.slice(0, 20);
+        const pipelineMap = pipelineDistribution;
+        const agents = agentList;
+
         return NextResponse.json({
             success: true,
             data: {
-                totalLeads: totalLeads || 0,
-                callsInPeriod: allCalls.length,
-                answerRate,
-                avgDuration: avgDuration === "0:00" ? "—" : avgDuration,
-                recentCalls: allCalls.slice(0, 20),
-                pipelineDistribution,
-                agentList,
+                totalLeads: leadsCount || 0,
+                callsInPeriod: callsCount || 0,
+                answerRate: callsCount ? (Math.round((connectedCount / callsCount) * 100)) + "%" : "0%",
+                avgDuration: formatDuration(avgDurationSeconds), // Use avgDurationSeconds here
+                recentCalls: recentCalls || [],
+                pipelineDistribution: pipelineMap,
+                agentList: agents || [],
                 filteredStats: {
-                    total: allCalls.length,
-                    connected: connectedCalls.length,
-                }
-            },
+                    total: callsCount || 0,
+                    connected: connectedCount || 0
+                },
+                outcomeStats,
+                avgAttempts
+            }
         });
     } catch (error: any) {
         console.error("Analytics API Error:", error);

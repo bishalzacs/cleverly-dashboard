@@ -17,7 +17,7 @@ type DashboardTab = "leads" | "pipeline" | "dialer" | "analysis";
 export default function Dashboard() {
     const [filters, setFilters] = useState<FilterState>({ owner: "", from: "", to: "" });
     const { leads, isLoading, error: leadsError, refreshLeads } = useLeads(filters);
-    const { deviceStatus, callStatus, callDuration, error: twilioError, makeCall, hangUp, toggleMute, isMuted } = useTwilioDevice();
+    const { deviceStatus, callStatus, callDuration, error: twilioError, makeCall, hangUp, toggleMute, isMuted, lastCallMeta, logCallWithOutcome } = useTwilioDevice();
 
     const [activeTab, setActiveTab] = useState<DashboardTab>("analysis");
     const [activeLead, setActiveLead] = useState<Lead | null>(null);
@@ -100,8 +100,18 @@ export default function Dashboard() {
                                         </button>
                                     </div>
                                     <div className="flex-1 overflow-y-auto custom-scrollbar">
-                                        <DialerPanel activeLead={activeLead} callStatus={callStatus} callDuration={callDuration}
-                                            isMuted={isMuted} onHangUp={hangUp} onMuteToggle={toggleMute} onCall={handleCallLead} />
+                                        <DialerPanel 
+                                            activeLead={activeLead} 
+                                            callStatus={callStatus} 
+                                            callDuration={callDuration}
+                                            isMuted={isMuted} 
+                                            onHangUp={hangUp} 
+                                            onMuteToggle={toggleMute} 
+                                            onCall={handleCallLead}
+                                            lastCallMeta={lastCallMeta}
+                                            onLogOutcome={logCallWithOutcome}
+                                            onClose={() => setActiveLead(null)}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -111,9 +121,16 @@ export default function Dashboard() {
                     {/* ── PIPELINE TAB ── */}
                     {activeTab === "pipeline" && (
                         <div className="h-full animate-in fade-in duration-300">
-                            <PipelineBoard leads={leads} isCallActive={isCallActive}
-                                onCallLead={handleCallLead} onLeadsChange={refreshLeads}
-                                filters={filters} onFiltersChange={setFilters} />
+                            <PipelineBoard 
+                                leads={leads} 
+                                isCallActive={isCallActive}
+                                onCallLead={handleCallLead} 
+                                onLeadsChange={refreshLeads}
+                                filters={filters} 
+                                onFiltersChange={setFilters} 
+                                activeLead={activeLead}
+                                onSelectLead={setActiveLead}
+                            />
                         </div>
                     )}
 

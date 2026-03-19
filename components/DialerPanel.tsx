@@ -13,7 +13,17 @@ interface DialerPanelProps {
     onHangUp: () => void;
     onMuteToggle: () => void;
     onCall?: (lead: Lead) => void;
+    onClose?: () => void;
+    lastCallMeta?: { phone: string; duration: number; leadId?: string; leadName?: string } | null;
+    onLogOutcome?: (outcome: string) => void;
 }
+
+const OUTCOMES = [
+    { id: "Connected", label: "Connected", color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500 hover:text-white" },
+    { id: "No Answer", label: "No Answer", color: "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500 hover:text-white" },
+    { id: "Busy", label: "Busy", color: "bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500 hover:text-white" },
+    { id: "Wrong Number", label: "Wrong Number", color: "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500 hover:text-white" },
+];
 
 const InfoRow = ({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value?: string | number | null; accent?: boolean }) => {
     if (!value && value !== 0) return null;
@@ -30,8 +40,9 @@ const InfoRow = ({ icon, label, value, accent }: { icon: React.ReactNode; label:
     );
 };
 
-export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onHangUp, onMuteToggle, onCall }: DialerPanelProps) => {
+export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onHangUp, onMuteToggle, onCall, lastCallMeta, onLogOutcome, onClose }: DialerPanelProps) => {
     const isCallActive = callStatus !== "idle" && callStatus !== "ended";
+    const showOutcomeSelection = callStatus === "ended" && lastCallMeta && onLogOutcome;
 
     if (!activeLead) {
         return (
@@ -92,6 +103,18 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
                                 <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-surface-base animate-pulse" />
                             )}
                         </div>
+
+                        {onClose && (
+                            <button 
+                                onClick={onClose}
+                                className="absolute top-8 right-8 p-3 rounded-xl bg-surface-panel/50 border border-border-subtle text-text-secondary hover:text-red-500 hover:bg-red-500/10 hover:border-red-500/30 transition-all duration-300 shadow-sm group"
+                                title="Close Panel"
+                            >
+                                <svg className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        )}
 
                         {/* Name & status */}
                         <div className="flex-1 min-w-0 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
@@ -195,18 +218,43 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
                 </div>
             </div>
 
+            {/* Outcome Selection Overlay */}
+            {showOutcomeSelection && (
+                <div className="flex-shrink-0 p-8 border-t border-border-subtle bg-surface-panel/90 backdrop-blur-xl animate-in slide-in-from-bottom-5">
+                    <h3 className="text-sm font-black text-text-primary uppercase tracking-widest mb-6 text-center">Select Call Outcome</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                        {OUTCOMES.map((outcome) => (
+                            <button
+                                key={outcome.id}
+                                onClick={() => onLogOutcome(outcome.id)}
+                                className={`py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 border ${outcome.color} shadow-lg active:scale-95`}
+                            >
+                                {outcome.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Call button (when not active) */}
-            {!isCallActive && onCall && activeLead.phone && (
+            {!isCallActive && !showOutcomeSelection && onCall && activeLead.phone && (
                 <div className="flex-shrink-0 p-8 border-t border-border-subtle bg-surface-base">
-                    <button
-                        onClick={() => onCall(activeLead)}
-                        className="w-full py-5 rounded-2xl font-black text-sm uppercase tracking-[0.1em] bg-brand-primary text-white hover:bg-brand-primary/90 hover:shadow-[0_20px_40px_rgba(59,28,217,0.4)] hover:-translate-y-1 transition-all duration-500 flex items-center justify-center gap-4 group active:scale-[0.96] shadow-xl"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 group-hover:rotate-12 transition-transform duration-500">
-                            <path fillRule="evenodd" d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z" clipRule="evenodd" />
-                        </svg>
-                        Call {activeLead.name?.split(" ")[0] || "Now"}
-                    </button>
+                    {activeLead.is_connected ? (
+                        <div className="w-full py-5 rounded-2xl font-black text-sm uppercase tracking-[0.1em] bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 flex items-center justify-center gap-4 opacity-80 cursor-default shadow-inner">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                            Lead Connected
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => onCall(activeLead)}
+                            className="w-full py-5 rounded-2xl font-black text-sm uppercase tracking-[0.1em] bg-brand-primary text-white hover:bg-brand-primary/90 hover:shadow-[0_20px_40px_rgba(59,28,217,0.4)] hover:-translate-y-1 transition-all duration-500 flex items-center justify-center gap-4 group active:scale-[0.96] shadow-xl"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 group-hover:rotate-12 transition-transform duration-500">
+                                <path fillRule="evenodd" d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z" clipRule="evenodd" />
+                            </svg>
+                            Call {activeLead.name?.split(" ")[0] || "Now"}
+                        </button>
+                    )}
                 </div>
             )}
         </div>

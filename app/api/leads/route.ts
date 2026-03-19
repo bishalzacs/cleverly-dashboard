@@ -57,6 +57,9 @@ export async function GET(request: Request) {
                 monday_created_at: row.monday_created_at,
                 group_id: row.group_id,
                 group_name: groupName,
+                call_attempts: row.call_attempts,
+                last_call_at: row.last_call_at,
+                is_connected: row.is_connected,
             };
         });
 

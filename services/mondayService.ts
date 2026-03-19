@@ -25,6 +25,9 @@ export interface Lead {
   monday_created_at?: string;
   group_id?: string;
   group_name?: "Lost" | "No-Show" | "Cancel";
+  call_attempts?: number;
+  last_call_at?: string;
+  is_connected?: boolean;
 }
 
 export const getLostLeads = async (): Promise<Lead[]> => {

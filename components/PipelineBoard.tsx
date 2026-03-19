@@ -24,10 +24,12 @@ interface PipelineBoardProps {
     onCallLead: (lead: Lead) => void;
     onLeadsChange: () => void;
     filters: FilterState;
-    onFiltersChange: (f: FilterState) => void;
+    onFiltersChange: (filters: FilterState) => void;
+    onSelectLead?: (lead: Lead) => void;
+    activeLead?: Lead | null;
 }
 
-export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, filters, onFiltersChange }: PipelineBoardProps) => {
+export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, filters, onFiltersChange, onSelectLead, activeLead }: PipelineBoardProps) => {
     const [dragLeadId, setDragLeadId] = useState<string | null>(null);
     const [dragOverStage, setDragOverStage] = useState<string | null>(null);
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
@@ -56,6 +58,25 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
     const handleDrop = async (e: React.DragEvent, stageId: string) => {
         e.preventDefault();
         if (!dragLeadId) return;
+
+        const lead = localLeads.find(l => l.id === dragLeadId);
+        if (!lead) return;
+
+        // Enforce progression rules
+        const attemptStages = ["first_attempt", "second_attempt", "third_attempt"];
+        const currentIndex = PIPELINE_STAGES.findIndex(s => s.id === (lead.pipeline_stage || "new_lead"));
+        const targetIndex = PIPELINE_STAGES.findIndex(s => s.id === stageId);
+
+        // Rule: Only allow moving to next attempt stages if 3 attempts completed or connected
+        if (attemptStages.includes(stageId) && !lead.is_connected && (lead.call_attempts || 0) < 3) {
+            // Check if they are trying to move FORWARD into or between attempt stages
+            if (targetIndex > currentIndex) {
+                alert(`Cannot move to next stage. Lead requires 3 call attempts (Currently: ${lead.call_attempts || 0})`);
+                setDragLeadId(null);
+                setDragOverStage(null);
+                return;
+            }
+        }
 
         // Optimistic update
         setLocalLeads((prev) => prev.map((l) => l.id === dragLeadId ? { ...l, pipeline_stage: stageId } : l));
@@ -150,8 +171,8 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
                                             <LeadCard
                                                 key={lead.id}
                                                 lead={lead}
-                                                isActive={false}
-                                                onSelect={() => { }}
+                                                isActive={activeLead?.id === lead.id}
+                                                onSelect={onSelectLead || (() => { })}
                                                 onCall={onCallLead}
                                                 isCallingDisabled={isCallActive}
                                                 onEdit={setEditingLead}
