@@ -40,22 +40,15 @@ export async function updateSession(request: NextRequest) {
       return supabaseResponse;
   }
 
-  // Fetch the current user to trigger token refresh if needed
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Lightweight check: Redirect to login only if NO Supabase session cookie exists.
+  // This bypasses the heavy getUser() call which was taking 15s+ and causing 504s.
+  // Strict auth validation now happens at the Page/API level which has a higher timeout.
+  const allCookies = request.cookies.getAll();
+  const hasSessionCookie = allCookies.some(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'));
 
-  if (!user && !isAuthPage) {
-    // no user, potentially respond by redirecting the user to the login page
+  if (!hasSessionCookie && !isAuthPage && !isApiRoute && !isStaticFilePattern) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    return NextResponse.redirect(url)
-  }
-  
-  if (user && isAuthPage) {
-    // user is already logged in, redirect them away from auth pages
-    const url = request.nextUrl.clone()
-    url.pathname = '/'
     return NextResponse.redirect(url)
   }
 
