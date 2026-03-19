@@ -114,9 +114,10 @@ async function fetchAllItemsFromGroup(groupId: string): Promise<any[]> {
  * Guarantees full pagination, retry logic, and group restriction.
  */
 export const getLostLeads = async (): Promise<Lead[]> => {
-  const LOST_ID = process.env.MONDAY_LOST_GROUP_ID || "";
-  const NOSHOW_ID = process.env.MONDAY_NOSHOW_GROUP_ID || "";
-  const CANCEL_ID = process.env.MONDAY_CANCEL_GROUP_ID || "";
+  // Get group IDs from env at request time with hardcoded fallbacks for the user's specific board
+  const LOST_ID = process.env.MONDAY_LOST_GROUP_ID || "new_group62617__1";
+  const NOSHOW_ID = process.env.MONDAY_NOSHOW_GROUP_ID || "new_group64021__1";
+  const CANCEL_ID = process.env.MONDAY_CANCEL_GROUP_ID || "new_group54376__1";
   const ALLOWED_GROUPS = [LOST_ID, NOSHOW_ID, CANCEL_ID].filter(Boolean);
 
   if (!BOARD_ID || ALLOWED_GROUPS.length === 0) {
