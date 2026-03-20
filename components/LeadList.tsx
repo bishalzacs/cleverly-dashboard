@@ -42,7 +42,7 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
 
     const owners = Array.from(new Set(baseLeads.map((l) => l.owner).filter(Boolean) as string[])).sort();
 
-    const groups = ["New Leads", "Lost", "No-Show", "Cancel"] as const;
+    const groups = ["Lost", "No-Show", "Cancel"] as const;
     const [columnSearch, setColumnSearch] = useState<Record<string, string>>({});
     const [columnOwner, setColumnOwner] = useState<Record<string, string>>({});
     const [columnDate, setColumnDate] = useState<Record<string, string>>({});
@@ -60,10 +60,6 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
             if (group === "No-Show") return isNoShow;
             if (group === "Cancel") return isCancel;
 
-            if (group === "New Leads") {
-                // Only show if in active pool and NOT assigned to any other category
-                return lead.is_in_active_pool === true && !isLost && !isNoShow && !isCancel;
-            }
             
             return false;
         });
