@@ -30,7 +30,6 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Derive unique non-empty owners from current lead set
     const owners = Array.from(
         new Set(leads.map((l) => l.owner).filter(Boolean) as string[])
     ).sort();
@@ -57,14 +56,13 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                 from = format(subYears(today, 1), "yyyy-MM-dd");
                 break;
             default:
-                onFiltersChange({ ...filters, from: "", to: "" }); // handles "custom" or clear
+                onFiltersChange({ ...filters, from: "", to: "" });
                 return;
         }
 
         onFiltersChange({ ...filters, from, to });
     };
 
-    // Determine current preset based on dates
     let currentPreset = "";
     if (filters.from && filters.to) {
         const todayStr = format(new Date(), "yyyy-MM-dd");
@@ -80,13 +78,12 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
     }
 
     const getDisplayDate = () => {
-        if (!filters.from && !filters.to) return "Date: All Time";
+        if (!filters.from && !filters.to) return "All Time";
         if (currentPreset === "3days") return "Last 3 Days";
         if (currentPreset === "1month") return "Past Month";
         if (currentPreset === "6months") return "Last 6 Months";
         if (currentPreset === "1year") return "Last 1 Year";
 
-        // Format custom date
         const formatStr = "MMM d, yyyy";
         try {
             const fromStr = filters.from ? format(parseISO(filters.from), formatStr) : "Start";
@@ -100,59 +97,59 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
     const hasFilters = filters.owner || filters.from || filters.to;
 
     return (
-        <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-border-subtle bg-surface-base relative z-40">
+        <div className="flex flex-wrap items-center gap-4 px-8 py-4 bg-zinc-950/20 backdrop-blur-sm relative z-40">
             {/* Owner filter */}
-            <div className="flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <select
-                    value={filters.owner}
-                    onChange={(e) => set("owner", e.target.value)}
-                    className="bg-surface-panel border border-border-subtle rounded-xl px-2.5 py-1.5 text-xs text-text-primary focus:outline-none focus:border-brand-primary/50 transition-all min-w-[130px] shadow-sm cursor-pointer hover:border-brand-primary/30"
-                >
-                    <option value="" className="text-text-primary bg-surface-panel">All Reps</option>
-                    {owners.map((o) => (
-                        <option key={o} value={o} className="text-text-primary bg-surface-panel">{o}</option>
-                    ))}
-                </select>
+            <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/50 border border-border-subtle rounded-xl hover:border-text-primary/10 transition-all cursor-pointer group shadow-inner">
+                    <svg className="w-3.5 h-3.5 text-text-secondary opacity-40 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <select
+                        value={filters.owner}
+                        onChange={(e) => set("owner", e.target.value)}
+                        className="bg-transparent text-[11px] font-bold text-text-primary focus:outline-none min-w-[120px] cursor-pointer appearance-none uppercase tracking-widest"
+                    >
+                        <option value="" className="bg-zinc-900">All Representatives</option>
+                        {owners.map((o) => (
+                            <option key={o} value={o} className="bg-zinc-900">{o}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             {/* Date Filter Dropdown */}
             <div className="relative" ref={dateRef}>
                 <button
                     onClick={() => setIsDateOpen(!isDateOpen)}
-                    className="flex items-center justify-between gap-2 bg-surface-panel border border-border-subtle rounded-xl px-3 py-1.5 text-xs text-text-primary hover:border-brand-primary/50 transition-all min-w-[170px] shadow-sm"
+                    className={`flex items-center gap-3 px-4 py-2 rounded-xl border transition-all shadow-inner group
+                        ${isDateOpen ? "bg-zinc-900 border-text-primary/20 shadow-2xl" : "bg-zinc-900/50 border-border-subtle hover:border-text-primary/10"}`}
                 >
-                    <div className="flex items-center gap-1.5 overflow-hidden">
-                        <svg className="w-3.5 h-3.5 text-text-secondary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span className="font-bold truncate max-w-[180px] text-text-primary">{getDisplayDate()}</span>
-                    </div>
-                    <svg className={`w-3.5 h-3.5 text-text-secondary transition-transform duration-300 flex-shrink-0 ${isDateOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <svg className="w-3.5 h-3.5 text-text-secondary opacity-40 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-[11px] font-bold text-text-primary uppercase tracking-widest">{getDisplayDate()}</span>
+                    <svg className={`w-3 h-3 text-text-secondary transition-transform duration-500 ${isDateOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
 
                 {isDateOpen && (
-                    <div className="absolute top-full left-0 mt-3 origin-top-left bg-surface-panel border border-border-subtle rounded-2xl shadow-2xl z-50 w-[280px] overflow-hidden animate-scale-in">
-                        {/* Presets List */}
-                        <div className="flex flex-col p-2 border-b border-border-subtle">
+                    <div className="absolute top-full left-0 mt-4 origin-top-left bg-zinc-900 border border-zinc-50/10 rounded-2xl shadow-[0_30px_100px_rgba(0,0,0,0.8)] z-50 w-[300px] overflow-hidden animate-scale-in">
+                        <div className="flex flex-col p-3 gap-1">
                             {[
-                                { val: "", label: "All Time" },
-                                { val: "3days", label: "Last 3 Days" },
-                                { val: "1month", label: "Past Month" },
-                                { val: "6months", label: "Last 6 Months" },
-                                { val: "1year", label: "Last 1 Year" }
+                                { val: "", label: "All Time Range" },
+                                { val: "3days", label: "Last 72 Hours" },
+                                { val: "1month", label: "Last 30 Days" },
+                                { val: "6months", label: "Past 6 Months" },
+                                { val: "1year", label: "Past Fiscal Year" }
                             ].map((preset) => (
                                 <button
                                     key={preset.val}
                                     onClick={() => { handlePresetChange(preset.val); setIsDateOpen(false); }}
-                                    className={`px-3 py-2.5 text-xs text-left rounded-xl transition-all ${
-                                        (preset.val === "" && !filters.from && !filters.to) || currentPreset === preset.val
-                                            ? "bg-brand-primary/20 text-brand-primary font-black"
-                                            : "text-text-secondary hover:bg-surface-base hover:text-text-primary font-bold"
+                                    className={`px-4 py-3 text-[10px] text-left rounded-xl transition-all uppercase tracking-[0.15em] font-black
+                                        ${(preset.val === "" && !filters.from && !filters.to) || currentPreset === preset.val
+                                            ? "bg-text-primary text-zinc-950 shadow-xl"
+                                            : "text-text-secondary hover:bg-zinc-50/5 hover:text-text-primary"
                                     }`}
                                 >
                                     {preset.label}
@@ -160,26 +157,25 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                             ))}
                         </div>
 
-                        {/* Custom Date Range */}
-                        <div className="p-4 bg-surface-base/30">
-                            <span className="text-[10px] uppercase font-black text-text-secondary tracking-[0.2em] mb-3 block opacity-40">Custom Range</span>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-[10px] text-text-secondary font-bold uppercase opacity-60">From</label>
+                        <div className="p-5 border-t border-zinc-50/5 bg-zinc-950/20">
+                            <span className="text-[9px] uppercase font-black text-text-secondary tracking-[0.25em] mb-4 block opacity-30 italic">Precision Range Select</span>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[9px] text-text-secondary font-black uppercase tracking-widest opacity-40 ml-1">From</label>
                                     <input
                                         type="date"
                                         value={filters.from}
                                         onChange={(e) => set("from", e.target.value)}
-                                        className="bg-surface-panel w-full border border-border-subtle rounded-xl px-2 py-2 text-[11px] text-text-primary focus:outline-none focus:border-brand-primary/50 transition-all shadow-inner custom-calendar-icon font-bold"
+                                        className="bg-zinc-950 w-full border border-zinc-50/10 rounded-xl px-3 py-2.5 text-[10px] text-text-primary focus:outline-none focus:border-brand-primary transition-all shadow-inner font-bold font-mono"
                                     />
                                 </div>
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-[10px] text-text-secondary font-bold uppercase opacity-60">To</label>
+                                <div className="space-y-2">
+                                    <label className="text-[9px] text-text-secondary font-black uppercase tracking-widest opacity-40 ml-1">To</label>
                                     <input
                                         type="date"
                                         value={filters.to}
                                         onChange={(e) => set("to", e.target.value)}
-                                        className="bg-surface-panel w-full border border-border-subtle rounded-xl px-2 py-2 text-[11px] text-text-primary focus:outline-none focus:border-brand-primary/50 transition-all shadow-inner custom-calendar-icon font-bold"
+                                        className="bg-zinc-950 w-full border border-zinc-50/10 rounded-xl px-3 py-2.5 text-[10px] text-text-primary focus:outline-none focus:border-brand-primary transition-all shadow-inner font-bold font-mono"
                                     />
                                 </div>
                             </div>
@@ -188,24 +184,15 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                 )}
             </div>
 
-            {/* Clear button */}
             {hasFilters && (
                 <button
                     onClick={() => onFiltersChange({ owner: "", from: "", to: "" })}
-                    className="flex items-center gap-1.5 ml-auto px-3 py-1.5 text-xs rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all font-medium"
+                    className="flex items-center gap-2 ml-auto px-5 py-2 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all shadow-xl shadow-rose-500/5 active:scale-95"
                 >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                    Clear Filters
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    Flush Filters
                 </button>
-            )}
-
-            {/* Active filter count badge */}
-            {hasFilters && (
-                <span className="hidden md:inline-flex items-center justify-center ml-2 text-[10px] text-brand-accent bg-brand-accent/10 border border-brand-accent/20 px-2 py-0.5 rounded-full font-semibold shadow-[0_0_10px_rgba(0,240,255,0.1)]">
-                    Active
-                </span>
             )}
         </div>
     );
 };
-

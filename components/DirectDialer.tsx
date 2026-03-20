@@ -61,24 +61,29 @@ export const DirectDialer = ({
     }, [isCallActive, phoneNumber, onCall]);
 
     return (
-        <div className="flex flex-col items-center justify-center p-6 bg-surface-panel rounded-2xl w-full max-w-sm mx-auto shadow-[0_30px_80px_rgba(0,0,0,0.6)] border border-border-subtle animate-scale-in">
-            <div className="w-full bg-surface-base border border-border-subtle rounded-xl p-5 mb-6 text-center shadow-inner relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-b from-brand-accent/10 to-transparent opacity-30 pointer-events-none group-hover:opacity-50 transition-opacity" />
+        <div className="flex flex-col items-center justify-center p-10 bg-surface-panel rounded-[2rem] w-full max-w-sm mx-auto shadow-[0_40px_100px_rgba(0,0,0,0.8)] border border-border-subtle/50 relative overflow-hidden group">
+            {/* Background design elements */}
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-primary/50 to-transparent opacity-50" />
+            
+            <div className="w-full bg-zinc-950/40 border border-border-subtle rounded-2xl p-6 mb-8 text-center relative overflow-hidden shadow-inner group-hover:border-border-subtle/80 transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/5 to-transparent opacity-30 pointer-events-none" />
 
-                <h2 className={`text-3xl font-mono tracking-[0.2em] h-10 flex items-center justify-center transition-all duration-500
-                    ${isCallActive ? "text-brand-primary drop-shadow-[0_0_15px_rgba(59,28,217,0.8)] scale-110" : "text-text-primary opacity-90"}`}>
-                    {phoneNumber || "— — — —"}
-                </h2>
+                <div className="flex justify-center items-center h-12 mb-2">
+                    <h2 className={`text-3xl font-mono tracking-[0.25em] transition-all duration-700 font-bold
+                        ${isCallActive ? "text-brand-primary drop-shadow-[0_0_20px_rgba(59,28,217,0.6)] scale-105" : "text-text-primary"}`}>
+                        {phoneNumber || "— — — —"}
+                    </h2>
+                </div>
 
-                <div className="flex justify-between items-center mt-5 text-[10px] uppercase tracking-[0.2em] font-black">
-                    <span className={
-                        callStatus === "connected" ? "text-brand-accent animate-pulse" :
-                            "text-text-secondary opacity-40 font-bold"
-                    }>
-                        {callStatus === "idle" ? "Ready" : callStatus.toUpperCase()}
-                    </span>
+                <div className="flex justify-between items-center mt-6 text-[10px] uppercase tracking-[0.3em] font-black">
+                    <div className="flex items-center gap-2">
+                         <span className={`w-1.5 h-1.5 rounded-full ${isCallActive ? "bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" : "bg-text-secondary opacity-20"}`} />
+                         <span className={callStatus === "connected" ? "text-emerald-500" : "text-text-secondary opacity-40"}>
+                            {callStatus === "idle" ? "System Ready" : callStatus.toUpperCase()}
+                        </span>
+                    </div>
                     {callStatus === "connected" && (
-                        <span className="text-brand-accent bg-brand-accent/10 px-3 py-1 rounded-lg backdrop-blur-md border border-brand-accent/20 shadow-lg">
+                        <span className="text-zinc-50 bg-zinc-50/10 px-3 py-1 rounded-lg backdrop-blur-md border border-zinc-50/20 shadow-lg font-mono">
                             {formatDuration(callDuration)}
                         </span>
                     )}
@@ -86,65 +91,65 @@ export const DirectDialer = ({
             </div>
 
             {/* Keypad */}
-            <div className={`grid grid-cols-3 gap-4 mb-6 w-full ${isCallActive ? "opacity-20 translate-y-4 scale-95 pointer-events-none" : "transition-all duration-700"}`}>
+            <div className={`grid grid-cols-3 gap-5 mb-8 w-full transition-all duration-700 ${isCallActive ? "opacity-10 translate-y-8 scale-95 pointer-events-none filter blur-sm" : ""}`}>
                 {["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"].map((key) => (
                     <button
                         key={key}
                         onClick={() => handleNumberClick(key)}
-                        className="h-16 rounded-xl bg-surface-base border border-border-subtle text-xl text-text-primary font-black hover:bg-brand-primary/20 hover:border-brand-primary/50 hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(59,28,217,0.3)] transition-all active:scale-90 flex items-center justify-center shadow-sm"
+                        className="h-16 rounded-2xl bg-surface-base border border-border-subtle text-xl text-text-primary font-bold hover:bg-zinc-900 hover:border-text-primary/10 hover:-translate-y-1 hover:shadow-2xl transition-all active:scale-90 flex flex-col items-center justify-center shadow-sm relative overflow-hidden group/btn"
                     >
-                        {key}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+                        <span className="relative z-10">{key}</span>
+                        {key !== "*" && key !== "#" && key !== "0" && key !== "1" && (
+                            <span className="text-[7px] text-text-secondary opacity-30 mt-0.5 relative z-10">
+                                {key === "2" ? "ABC" : key === "3" ? "DEF" : key === "4" ? "GHI" : key === "5" ? "JKL" : key === "6" ? "MNO" : key === "7" ? "PQRS" : key === "8" ? "TUV" : "WXYZ"}
+                            </span>
+                        )}
                     </button>
                 ))}
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-center space-x-8 w-full">
-                {/* Backspace Button */}
-                {!isCallActive && (
-                    <button
-                        onClick={handleBackspace}
-                        disabled={!phoneNumber}
-                        className="w-16 h-16 rounded-2xl bg-surface-base border border-border-subtle text-text-secondary hover:text-white hover:bg-red-500/20 hover:border-red-500/50 transition-all flex items-center justify-center disabled:opacity-20 disabled:cursor-not-allowed shadow-sm"
-                    >
-                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" /></svg>
-                    </button>
-                )}
+            <div className="flex items-center justify-between w-full px-2">
+                <button
+                    onClick={handleBackspace}
+                    disabled={!phoneNumber || isCallActive}
+                    className="w-14 h-14 rounded-2xl bg-surface-base border border-border-subtle text-text-secondary hover:text-rose-500 hover:bg-rose-500/5 hover:border-rose-500/20 transition-all flex items-center justify-center disabled:opacity-0 disabled:scale-95 transition-all duration-500 shadow-sm"
+                >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" /></svg>
+                </button>
 
-                {/* Call / Hangup Button */}
                 {!isCallActive ? (
                     <button
                         onClick={() => onCall(phoneNumber)}
                         disabled={!phoneNumber}
-                        className="w-20 h-20 rounded-2xl bg-brand-accent text-black shadow-[0_0_30px_rgba(0,240,255,0.4)] hover:shadow-[0_0_50px_rgba(0,240,255,0.6)] transition-all transform hover:scale-110 active:scale-90 flex items-center justify-center disabled:opacity-20 disabled:bg-surface-base disabled:shadow-none disabled:text-text-secondary border-none"
+                        className="w-20 h-20 rounded-full bg-text-primary text-surface-base shadow-[0_20px_50px_rgba(255,255,255,0.1)] hover:shadow-[0_25px_60px_rgba(255,255,255,0.2)] transition-all transform hover:scale-110 active:scale-90 flex items-center justify-center disabled:opacity-20 disabled:grayscale border-none"
                     >
                         <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                     </button>
                 ) : (
                     <button
                         onClick={onHangUp}
-                        className="w-20 h-20 rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-[0_0_30px_rgba(239,68,68,0.4)] hover:shadow-[0_0_50px_rgba(239,68,68,0.6)] transition-all transform hover:scale-110 active:scale-90 flex items-center justify-center animate-pulse"
+                        className="w-20 h-20 rounded-full bg-rose-500 text-white shadow-[0_20px_50px_rgba(244,63,94,0.3)] hover:shadow-[0_25px_60px_rgba(244,63,94,0.5)] transition-all transform hover:scale-110 active:scale-90 flex items-center justify-center animate-pulse border-none"
                     >
-                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M16 8l-8 8m0-8l8 8" /></svg>
+                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M16 8l-8 8m0-8l8 8" /></svg>
                     </button>
                 )}
 
-                {/* Mute Button */}
-                {isCallActive && (
-                    <button
-                        onClick={onToggleMute}
-                        className={`w-16 h-16 rounded-2xl border transition-all flex items-center justify-center shadow-lg
-                            ${isMuted
-                                ? "bg-red-500/20 text-red-500 border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.3)]"
-                                : "bg-surface-base border-border-subtle text-text-secondary hover:text-white hover:bg-white/10"}`}
-                    >
-                        {isMuted ? (
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z m7.414-8l4 4m0-4l-4 4" /></svg>
-                        ) : (
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
-                        )}
-                    </button>
-                )}
+                <button
+                    onClick={onToggleMute}
+                    disabled={!isCallActive}
+                    className={`w-14 h-14 rounded-2xl border transition-all flex items-center justify-center shadow-lg disabled:opacity-0 disabled:scale-95 transition-all duration-500
+                        ${isMuted
+                            ? "bg-rose-500/10 text-rose-500 border-rose-500/20 shadow-[0_0_30px_rgba(244,63,94,0.2)]"
+                            : "bg-surface-base border-border-subtle text-text-secondary hover:text-text-primary hover:bg-zinc-900"}`}
+                >
+                    {isMuted ? (
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z m7.414-8l4 4m0-4l-4 4" /></svg>
+                    ) : (
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                    )}
+                </button>
             </div>
         </div>
     );
