@@ -49,15 +49,23 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
 
     const getGroupLeads = (group: typeof groups[number]) => {
         let filtered = baseLeads.filter(lead => {
-            if (group === "New Leads") return lead.is_in_active_pool === true;
-            
-            if (lead.group_name) return lead.group_name === group;
-            // fallback
             const s = (lead.status || "").toLowerCase();
-            if (group === "Lost") return s.includes("lost");
-            if (group === "No-Show") return s.includes("no show") || s.includes("no-show");
-            if (group === "Cancel") return s.includes("cancel");
-            return true;
+            
+            // Check categorization
+            const isLost = lead.group_name === "Lost" || s.includes("lost");
+            const isNoShow = lead.group_name === "No-Show" || s.includes("no show") || s.includes("no-show");
+            const isCancel = lead.group_name === "Cancel" || s.includes("cancel");
+
+            if (group === "Lost") return isLost;
+            if (group === "No-Show") return isNoShow;
+            if (group === "Cancel") return isCancel;
+
+            if (group === "New Leads") {
+                // Only show if in active pool and NOT assigned to any other category
+                return lead.is_in_active_pool === true && !isLost && !isNoShow && !isCancel;
+            }
+            
+            return false;
         });
 
         const ownerStr = columnOwner[group];
