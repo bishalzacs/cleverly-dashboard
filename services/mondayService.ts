@@ -189,8 +189,13 @@ export const getLostLeads = async (): Promise<Lead[]> => {
       group_id: item.group_id,
       group_name: groupName,
     };
-  }).filter((lead: Lead) => lead.phone && lead.phone.trim() !== "");
+  });
 
-  console.log(`[Monday] Leads with valid phone: ${leads.length} / ${allItems.length}`);
-  return leads;
+  const withPhone = (leads as any[]).filter((l) => l.phone && l.phone.trim() !== "");
+  const withoutPhone = (leads as any[]).filter((l) => !l.phone || l.phone.trim() === "");
+
+  console.log(`[Monday] Leads with phone: ${withPhone.length}`);
+  console.log(`[Monday] Leads without phone: ${withoutPhone.length} (Skipping these to prevent dialer errors)`);
+
+  return withPhone;
 };

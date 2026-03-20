@@ -22,7 +22,7 @@ export const useLeads = (filters?: FilterState): UseLeadsReturn => {
     const fetchLeads = useCallback(async () => {
         try {
             setError(null);
-            const params = new URLSearchParams({ limit: "5000" });
+            const params = new URLSearchParams({ limit: "10000" });
             if (filters?.owner) params.set("owner", filters.owner);
             if (filters?.from) params.set("from", filters.from);
             if (filters?.to) params.set("to", filters.to);

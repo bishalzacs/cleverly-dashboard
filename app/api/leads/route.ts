@@ -12,7 +12,7 @@ export async function GET(request: Request) {
         );
 
         const { searchParams } = new URL(request.url);
-        const limit = Math.min(parseInt(searchParams.get("limit") || "5000"), 5000);
+        const limit = Math.min(parseInt(searchParams.get("limit") || "10000"), 10000);
         const page = parseInt(searchParams.get("page") || "1");
         const offset = (page - 1) * limit;
         const owner = searchParams.get("owner") || "";
