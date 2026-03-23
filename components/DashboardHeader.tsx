@@ -20,11 +20,19 @@ export const DashboardHeader = ({ deviceStatus, callStatus }: DashboardHeaderPro
       const { data: { user }, error } = await supabase.auth.getUser();
       if (user && !error) {
         setUserEmail(user.email || null);
-      } else {
-        // Fallback: This fixes a cross-browser bug where the Firebase cookie 
-        // survives but the Supabase session expires. Forces a clean re-login.
-        window.location.href = "/login";
+        return;
       }
+      
+      // Fallback: Support Firebase-only sessions 
+      const cookies = document.cookie.split(';');
+      const hasFirebase = cookies.some(c => c.trim().startsWith('firebase-auth-token='));
+      if (hasFirebase) {
+        setUserEmail("Agent");
+        return;
+      }
+
+      // Kicked out if neither are valid
+      window.location.href = "/login";
     };
     fetchUser();
   }, []);
