@@ -13,30 +13,30 @@
 }
 
 :root {
-  /* Cleverly Branding */
-  --brand-primary: #3B1CD9;
+  /* Cleverly Branding - Updated for Premium Fintech Theme */
+  --brand-primary: #0066FF; /* Bright neon blue from reference */
   --brand-accent: #FF782D;
 
   /* High Contrast SaaS Dark Theme (Default) */
-  --surface-base: #09090B;        /* Zinc 950 */
-  --surface-panel: #18181B;       /* Zinc 900 */
-  --surface-panel-hover: #27272A; /* Zinc 800 */
-  --border-subtle: #27272A;       /* Zinc 800 */
-  --text-primary: #FAFAFA;        /* Zinc 50 */
-  --text-secondary: #A1A1AA;      /* Zinc 400 */
-  --background: #09090B;
-  --foreground: #FAFAFA;
+  --surface-base: #030308;        /* Deep Navy/Black background */
+  --surface-panel: #111116;       /* Card background */
+  --surface-panel-hover: #1A1A22; /* Hover state */
+  --border-subtle: rgba(255, 255, 255, 0.05); /* Ultra-thin, subtle borders */
+  --text-primary: #FFFFFF;        /* Pure white */
+  --text-secondary: #8B8C95;      /* Muted gray for secondary text */
+  --background: #030308;
+  --foreground: #FFFFFF;
 }
 
 [data-theme='light'] {
-  /* Clean SaaS Light Theme */
-  --surface-base: #FFFFFF;
-  --surface-panel: #F9FAFB;
-  --surface-panel-hover: #F3F4F6;
-  --border-subtle: #E5E7EB;
+  /* Keeping light theme as fallback, though design is dark-first */
+  --surface-base: #F8F9FA;
+  --surface-panel: #FFFFFF;
+  --surface-panel-hover: #F1F3F5;
+  --border-subtle: rgba(0, 0, 0, 0.05);
   --text-primary: #111827;
   --text-secondary: #6B7280;
-  --background: #FFFFFF;
+  --background: #F8F9FA;
   --foreground: #111827;
 }
 

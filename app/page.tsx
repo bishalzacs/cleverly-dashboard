@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { TopBar } from "@/components/TopBar";
+import { useState, useEffect } from "react";
+import { DashboardHeader } from "@/components/DashboardHeader";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { PremiumDashboardView } from "@/components/dashboard/PremiumDashboardView";
 import { LeadList } from "@/components/LeadList";
 import { DialerPanel } from "@/components/DialerPanel";
 import { DirectDialer } from "@/components/DirectDialer";
@@ -11,17 +13,32 @@ import { FilterBar, FilterState } from "@/components/FilterBar";
 import { useLeads } from "@/hooks/useLeads";
 import { useTwilioDevice } from "@/hooks/useTwilioDevice";
 import { Lead } from "@/services/mondayService";
+import { createClient } from "@/utils/supabase/client";
 
-type DashboardTab = "leads" | "pipeline" | "dialer" | "analysis";
+type DashboardTab = "dashboard" | "leads" | "pipeline" | "dialer" | "analysis";
 
 export default function Dashboard() {
     const [filters, setFilters] = useState<FilterState>({ owner: "", from: "", to: "" });
     const { leads, isLoading, error: leadsError, refreshLeads } = useLeads(filters);
     const { deviceStatus, callStatus, callDuration, error: twilioError, makeCall, hangUp, toggleMute, isMuted, lastCallMeta, logCallWithOutcome } = useTwilioDevice();
 
-    const [activeTab, setActiveTab] = useState<DashboardTab>("analysis");
+    const [activeTab, setActiveTab] = useState<DashboardTab>("dashboard");
     const [activeLead, setActiveLead] = useState<Lead | null>(null);
     const [showDialerPanel, setShowDialerPanel] = useState(false);
+    const [userName, setUserName] = useState<string | null>(null);
+    const supabase = createClient();
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                // If you use profiles for real names, you can fetch here. For now, fallback to email prefix.
+                const name = user.email?.split('@')[0] || "User";
+                setUserName(name.charAt(0).toUpperCase() + name.slice(1));
+            }
+        };
+        fetchUser();
+    }, []);
 
     const isCallActive = callStatus === "connecting" || callStatus === "ringing" || callStatus === "connected";
 
@@ -38,45 +55,24 @@ export default function Dashboard() {
 
     const switchTab = (tab: DashboardTab) => { setActiveTab(tab); setShowDialerPanel(false); };
 
-    const navItems = [
-        {
-            id: "analysis" as DashboardTab, label: "Analytics",
-            icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
-        },
-        {
-            id: "leads" as DashboardTab, label: "Leads",
-            icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
-        },
-        {
-            id: "pipeline" as DashboardTab, label: "Pipeline",
-            icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>,
-        },
-        {
-            id: "dialer" as DashboardTab, label: "Dialer",
-            icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>,
-        },
-    ];
-
     return (
-        <div className="flex flex-col h-[100dvh] bg-surface-base text-text-primary overflow-hidden font-sans">
-            <TopBar deviceStatus={deviceStatus} callStatus={callStatus} error={twilioError} />
+        <div className="flex h-[100dvh] bg-[#030308] text-white overflow-hidden font-sans">
+            {/* Left Sidebar */}
+            <div className="hidden md:block h-full">
+                <DashboardSidebar activeTab={activeTab} onTabChange={switchTab} userName={userName} />
+            </div>
 
-            <div className="flex-1 flex overflow-hidden">
-                {/* Desktop Sidebar */}
-                <nav className="hidden md:flex w-20 bg-surface-panel border-r border-border-subtle flex-col items-center py-6 space-y-6 z-30 shadow-[10px_0_40px_rgba(0,0,0,0.5)] flex-shrink-0 animate-fade-in">
-                    {navItems.map((item, idx) => (
-                        <button key={item.id} onClick={() => switchTab(item.id)}
-                            className={`p-3 rounded-xl transition-all duration-500 relative group animate-scale-in ${activeTab === item.id ? "bg-brand-primary text-white shadow-[0_0_25px_rgba(59,28,217,0.5)] scale-110" : "text-text-secondary opacity-40 hover:opacity-100 hover:bg-surface-base"}`}
-                            style={{ animationDelay: `${idx * 0.1}s` }}
-                            title={item.label}>
-                            <div className="relative z-10">{item.icon}</div>
-                            {activeTab === item.id && <div className="absolute inset-0 bg-brand-primary rounded-xl animate-pulse -z-10 blur-sm opacity-50" />}
-                        </button>
-                    ))}
-                </nav>
+            {/* Right Content Area */}
+            <div className="flex-1 flex flex-col min-w-0 h-full">
+                <DashboardHeader deviceStatus={deviceStatus} callStatus={callStatus} />
 
-                {/* Main Content */}
-                <main className="flex-1 bg-surface-base h-full relative overflow-hidden">
+                {/* Main Content Pane */}
+                <main className="flex-1 overflow-hidden relative">
+
+                    {/* ── NEW PREMIUM DASHBOARD ── */}
+                    {activeTab === "dashboard" && (
+                        <PremiumDashboardView />
+                    )}
 
                     {/* ── LEADS TAB ── */}
                     {activeTab === "leads" && (
@@ -151,17 +147,14 @@ export default function Dashboard() {
                 </main>
             </div>
 
-            {/* Mobile Navigation */}
-            <nav className="md:hidden flex items-center border-t border-border-subtle bg-surface-panel z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] px-4">
-                {navItems.map((item) => (
-                    <button key={item.id} onClick={() => switchTab(item.id)}
-                        className={`flex-1 flex flex-col items-center justify-center gap-1.5 py-4 transition-all duration-300 relative ${activeTab === item.id ? "text-brand-primary" : "text-text-secondary opacity-40"}`}>
-                        <div className={`${activeTab === item.id ? "scale-110" : "scale-100"} transition-transform`}>{item.icon}</div>
-                        <span className="text-[9px] font-black tracking-[0.2em] uppercase">{item.label}</span>
-                        {activeTab === item.id && <div className="absolute bottom-0 w-10 h-1 bg-brand-primary rounded-t shadow-[0_0_15px_rgba(59,28,217,0.8)]" />}
+            {/* Mobile Navigation Placeholder (Optional: Add mobile drawer if needed later) */}
+            <div className="md:hidden flex h-16 bg-[#111116] border-t border-white/5 items-center justify-around z-50 px-2 shrink-0">
+                {["dashboard", "leads", "pipeline", "dialer", "analysis"].map((tab) => (
+                    <button key={tab} onClick={() => switchTab(tab as DashboardTab)} className={`flex-1 flex flex-col items-center justify-center p-2 uppercase text-[9px] font-bold tracking-widest transition-colors ${activeTab === tab ? "text-brand-primary" : "text-text-secondary"}`}>
+                        {tab.substring(0,3)}
                     </button>
                 ))}
-            </nav>
+            </div>
 
 
             {/* Error Toast */}
