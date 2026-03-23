@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import useSWR from "swr";
 
 const PIPELINE_STAGES = [
     { id: "new_lead", label: "New Lead", color: "#3B82F6" },
@@ -16,30 +17,72 @@ const PIPELINE_STAGES = [
 ];
 
 export const PremiumDashboardView = () => {
-  const [data, setData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("1W");
   const [tableFilter, setTableFilter] = useState("All");
 
-  const fetchAnalytics = useCallback(async () => {
-      try {
-          setIsLoading(true);
-          const rangeMap: any = { '1D': 'today', '1W': 'week', '1M': 'month', '6M': 'all', '1Y': 'all' };
-          const rangeParam = rangeMap[timeRange] || 'week';
-          
-          const res = await fetch(`/api/analytics?range=${rangeParam}`);
-          const json = await res.json();
-          if (json.success) setData(json.data);
-      } catch (e) {
-          console.error("Failed to fetch analytics", e);
-      } finally {
-          setIsLoading(false);
-      }
-  }, [timeRange]);
+  const rangeMap: any = { '1D': 'today', '1W': 'week', '1M': 'month', '6M': 'all', '1Y': 'all' };
+  const rangeParam = rangeMap[timeRange] || 'week';
 
-  useEffect(() => {
-      fetchAnalytics();
-  }, [fetchAnalytics]);
+  const fetcher = (url: string) => fetch(url).then((res) => res.json());
+  const { data: response, error, isLoading } = useSWR(`/api/analytics?range=${rangeParam}`, fetcher, {
+      revalidateOnFocus: true // Auto-refresh when user clicks back to the window
+  });
+  
+  const data = response?.data;
+
+  // Chart Generator
+  const generateChartPaths = () => {
+      // Default flat path
+      if (!data?.chartData || data.chartData.length === 0) {
+          return {
+              area: "M0,200 L1000,200 Z",
+              line: "M0,200 L1000,200",
+              labels: [],
+              callsInPeriod: 0,
+              yLabels: [100, 75, 50, 25, 0]
+          };
+      }
+
+      const points = data.chartData;
+      const maxVal = Math.max(...points.map((p: any) => p.value), 10);
+      const chartWidth = 1000;
+      const chartHeight = 150; // The Y range for the line (from y=50 to y=200)
+      const xStep = chartWidth / Math.max(points.length - 1, 1);
+      
+      let linePath = "";
+      let areaPath = "";
+      
+      points.forEach((point: any, index: number) => {
+          const normalizedY = 200 - ((point.value / maxVal) * chartHeight);
+          const x = index * xStep;
+          if (index === 0) {
+              linePath += `M${x},${normalizedY}`;
+              areaPath += `M${x},${normalizedY}`;
+          } else {
+              const prevX = (index - 1) * xStep;
+              const prevY = 200 - ((points[index - 1].value / maxVal) * chartHeight);
+              const cp1X = prevX + (x - prevX) / 2;
+              const cp1Y = prevY;
+              const cp2X = prevX + (x - prevX) / 2;
+              const cp2Y = normalizedY;
+              linePath += ` C${cp1X},${cp1Y} ${cp2X},${cp2Y} ${x},${normalizedY}`;
+              areaPath += ` C${cp1X},${cp1Y} ${cp2X},${cp2Y} ${x},${normalizedY}`;
+          }
+      });
+      
+      areaPath += ` L${chartWidth},200 L0,200 Z`;
+      const yLabels = [Math.ceil(maxVal), Math.ceil(maxVal * 0.75), Math.ceil(maxVal * 0.5), Math.ceil(maxVal * 0.25), 0];
+
+      return {
+          area: areaPath,
+          line: linePath,
+          labels: points.map((p:any) => p.label),
+          callsInPeriod: data.callsInPeriod || 0,
+          yLabels
+      };
+  };
+
+  const chart = generateChartPaths();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -54,6 +97,13 @@ export const PremiumDashboardView = () => {
     <div className="flex flex-col gap-6 p-8 h-full overflow-y-auto custom-scrollbar animate-fade-in slide-in-from-bottom-4">
       
       {/* Top Section: Hero Stat & Pipeline Cards */}
+      {error && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl p-4 text-sm flex items-center justify-between col-span-1 md:col-span-12">
+            <span>Database connection lost. Trying to reconnect...</span>
+            <button onClick={() => window.location.reload()} className="bg-red-500 text-white rounded px-3 py-1 font-medium hover:bg-red-600 transition">Retry</button>
+          </div>
+      )}
+      
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         
         {/* Total Leads Card */}
@@ -164,52 +214,42 @@ export const PremiumDashboardView = () => {
                 <path d="M0,160 L1000,160" stroke="rgba(255,255,255,0.05)" strokeWidth="1" fill="none" />
                 
                 {/* Area Fill */}
-                <path d="M0,50 C100,50 150,120 200,120 C250,120 300,90 350,90 C400,90 420,110 450,110 C500,110 520,70 580,70 C650,70 700,50 780,50 C850,50 900,100 950,100 L1000,120 L1000,200 L0,200 Z" fill="url(#chartGradient)" />
+                <path d={chart.area} fill="url(#chartGradient)" className="transition-all duration-700 ease-in-out" />
                 
                 {/* Line */}
-                <path d="M0,50 C100,50 150,120 200,120 C250,120 300,90 350,90 C400,90 420,110 450,110 C500,110 520,70 580,70 C650,70 700,50 780,50 C850,50 900,100 950,100 L1000,120" fill="none" stroke="url(#lineGradient)" strokeWidth="3" className="drop-shadow-[0_0_8px_rgba(0,102,255,0.5)]" />
+                <path d={chart.line} fill="none" stroke="url(#lineGradient)" strokeWidth="3" className="drop-shadow-[0_0_8px_rgba(0,102,255,0.5)] transition-all duration-700 ease-in-out" />
                 
                 {/* Tooltip dot */}
-                <circle cx="450" cy="110" r="5" fill="#0066FF" className="drop-shadow-[0_0_10px_rgba(0,102,255,1)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                <circle cx="500" cy="110" r="5" fill="#0066FF" className="drop-shadow-[0_0_10px_rgba(0,102,255,1)] opacity-0 group-hover:opacity-100 transition-opacity" />
                 {/* Vertical dash line for tooltip */}
-                <path d="M450,110 L450,200" stroke="#0066FF" strokeWidth="1" strokeDasharray="4 4" className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                <path d="M500,110 L500,200" stroke="#0066FF" strokeWidth="1" strokeDasharray="4 4" className="opacity-0 group-hover:opacity-100 transition-opacity" />
             </svg>
 
             {/* CSS Tooltip positioned absolutely for visual match */}
-            <div className="absolute top-[10%] left-[45%] -translate-x-1/2 -translate-y-[120%] bg-[#1A1A22] border border-white/10 rounded-xl p-3 shadow-xl opacity-0 group-hover:opacity-100 transition-all z-20 w-48 pointer-events-none">
+            <div className="absolute top-[10%] left-[50%] -translate-x-1/2 -translate-y-[120%] bg-[#1A1A22] border border-white/10 rounded-xl p-3 shadow-xl opacity-0 group-hover:opacity-100 transition-all z-20 w-48 pointer-events-none">
                 <div className="flex justify-between items-center mb-2">
-                    <span className="text-[10px] text-text-secondary uppercase tracking-widest">Peak Volume</span>
+                    <span className="text-[10px] text-text-secondary uppercase tracking-widest">Call Volume</span>
                     <span className="text-[10px] text-text-secondary tracking-widest">...</span>
                 </div>
                 <div className="flex justify-between items-end">
-                    <span className="text-white text-lg font-bold tracking-tight">{isLoading ? "-" : "248"} Calls</span>
-                    <span className="bg-[#10B981]/10 text-[#10B981] text-[10px] px-1.5 py-0.5 rounded flex items-center">
-                        <svg className="w-2.5 h-2.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                        12%
+                    <span className="text-white text-lg font-bold tracking-tight">{isLoading ? "-" : chart.callsInPeriod} Calls</span>
+                    {/* Placeholder variance till api supports comparison */}
+                    <span className="bg-white/5 text-text-secondary text-[10px] px-1.5 py-0.5 rounded flex items-center">
+                        Total
                     </span>
                 </div>
                 {/* Tooltip arrow */}
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-[#1A1A22]"></div>
             </div>
 
-            {/* Y axis labels mapped for calls instead of stock price */}
+            {/* Y axis labels mapped dynamically */}
             <div className="absolute left-0 top-0 h-[200px] flex flex-col justify-between text-[9px] text-text-secondary py-1 pointer-events-none">
-                <span>500</span>
-                <span>375</span>
-                <span>250</span>
-                <span>125</span>
-                <span>0</span>
+                {chart.yLabels.map((val, i) => <span key={i}>{val}</span>)}
             </div>
 
-            {/* X axis labels for week days */}
+            {/* X axis labels mapped dynamically */}
             <div className="flex justify-between w-[95%] mx-auto mt-4 text-[9px] text-text-secondary px-2 uppercase tracking-widest">
-                <span>Mon</span>
-                <span>Tue</span>
-                <span>Wed</span>
-                <span>Thu</span>
-                <span>Fri</span>
-                <span>Sat</span>
-                <span>Sun</span>
+                {chart.labels.map((lbl: string, i: number) => <span key={i}>{lbl}</span>)}
             </div>
         </div>
       </div>

@@ -21,7 +21,7 @@ export async function GET(request: Request) {
         else if (range === "week") startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         else if (range === "month") startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-        // 1. Pipeline Stage Distribution (Using RPC for performance)
+        // 1. Pipeline Stage Distribution
         const { data: pipelineStats } = await supabase.rpc("get_pipeline_stats");
         const pipelineDistribution: Record<string, number> = {};
         pipelineStats?.forEach((item: { stage: string; count: number }) => {
@@ -40,18 +40,7 @@ export async function GET(request: Request) {
         const connectedCalls = allCalls.filter((c: any) => c.status === "connected");
         const totalDuration = connectedCalls.reduce((sum: number, c: any) => sum + (c.duration_seconds || 0), 0);
         const avgDurationSeconds = connectedCalls.length > 0 ? Math.round(totalDuration / connectedCalls.length) : 0;
-        const avgDuration = `${Math.floor(avgDurationSeconds / 60)}:${String(avgDurationSeconds % 60).padStart(2, "0")}`;
-        const answerRate = allCalls.length > 0 ? ((connectedCalls.length / allCalls.length) * 100).toFixed(1) + "%" : "0%";
-
-        // 4. Fetch unique agents (Using RPC for performance)
-        const { data: agentList } = await supabase.rpc("get_active_agents");
-
-        // 5. Total Leads Count
-        const { count: totalLeads } = await supabase
-            .from("leads")
-            .select("*", { count: "exact", head: true });
-
-        // Helper function for duration formatting
+        
         const formatDuration = (seconds: number) => {
             if (seconds === 0) return "—";
             const minutes = Math.floor(seconds / 60);
@@ -59,9 +48,51 @@ export async function GET(request: Request) {
             return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
         };
 
-        // 4. Get Outcome Distribution
-        const { data: outcomes, error: outcomeError } = await callQuery
-            .select("outcome");
+        const avgDuration = formatDuration(avgDurationSeconds);
+        const answerRate = allCalls.length > 0 ? ((connectedCalls.length / allCalls.length) * 100).toFixed(1) + "%" : "0%";
+
+        // Generate Chart Data dynamically based on historical buckets
+        const chartDataMap: Record<string, number> = {};
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        
+        // Pre-fill last 7 days for 'week' chart so chart has all 7 visual points even if 0 calls
+        if (range === "week") {
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+                chartDataMap[daysOfWeek[d.getDay()]] = 0;
+            }
+        }
+
+        allCalls.forEach((call: any) => {
+            const d = new Date(call.created_at);
+            let key = "";
+            if (range === "today") {
+                key = d.getHours() + ":00";
+            } else if (range === "week") {
+                key = daysOfWeek[d.getDay()];
+            } else if (range === "month") {
+                key = d.getDate().toString(); 
+            } else {
+                key = d.toLocaleString('default', { month: 'short' });
+            }
+            chartDataMap[key] = (chartDataMap[key] || 0) + 1;
+        });
+
+        const chartData = Object.keys(chartDataMap).map(k => ({
+            label: k,
+            value: chartDataMap[k]
+        }));
+
+        // 4. Fetch unique agents
+        const { data: agentList } = await supabase.rpc("get_active_agents");
+
+        // 5. Total Leads Count
+        const { count: totalLeads } = await supabase
+            .from("leads")
+            .select("*", { count: "exact", head: true });
+
+        // 6. Get Outcome Distribution
+        const { data: outcomes } = await callQuery.select("outcome");
         
         const outcomeStats = {
             "Connected": 0,
@@ -78,38 +109,31 @@ export async function GET(request: Request) {
             });
         }
 
-        // 5. Get Lead Stats (for attempts)
-        const { data: leadStats, error: leadStatsError } = await supabase
+        // 7. Get Lead Stats (for attempts)
+        const { data: leadStats } = await supabase
             .from("leads")
             .select("call_attempts, is_connected");
 
         const totalAttempts = leadStats?.reduce((sum, l) => sum + (l.call_attempts || 0), 0) || 0;
         const avgAttempts = leadStats?.length ? (totalAttempts / leadStats.length).toFixed(1) : "0";
 
-        // Prepare variables for the new return structure
-        const leadsCount = totalLeads;
-        const callsCount = allCalls.length;
-        const connectedCount = connectedCalls.length;
-        const recentCalls = allCalls.slice(0, 20);
-        const pipelineMap = pipelineDistribution;
-        const agents = agentList;
-
         return NextResponse.json({
             success: true,
             data: {
-                totalLeads: leadsCount || 0,
-                callsInPeriod: callsCount || 0,
-                answerRate: callsCount ? (Math.round((connectedCount / callsCount) * 100)) + "%" : "0%",
-                avgDuration: formatDuration(avgDurationSeconds), // Use avgDurationSeconds here
-                recentCalls: recentCalls || [],
-                pipelineDistribution: pipelineMap,
-                agentList: agents || [],
+                totalLeads: totalLeads || 0,
+                callsInPeriod: allCalls.length || 0,
+                answerRate,
+                avgDuration,
+                recentCalls: allCalls.slice(0, 20),
+                pipelineDistribution,
+                agentList: agentList || [],
                 filteredStats: {
-                    total: callsCount || 0,
-                    connected: connectedCount || 0
+                    total: allCalls.length || 0,
+                    connected: connectedCalls.length || 0
                 },
                 outcomeStats,
-                avgAttempts
+                avgAttempts,
+                chartData
             }
         });
     } catch (error: any) {

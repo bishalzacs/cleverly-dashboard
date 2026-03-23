@@ -21,6 +21,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "socket.io": "^4.8.3",
+    "swr": "^2.4.1",
     "twilio": "^5.12.2"
   },
   "devDependencies": {
