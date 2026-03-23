@@ -36,6 +36,15 @@ export async function GET(request: Request) {
         const { data: calls } = await callQuery.order("created_at", { ascending: false });
         const allCalls = calls || [];
         
+        // 2.b Unrestricted Recent Calls for the interactions UI table
+        let recentCallsQuery = supabase.from("call_logs").select("*")
+            .order("created_at", { ascending: false })
+            .limit(20);
+        if (agentId) recentCallsQuery = recentCallsQuery.eq("agent_id", agentId);
+        
+        const { data: recentCallsData } = await recentCallsQuery;
+        const recentCalls = recentCallsData || [];
+        
         // 3. Aggregate Stats
         const connectedCalls = allCalls.filter((c: any) => c.status === "connected");
         const totalDuration = connectedCalls.reduce((sum: number, c: any) => sum + (c.duration_seconds || 0), 0);
@@ -124,7 +133,7 @@ export async function GET(request: Request) {
                 callsInPeriod: allCalls.length || 0,
                 answerRate,
                 avgDuration,
-                recentCalls: allCalls.slice(0, 20),
+                recentCalls: recentCalls,
                 pipelineDistribution,
                 agentList: agentList || [],
                 filteredStats: {

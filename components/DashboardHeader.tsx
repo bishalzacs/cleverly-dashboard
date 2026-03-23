@@ -17,9 +17,13 @@ export const DashboardHeader = ({ deviceStatus, callStatus }: DashboardHeaderPro
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (user && !error) {
         setUserEmail(user.email || null);
+      } else {
+        // Fallback: This fixes a cross-browser bug where the Firebase cookie 
+        // survives but the Supabase session expires. Forces a clean re-login.
+        window.location.href = "/login";
       }
     };
     fetchUser();
