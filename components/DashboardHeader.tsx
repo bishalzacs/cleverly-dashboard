@@ -30,41 +30,20 @@ export const DashboardHeader = ({ deviceStatus, callStatus }: DashboardHeaderPro
     window.location.href = "/login";
   };
 
-  const pills = ["Market", "Wallets", "Tools"];
-
   return (
     <header className="h-20 w-full flex items-center justify-between px-8 z-40 bg-surface-base">
       
-      {/* Left Navigation Pills */}
-      <div className="flex items-center space-x-2">
-        {pills.map(pill => (
-          <button
-            key={pill}
-            onClick={() => setActivePill(pill)}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${
-              activePill === pill 
-                ? "bg-white/10 text-white border-white/10" 
-                : "bg-transparent text-text-secondary border-transparent hover:text-white hover:bg-white/5"
-            }`}
-          >
-            {pill}
-          </button>
-        ))}
-      </div>
-
-      {/* Center Search Bar */}
-      <div className="flex-1 max-w-md mx-8 relative">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <svg className="w-4 h-4 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+      {/* Primary Search Bar */}
+        <div className="hidden lg:flex items-center space-x-4 flex-1 max-w-2xl px-8 relative">
+          <div className="absolute left-12 top-1/2 -translate-y-1/2 opacity-50">
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          </div>
+          <input 
+            type="text" 
+            placeholder="Search Cleverly..." 
+            className="w-full bg-[#1A1A22] border border-white/5 placeholder:text-text-secondary text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all py-2 pl-10 pr-4 rounded-full"
+          />
         </div>
-        <input
-          type="text"
-          placeholder="Ask cleverly anything..."
-          className="w-full bg-[#1A1A22] border border-white/5 text-white text-sm rounded-full pl-11 pr-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-primary focus:border-transparent transition-all placeholder-text-secondary/50 shadow-inner"
-        />
-      </div>
 
       {/* Right Icons & Profile */}
       <div className="flex items-center space-x-6">

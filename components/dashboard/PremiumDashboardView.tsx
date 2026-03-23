@@ -10,17 +10,24 @@ const PIPELINE_STAGES = [
     { id: "third_attempt", label: "3rd Attempt", color: "#EF4444" },
     { id: "call_received", label: "Not Answered", color: "#F43F5E" },
     { id: "interested", label: "Interested", color: "#10B981" },
+    { id: "not_interested", label: "Not Int.", color: "#64748B" },
+    { id: "follow_up", label: "Follow Up", color: "#A855F7" },
     { id: "closed", label: "Booked", color: "#14B8A6" },
 ];
 
 export const PremiumDashboardView = () => {
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState("1W");
+  const [tableFilter, setTableFilter] = useState("All");
 
   const fetchAnalytics = useCallback(async () => {
       try {
           setIsLoading(true);
-          const res = await fetch(`/api/analytics?range=week`);
+          const rangeMap: any = { '1D': 'today', '1W': 'week', '1M': 'month', '6M': 'all', '1Y': 'all' };
+          const rangeParam = rangeMap[timeRange] || 'week';
+          
+          const res = await fetch(`/api/analytics?range=${rangeParam}`);
           const json = await res.json();
           if (json.success) setData(json.data);
       } catch (e) {
@@ -28,7 +35,7 @@ export const PremiumDashboardView = () => {
       } finally {
           setIsLoading(false);
       }
-  }, []);
+  }, [timeRange]);
 
   useEffect(() => {
       fetchAnalytics();
@@ -121,10 +128,13 @@ export const PremiumDashboardView = () => {
       {/* Middle Section: System Performance Chart */}
       <div className="bg-[#111116] rounded-2xl p-6 border border-white/5 hover-float cursor-default">
         <div className="flex justify-between items-center mb-8">
-            <span className="text-text-secondary text-sm font-medium">Weekly Call Volume</span>
+            <span className="text-text-secondary text-sm font-medium">Call Volume</span>
             <div className="flex space-x-2">
                 {['1D', '1W', '1M', '6M', '1Y'].map(time => (
-                    <button key={time} className={`w-10 h-10 rounded-full text-xs font-medium transition-all ${time === '1W' ? 'bg-brand-primary text-white shadow-[0_0_15px_rgba(0,102,255,0.4)]' : 'bg-transparent text-text-secondary border border-white/10 hover:text-white hover:bg-white/5'}`}>
+                    <button 
+                        key={time} 
+                        onClick={() => setTimeRange(time)}
+                        className={`w-10 h-10 rounded-full text-xs font-medium transition-all ${time === timeRange ? 'bg-brand-primary text-white shadow-[0_0_15px_rgba(0,102,255,0.4)]' : 'bg-transparent text-text-secondary border border-white/10 hover:text-white hover:bg-white/5'}`}>
                         {time}
                     </button>
                 ))}
@@ -213,7 +223,10 @@ export const PremiumDashboardView = () => {
                 <span className="text-text-secondary text-sm font-medium">Recent Interactions</span>
                 <div className="flex space-x-1 bg-[#1A1A22] border border-white/5 p-1 rounded-full">
                     {['All', 'Connected', 'Missed'].map(filter => (
-                        <button key={filter} className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${filter === 'All' ? 'bg-brand-primary text-white shadow-md' : 'text-text-secondary hover:text-white'}`}>
+                        <button 
+                            key={filter} 
+                            onClick={() => setTableFilter(filter)}
+                            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${filter === tableFilter ? 'bg-brand-primary text-white shadow-md' : 'text-text-secondary hover:text-white'}`}>
                             {filter}
                         </button>
                     ))}
@@ -238,7 +251,12 @@ export const PremiumDashboardView = () => {
                         ) : data?.recentCalls?.length === 0 ? (
                             <tr><td colSpan={6} className="text-center py-10 text-text-secondary">No recent calls to display.</td></tr>
                         ) : (
-                            data?.recentCalls?.slice(0, 5).map((call: any, idx: number) => {
+                            data?.recentCalls?.filter((call: any) => {
+                                if (tableFilter === 'All') return true;
+                                if (tableFilter === 'Connected') return call.status === 'connected';
+                                if (tableFilter === 'Missed') return call.status !== 'connected';
+                                return true;
+                            }).slice(0, 5).map((call: any, idx: number) => {
                                 const color = getStatusColor(call.status);
                                 const isConnected = call.status === 'connected';
                                 
