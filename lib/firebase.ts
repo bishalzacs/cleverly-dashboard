@@ -18,10 +18,8 @@ const auth = getAuth(app);
 
 // Providers
 const googleProvider = new GoogleAuthProvider();
-const githubProvider = new GithubAuthProvider();
-const appleProvider = new OAuthProvider('apple.com');
 
 // Initialize Analytics conditionally (Client side only)
 const analytics = typeof window !== 'undefined' ? isSupported().then(yes => yes ? getAnalytics(app) : null) : null;
 
-export { app, auth, analytics, googleProvider, githubProvider, appleProvider };
+export { app, auth, analytics, googleProvider };
