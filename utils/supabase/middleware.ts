@@ -44,9 +44,11 @@ export async function updateSession(request: NextRequest) {
   // This bypasses the heavy getUser() call which was taking 15s+ and causing 504s.
   // Strict auth validation now happens at the Page/API level which has a higher timeout.
   const allCookies = request.cookies.getAll();
-  const hasSessionCookie = allCookies.some(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'));
+  const hasSupabaseSession = allCookies.some(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'));
+  const hasFirebaseSession = allCookies.some(c => c.name === 'firebase-auth-token');
+  const hasSession = hasSupabaseSession || hasFirebaseSession;
 
-  if (!hasSessionCookie && !isAuthPage && !isApiRoute && !isStaticFilePattern) {
+  if (!hasSession && !isAuthPage && !isApiRoute && !isStaticFilePattern) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)

@@ -18,6 +18,8 @@ export const metadata: Metadata = {
   description: "Cleverly — Premium AI-powered sales dialer and lead management dashboard.",
 };
 
+import { AuthProvider } from "@/context/AuthContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -42,8 +44,9 @@ export default function RootLayout({
       <body
         className={`${outfit.variable} ${inter.variable} antialiased font-inter bg-surface-base text-text-primary custom-scrollbar min-h-screen`}
       >
-
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
