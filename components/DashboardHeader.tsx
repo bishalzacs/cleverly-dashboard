@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { DeviceStatus, CallStatus } from "@/hooks/useTwilioDevice";
 import { StatusIndicator } from "./StatusIndicator";
+import { ProfileModal } from "./ProfileModal";
 import { createClient } from "@/utils/supabase/client";
 
 type DashboardHeaderProps = {
@@ -13,26 +14,38 @@ type DashboardHeaderProps = {
 export const DashboardHeader = ({ deviceStatus, callStatus }: DashboardHeaderProps) => {
   const [activePill, setActivePill] = useState("Market");
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileData, setProfileData] = useState<{name: string, avatarUrl: string} | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
     const fetchUser = async () => {
+      let email = null;
       const { data: { user }, error } = await supabase.auth.getUser();
+      
       if (user && !error) {
-        setUserEmail(user.email || null);
-        return;
+        email = user.email || user.id;
+      } else {
+        const cookies = document.cookie.split(';');
+        const hasFirebase = cookies.some(c => c.trim().startsWith('firebase-auth-token='));
+        if (hasFirebase) {
+          // If we can't extract the email easily via client, use a generic fallback ID
+          email = "Agent";
+        } else {
+          window.location.href = "/login";
+          return;
+        }
       }
       
-      // Fallback: Support Firebase-only sessions 
-      const cookies = document.cookie.split(';');
-      const hasFirebase = cookies.some(c => c.trim().startsWith('firebase-auth-token='));
-      if (hasFirebase) {
-        setUserEmail("Agent");
-        return;
-      }
+      setUserEmail(email);
 
-      // Kicked out if neither are valid
-      window.location.href = "/login";
+      // Fetch profile data
+      if (email) {
+          const { data } = await supabase.from("user_profiles").select("name, avatar_url").eq("email", email).single();
+          if (data) {
+              setProfileData({ name: data.name, avatarUrl: data.avatar_url });
+          }
+      }
     };
     fetchUser();
   }, []);
@@ -76,23 +89,37 @@ export const DashboardHeader = ({ deviceStatus, callStatus }: DashboardHeaderPro
 
         {/* Profile */}
         <div 
-          onClick={handleLogout}
+          onClick={() => setShowProfileModal(true)}
           className="flex items-center space-x-3 cursor-pointer group px-2 py-1.5 rounded-full hover:bg-white/5 transition-all"
-          title="Sign Out"
+          title="Account Settings"
         >
-          <div className="w-10 h-10 rounded-full bg-brand-primary overflow-hidden border-2 border-white/10 flex items-center justify-center">
-            {/* If we had an image it would go here, using initial for now */}
-            <span className="text-white font-bold text-sm">
-                {userEmail ? userEmail.charAt(0).toUpperCase() : "U"}
-            </span>
+          <div className="w-10 h-10 rounded-full bg-brand-primary overflow-hidden border-2 border-white/10 flex items-center justify-center shrink-0">
+             {profileData?.avatarUrl ? (
+                <img src={profileData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+             ) : (
+                <span className="text-white font-bold text-sm uppercase">
+                    {profileData?.name ? profileData.name.charAt(0) : userEmail ? userEmail.charAt(0) : "U"}
+                </span>
+             )}
           </div>
           <div className="hidden md:flex flex-col">
-            <span className="text-sm font-semibold text-white group-hover:text-red-400 transition-colors">User</span>
+            <span className="text-sm font-semibold text-white group-hover:text-brand-primary transition-colors truncate max-w-[120px]">
+                {profileData?.name || "Agent"}
+            </span>
             <span className="text-xs text-text-secondary truncate max-w-[120px]">{userEmail || "Loading..."}</span>
           </div>
         </div>
 
       </div>
+
+      {showProfileModal && userEmail && (
+          <ProfileModal 
+              userEmail={userEmail} 
+              onClose={() => setShowProfileModal(false)}
+              onSignOut={handleLogout}
+              onProfileUpdate={(res) => setProfileData({ name: res.name, avatarUrl: res.avatarUrl })}
+          />
+      )}
     </header>
   );
 };

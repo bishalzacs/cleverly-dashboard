@@ -169,3 +169,13 @@ body {
 .custom-calendar-icon::-webkit-calendar-picker-indicator:hover {
   filter: drop-shadow(0 0 2px rgba(59, 28, 217, 0.2));
 }
+
+/* Global Pointer Utilities for UI Interactivity Improvement */
+button, 
+[role="button"],
+a,
+select,
+.cursor-pointer,
+nav[role="navigation"] button {
+  cursor: pointer !important;
+}

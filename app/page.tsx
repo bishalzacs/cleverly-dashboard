@@ -12,6 +12,7 @@ import { PipelineBoard } from "@/components/PipelineBoard";
 import { FilterBar, FilterState } from "@/components/FilterBar";
 import { useLeads } from "@/hooks/useLeads";
 import { useTwilioDevice } from "@/hooks/useTwilioDevice";
+import { DialerRecentCallsList } from "@/components/DialerRecentCallsList";
 import { Lead } from "@/services/mondayService";
 import { createClient } from "@/utils/supabase/client";
 
@@ -132,9 +133,23 @@ export default function Dashboard() {
 
                     {/* ── DIALER TAB ── */}
                     {activeTab === "dialer" && (
-                        <div className="flex h-full items-center justify-center p-2 animate-in fade-in zoom-in-95 duration-500">
-                            <DirectDialer callStatus={callStatus} callDuration={callDuration} isMuted={isMuted}
-                                onCall={makeCall} onHangUp={hangUp} onToggleMute={toggleMute} />
+                        <div className="flex h-[calc(100vh-80px)] w-full max-w-6xl mx-auto p-4 md:p-8 space-x-0 md:space-x-8 animate-in fade-in zoom-in-95 duration-500">
+                            {/* Left Side: The Actual Dialer */}
+                            <div className="flex-1 flex justify-center items-center">
+                                <DirectDialer callStatus={callStatus} callDuration={callDuration} isMuted={isMuted}
+                                    onCall={makeCall} onHangUp={hangUp} onToggleMute={toggleMute} />
+                            </div>
+
+                            {/* Right Side: Recent Calls */}
+                            <div className="hidden md:flex w-[350px] flex-col bg-surface-panel border border-border-subtle rounded-3xl shadow-xl overflow-hidden h-[600px] my-auto">
+                                <div className="p-5 border-b border-border-subtle bg-surface-panel-hover">
+                                    <h3 className="font-bold text-lg text-white font-outfit">Recent Calls</h3>
+                                    <p className="text-xs text-text-secondary">Your latest interactions</p>
+                                </div>
+                                <div className="flex-1 overflow-y-auto custom-scrollbar p-0">
+                                    <DialerRecentCallsList onCall={makeCall} />
+                                </div>
+                            </div>
                         </div>
                     )}
 
