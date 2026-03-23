@@ -93,7 +93,22 @@ export async function GET(request: Request) {
         }));
 
         // 4. Fetch unique agents
-        const { data: agentList } = await supabase.rpc("get_active_agents");
+        const { data: agentListData } = await supabase.rpc("get_active_agents");
+        let agentList = agentListData || [];
+        
+        // Enrich agents with user profiles (names, avatars, bios)
+        if (agentList.length > 0) {
+            const emails = agentList.map((a: any) => a.email).filter(Boolean);
+            if (emails.length > 0) {
+                const { data: profiles } = await supabase.from("user_profiles").select("email, name, bio, avatar_url").in("email", emails);
+                if (profiles) {
+                    agentList = agentList.map((a: any) => {
+                        const profile = profiles.find((p: any) => p.email === a.email);
+                        return { ...a, profile: profile || null };
+                    });
+                }
+            }
+        }
 
         // 5. Total Leads Count
         const { count: totalLeads } = await supabase

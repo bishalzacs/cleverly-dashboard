@@ -363,12 +363,16 @@ export const PremiumDashboardView = () => {
                     data.agentList.map((agent: any, i: number) => (
                         <div key={agent.id} className="flex justify-between items-center group cursor-pointer p-2 rounded-lg hover:bg-white/5 transition-colors">
                             <div className="flex items-center space-x-3 w-3/4">
-                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-xs text-text-secondary group-hover:bg-brand-primary/20 transition-colors group-hover:text-brand-primary">
-                                    {agent.email.charAt(0).toUpperCase()}
+                                <div className="w-8 h-8 rounded-full border border-white/5 bg-white/5 overflow-hidden flex items-center justify-center shrink-0 text-xs text-text-secondary group-hover:border-brand-primary/50 transition-all">
+                                    {agent.profile?.avatar_url ? (
+                                        <img src={agent.profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                                    ) : (
+                                        agent.profile?.name ? agent.profile.name.charAt(0).toUpperCase() : agent.email.charAt(0).toUpperCase()
+                                    )}
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                    <span className="text-sm font-semibold text-white truncate">{agent.email.split('@')[0]}</span>
-                                    <span className="text-[10px] text-text-secondary truncate">{agent.email}</span>
+                                    <span className="text-sm font-semibold text-white truncate">{agent.profile?.name || agent.email.split('@')[0]}</span>
+                                    <span className="text-[10px] text-text-secondary truncate">{agent.profile?.bio || agent.email}</span>
                                 </div>
                             </div>
                             <div className="flex flex-col items-end">
