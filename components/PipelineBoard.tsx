@@ -169,7 +169,10 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
                                                 key={lead.id}
                                                 lead={lead}
                                                 isActive={activeLead?.id === lead.id}
-                                                onSelect={onSelectLead || (() => { })}
+                                                onSelect={(l) => {
+                                                    if (onSelectLead) onSelectLead(l);
+                                                    setEditingLead(l);
+                                                }}
                                                 onCall={onCallLead}
                                                 isCallingDisabled={isCallActive}
                                                 onEdit={setEditingLead}
