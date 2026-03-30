@@ -53,10 +53,13 @@ export const useLeads = (filters?: FilterState): UseLeadsReturn => {
             .channel('leads-realtime')
             .on(
                 'postgres_changes',
-                { event: '*', schema: 'public', table: 'leads' },
-                () => {
-                    // On any change, refresh for consistency (handles complex filters better than manual patch)
-                    fetchLeads();
+                { event: 'UPDATE', schema: 'public', table: 'leads' },
+                (payload) => {
+                    setLeads((prev) => 
+                        prev.map((lead) => 
+                            lead.id === payload.new.id ? { ...lead, ...payload.new } : lead
+                        )
+                    );
                 }
             )
             .subscribe();

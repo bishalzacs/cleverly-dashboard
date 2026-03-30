@@ -1,0 +1,11 @@
+[dotenv@17.3.1] injecting env (15) from .env.local -- tip: ⚙️  suppress all logs with { quiet: true }
+BOARD_ID: 6942829967
+LOST_ID: new_group62617__1
+GraphQL Error: {
+  "errors": [
+    "Not Authenticated"
+  ],
+  "status": 401,
+  "headers": {},
+  "body": "{\"errors\":[\"Not Authenticated\"]}"
+}

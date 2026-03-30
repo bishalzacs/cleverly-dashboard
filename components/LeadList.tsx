@@ -42,27 +42,13 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
 
     const owners = Array.from(new Set(baseLeads.map((l) => l.owner).filter(Boolean) as string[])).sort();
 
-    const groups = ["Lost", "No-Show", "Cancel"] as const;
+    const groups = ["Lost", "No-Show", "Cancel", "Other"] as const;
     const [columnSearch, setColumnSearch] = useState<Record<string, string>>({});
     const [columnOwner, setColumnOwner] = useState<Record<string, string>>({});
     const [columnDate, setColumnDate] = useState<Record<string, string>>({});
 
     const getGroupLeads = (group: typeof groups[number]) => {
-        let filtered = baseLeads.filter(lead => {
-            const s = (lead.status || "").toLowerCase();
-            
-            // Check categorization
-            const isLost = lead.group_name === "Lost" || s.includes("lost");
-            const isNoShow = lead.group_name === "No-Show" || s.includes("no show") || s.includes("no-show");
-            const isCancel = lead.group_name === "Cancel" || s.includes("cancel");
-
-            if (group === "Lost") return isLost;
-            if (group === "No-Show") return isNoShow;
-            if (group === "Cancel") return isCancel;
-
-            
-            return false;
-        });
+        let filtered = baseLeads.filter(lead => lead.group_name === group);
 
         const ownerStr = columnOwner[group];
         if (ownerStr) {

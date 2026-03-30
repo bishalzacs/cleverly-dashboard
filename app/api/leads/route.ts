@@ -74,7 +74,7 @@ export async function GET(request: Request) {
             plan_type: row.plan_type,
             monday_created_at: row.monday_created_at,
             group_id: row.group_id,
-            group_name: GROUP_NAME_MAP[row.group_id] || row.group_name || "Lost",
+            group_name: GROUP_NAME_MAP[row.group_id] || "Other",
             is_in_active_pool: row.is_in_active_pool,
             call_attempts: row.call_attempts,
             last_call_at: row.last_call_at,
