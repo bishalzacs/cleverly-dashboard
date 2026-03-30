@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// Constants used as fallback if env vars missing
-const DEFAULT_GROUPS = ["Lost", "No-Show", "Cancel"];
+// STRICT MAPPING AS REQUESTED
+const GROUP_MAP: Record<string, string> = {
+    "new_group62617__1": "Lost",
+    "new_group64021__1": "No-Show",
+    "new_group54376__1": "Cancel"
+};
 
 export async function GET(request: Request) {
     try {
@@ -12,55 +16,61 @@ export async function GET(request: Request) {
         );
 
         const { searchParams } = new URL(request.url);
-        const limit = Math.min(parseInt(searchParams.get("limit") || "10000"), 10000);
-        const page = parseInt(searchParams.get("page") || "1");
-        const offset = (page - 1) * limit;
         const owner = searchParams.get("owner") || "";
         const from = searchParams.get("from") || "";
         const to = searchParams.get("to") || "";
 
-        // Get group IDs from env at request time
-        // Get group IDs from env at request time with hardcoded fallbacks for the user's specific board
-        const LOST_ID = process.env.MONDAY_LOST_GROUP_ID || "new_group62617__1";
-        const NOSHOW_ID = process.env.MONDAY_NOSHOW_GROUP_ID || "new_group64021__1";
-        const CANCEL_ID = process.env.MONDAY_CANCEL_GROUP_ID || "new_group54376__1";
+        let allLeads: any[] = [];
+        let totalCount = 0;
+        let currentOffset = 0;
+        const FETCH_SIZE = 1000; // Supabase safe payload chunking
+        let hasMore = true;
 
-        const ALLOWED_GROUP_IDS = [LOST_ID, NOSHOW_ID, CANCEL_ID].filter(Boolean);
-        const GROUP_NAME_MAP: Record<string, string> = {};
-        if (LOST_ID) GROUP_NAME_MAP[LOST_ID] = "Lost";
-        if (NOSHOW_ID) GROUP_NAME_MAP[NOSHOW_ID] = "No-Show";
-        if (CANCEL_ID) GROUP_NAME_MAP[CANCEL_ID] = "Cancel";
+        // STEP 1: REMOVE LIMIT - Loop until ALL matching rows are fetched
+        while (hasMore) {
+            let query = supabase
+                .from("leads")
+                .select("*", { count: "exact" })
+                .order("updated_at", { ascending: false }) // STEP 5: ORDERING
+                .range(currentOffset, currentOffset + FETCH_SIZE - 1);
 
-        console.log("[Leads API] Using group IDs:", { LOST_ID, NOSHOW_ID, CANCEL_ID });
+            // We do NOT use query.in("group_id", ALLOWED_GROUP_IDS) here. 
+            // We want ALL leads, regardless of their group.
+            
+            if (owner) query = query.eq("owner", owner);
+            if (from) query = query.gte("monday_created_at", from + "T00:00:00Z");
+            if (to) query = query.lte("monday_created_at", to + "T23:59:59Z");
 
-        // ORDER BY updated_at DESC — newest leads appear first
-        let query = supabase
-            .from("leads")
-            .select("*", { count: "exact" })
-            .order("updated_at", { ascending: false })
-            .order("created_date", { ascending: false }) // fallback sort
-            .range(offset, offset + limit - 1);
+            const { data, error, count } = await query;
 
-        // Restrict to only the 3 allowed Monday groups at DB level
-        if (ALLOWED_GROUP_IDS.length > 0) {
-            query = query.in("group_id", ALLOWED_GROUP_IDS);
+            if (error) {
+                console.error("[Leads API] Supabase select error:", error);
+                throw new Error(error.message);
+            }
+
+            if (count !== null && totalCount === 0) totalCount = count;
+
+            if (data && data.length > 0) {
+                allLeads.push(...data);
+                currentOffset += FETCH_SIZE;
+                // If we got exactly FETCH_SIZE rows, there might be more
+                if (data.length < FETCH_SIZE) hasMore = false;
+            } else {
+                hasMore = false; // No more rows
+            }
         }
 
-        if (owner) query = query.eq("owner", owner);
-        if (from) query = query.gte("monday_created_at", from + "T00:00:00Z");
-        if (to) query = query.lte("monday_created_at", to + "T23:59:59Z");
-
-        const { data: leads, error, count } = await query;
-
-        if (error) {
-            console.error("[Leads API] Supabase select error:", error);
-            throw new Error(error.message);
-        }
-
-        const mapped = (leads || []).map((row: any) => ({
+        // STEP 2 & 3: FIX GROUP MAPPING AND RETURN STRICT DATA
+        const mapped = allLeads.map((row: any) => ({
             id: row.id,
             name: row.name,
             phone: row.phone,
+            group_id: row.group_id,
+            // DO NOT fallback to "Lost", strict mapping -> "Other"
+            group_name: GROUP_MAP[row.group_id] || "Other",
+            updated_at: row.updated_at,
+            
+            // Standard frontend required fields
             email: row.email,
             status: row.status,
             createdDate: row.created_date,
@@ -73,15 +83,13 @@ export async function GET(request: Request) {
             deal_value: row.deal_value,
             plan_type: row.plan_type,
             monday_created_at: row.monday_created_at,
-            group_id: row.group_id,
-            group_name: GROUP_NAME_MAP[row.group_id] || "Other",
             is_in_active_pool: row.is_in_active_pool,
             call_attempts: row.call_attempts,
             last_call_at: row.last_call_at,
             is_connected: row.is_connected,
         }));
 
-        return NextResponse.json({ success: true, data: mapped, count });
+        return NextResponse.json({ success: true, data: mapped, count: totalCount });
     } catch (error: any) {
         console.error("[Leads API] Fatal error:", error);
         return NextResponse.json(
