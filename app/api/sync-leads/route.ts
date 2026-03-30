@@ -43,6 +43,7 @@ export async function POST(_request: Request) {
                 deal_value: lead.deal_value ?? null,
                 plan_type: lead.plan_type || null,
                 group_id: lead.group_id || null,
+                updated_at: new Date().toISOString(),
             }));
 
             const { error } = await supabase
@@ -76,9 +77,20 @@ export async function POST(_request: Request) {
             if (deleteError) console.warn("[Sync] Ghost deletion error:", deleteError.message);
         }
 
-        // 3. Count validation
+        // 3. Count validation & Latest Timestamp
         const { count: dbCount } = await supabase.from("leads").select("*", { count: "exact", head: true });
+        
+        // Fetch newest lead to verify updated_at freshness
+        const { data: latestLeads } = await supabase
+            .from("leads")
+            .select("name, updated_at")
+            .order("updated_at", { ascending: false })
+            .limit(1);
+            
         console.log(`[Sync] Final DB count: ${dbCount} | Monday count: ${leads.length}`);
+        if (latestLeads && latestLeads.length > 0) {
+            console.log(`[Sync] ⚡ Latest lead updated: ${latestLeads[0].name} at ${latestLeads[0].updated_at}`);
+        }
 
         return NextResponse.json({
             success: true,

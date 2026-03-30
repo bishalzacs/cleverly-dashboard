@@ -33,11 +33,11 @@ export async function GET(request: Request) {
 
         console.log("[Leads API] Using group IDs:", { LOST_ID, NOSHOW_ID, CANCEL_ID });
 
-        // ORDER BY monday_created_at DESC — newest leads appear first
+        // ORDER BY updated_at DESC — newest leads appear first
         let query = supabase
             .from("leads")
             .select("*", { count: "exact" })
-            .order("monday_created_at", { ascending: false })
+            .order("updated_at", { ascending: false })
             .order("created_date", { ascending: false }) // fallback sort
             .range(offset, offset + limit - 1);
 
