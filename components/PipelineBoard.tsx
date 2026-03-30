@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Lead } from "@/services/mondayService";
 import { LeadCard } from "./LeadCard";
 import { LeadEditModal } from "./LeadEditModal";
@@ -35,9 +35,9 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
     const [localLeads, setLocalLeads] = useState<Lead[]>(leads);
 
-    if (leads !== localLeads && leads.length !== localLeads.length) {
+    useEffect(() => {
         setLocalLeads(leads);
-    }
+    }, [leads]);
 
     const getLeadsByStage = useCallback((stageId: string) => {
         return localLeads.filter((l) => (l.pipeline_stage || "new_lead") === stageId);
