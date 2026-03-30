@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // STRICT MAPPING AS REQUESTED
 const GROUP_MAP: Record<string, string> = {
     "new_group62617__1": "Lost",
