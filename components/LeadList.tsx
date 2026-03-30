@@ -42,18 +42,24 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
 
     const owners = Array.from(new Set(baseLeads.map((l) => l.owner).filter(Boolean) as string[])).sort();
 
-    const groups = ["Lost", "No-Show", "Cancel", "Other"] as const;
     const [columnSearch, setColumnSearch] = useState<Record<string, string>>({});
     const [columnOwner, setColumnOwner] = useState<Record<string, string>>({});
     const [columnDate, setColumnDate] = useState<Record<string, string>>({});
 
-    const getGroupLeads = (group: typeof groups[number]) => {
-        let filtered = baseLeads.filter(lead => lead.group_name === group);
+    const grouped = {
+        Lost: baseLeads.filter(l => l.group_name === "Lost"),
+        "No-Show": baseLeads.filter(l => l.group_name === "No-Show"),
+        Cancel: baseLeads.filter(l => l.group_name === "Cancel"),
+        Other: baseLeads.filter(l => (l.group_name !== "Lost" && l.group_name !== "No-Show" && l.group_name !== "Cancel"))
+    };
+
+    const groupKeys = Object.keys(grouped) as (keyof typeof grouped)[];
+
+    const getGroupLeads = (group: keyof typeof grouped) => {
+        let filtered = grouped[group];
 
         const ownerStr = columnOwner[group];
-        if (ownerStr) {
-            filtered = filtered.filter(lead => lead.owner === ownerStr);
-        }
+        if (ownerStr) filtered = filtered.filter(lead => lead.owner === ownerStr);
 
         const datePreset = columnDate[group];
         if (datePreset && datePreset !== "all") {
@@ -138,7 +144,7 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
 
             <div className="flex-1 overflow-x-auto overflow-y-hidden bg-surface-base">
                 <div className="flex h-full gap-6 p-8 min-w-max">
-                    {groups.map((group) => {
+                    {groupKeys.map((group) => {
                         const groupLeads = getGroupLeads(group);
                         return (
                             <div key={group} className="flex flex-col w-[320px] md:w-[360px] flex-shrink-0 bg-surface-panel rounded-2xl border border-border-subtle shadow-2xl overflow-hidden h-full mb-4">
@@ -156,14 +162,14 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                                         <input 
                                             type="text" 
                                             placeholder={`Filter ${group}...`}
-                                            value={columnSearch[group] || ""}
+                                            value={columnSearch[group as string] || ""}
                                             onChange={(e) => setColumnSearch({...columnSearch, [group]: e.target.value})}
                                             className="w-full bg-surface-base border border-border-subtle rounded-xl pl-10 pr-4 py-3 text-xs text-text-primary placeholder-text-secondary/40 focus:outline-none focus:border-text-primary/10 transition-all font-sans shadow-inner"
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <select
-                                            value={columnOwner[group] || ""}
+                                            value={columnOwner[group as string] || ""}
                                             onChange={(e) => setColumnOwner({...columnOwner, [group]: e.target.value})}
                                             className="bg-surface-base border border-border-subtle rounded-xl px-3 py-2.5 text-[10px] font-bold text-text-secondary uppercase tracking-widest hover:text-text-primary focus:outline-none transition-all cursor-pointer shadow-inner"
                                         >
@@ -171,7 +177,7 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                                             {owners.map(o => <option key={o} value={o} className="bg-surface-panel">{o}</option>)}
                                         </select>
                                          <select
-                                            value={columnDate[group] || "all"}
+                                            value={columnDate[group as string] || "all"}
                                             onChange={(e) => setColumnDate({...columnDate, [group]: e.target.value})}
                                             className="bg-surface-base border border-border-subtle rounded-xl px-3 py-2.5 text-[10px] font-bold text-text-secondary uppercase tracking-widest hover:text-text-primary focus:outline-none transition-all cursor-pointer shadow-inner"
                                         >
