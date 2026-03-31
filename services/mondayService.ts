@@ -53,7 +53,7 @@ async function fetchBoardItemsSorted(): Promise<{ items: any[], isComplete: bool
   const allItems: any[] = [];
   let cursor: string | null = null;
   let pagesFetched = 0;
-  const MAX_PAGES = 15; // 500 * 15 = 7500 items. 
+  const MAX_PAGES = 30; // 500 * 30 = 15,000 items. Ensures full board coverage for 4,600+ items.
   let isComplete = false;
 
   do {
@@ -100,6 +100,14 @@ async function fetchBoardItemsSorted(): Promise<{ items: any[], isComplete: bool
     const pageData: any = cursor ? data.next_items_page : data?.boards?.[0]?.items_page;
     const items: any[] = pageData?.items || [];
     
+    // VERIFICATION LOG: Specifically look for D'Angelo in the first few batches
+    if (pagesFetched <= 3) {
+      const match = items.find(i => i.name.toLowerCase().includes("d'angelo"));
+      if (match) {
+        console.log(`[Monday] SUCCESS: Found '${match.name}' (ID: ${match.id}) in Page ${pagesFetched}`);
+      }
+    }
+
     console.log(`[Monday] Page ${pagesFetched}: fetched ${items.length} items (Newest First)`);
     allItems.push(...items);
 
