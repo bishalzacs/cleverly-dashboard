@@ -9,7 +9,7 @@ const supabase = createClient(
 
 async function sync() {
     console.log("Fetching leads from Monday...");
-    const leads = await getLostLeads();
+    const { leads } = await getLostLeads();
     console.log(`Fetched ${leads.length} leads. Upserting into Supabase...`);
 
     const recordsToUpsert = leads.map((lead) => ({

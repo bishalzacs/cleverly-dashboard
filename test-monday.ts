@@ -5,8 +5,8 @@ import { getLostLeads } from "./services/mondayService";
 async function run() {
   try {
     console.log("Fetching leads...");
-    const leads = await getLostLeads();
-    console.log("Leads fetched (with phone):", leads.length);
+    const { leads, isComplete } = await getLostLeads();
+    console.log(`Leads fetched (with phone): ${leads.length} | Complete: ${isComplete}`);
     
     const targets = ["David D'Angelo", "Andrew", "Dr. CJohnson", "Anne Louisa Makoha"];
     

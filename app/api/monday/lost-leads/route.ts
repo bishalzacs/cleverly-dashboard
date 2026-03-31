@@ -3,7 +3,7 @@ import { getLostLeads } from "@/services/mondayService";
 
 export async function GET() {
     try {
-        const leads = await getLostLeads();
+        const { leads } = await getLostLeads();
         return NextResponse.json({ success: true, leads });
     } catch (error: any) {
         console.error("Monday Route Error:", error);
