@@ -10,18 +10,16 @@ export async function POST(_request: Request) {
         );
 
         console.log("[Sync] Fetching leads from Monday.com...");
-        const leads = await getLostLeads();
+        const { leads, isComplete } = await getLostLeads();
 
         if (!leads || leads.length === 0) {
             console.log("[Sync] No leads returned from Monday.com.");
             return NextResponse.json({ success: true, message: "No leads to sync", mondayCount: 0, dbCount: 0 });
         }
 
-        console.log(`[Sync] Monday.com returned ${leads.length} leads.`);
+        console.log(`[Sync] Monday.com returned ${leads.length} leads. Complete: ${isComplete}`);
 
         // 1. Upsert in batches of 200
-        //    Key: we do NOT touch pipeline_stage, call_attempts, last_call_at, is_connected
-        //    These are managed by call tracking — syncing Monday should never overwrite them.
         const batchSize = 200;
         let upsertedCount = 0;
         const validMondayIds = leads.map((l) => l.id);
@@ -61,20 +59,25 @@ export async function POST(_request: Request) {
             console.log(`[Sync] Upserted batch ${Math.ceil((i + batchSize) / batchSize)} (${upsertedCount}/${leads.length})`);
         }
 
-        // 2. Tombstone: delete leads no longer in any of the 3 allowed Monday groups
-        //    This prevents "ghost leads" from accumulating in the DB
-        const { data: ghostLeads, error: ghostError } = await supabase
-            .from("leads")
-            .select("id")
-            .not("id", "in", `(${validMondayIds.join(",")})`);
+        // 2. Tombstone: ONLY if the fetch was complete. 
+        //    If it was a partial sync (fast polling), we don't know what's deleted, so we skip this.
+        if (isComplete) {
+            console.log("[Sync] Exhaustive sync complete. Checking for ghost leads...");
+            const { data: ghostLeads, error: ghostError } = await supabase
+                .from("leads")
+                .select("id")
+                .not("id", "in", `(${validMondayIds.join(",")})`);
 
-        if (ghostError) {
-            console.warn("[Sync] Could not fetch ghost leads:", ghostError.message);
-        } else if (ghostLeads && ghostLeads.length > 0) {
-            const ghostIds = ghostLeads.map((g: any) => g.id);
-            console.log(`[Sync] Removing ${ghostIds.length} ghost leads no longer in Monday...`);
-            const { error: deleteError } = await supabase.from("leads").delete().in("id", ghostIds);
-            if (deleteError) console.warn("[Sync] Ghost deletion error:", deleteError.message);
+            if (ghostError) {
+                console.warn("[Sync] Could not fetch ghost leads:", ghostError.message);
+            } else if (ghostLeads && ghostLeads.length > 0) {
+                const ghostIds = ghostLeads.map((g: any) => g.id);
+                console.log(`[Sync] Removing ${ghostIds.length} ghost leads no longer in Monday...`);
+                const { error: deleteError } = await supabase.from("leads").delete().in("id", ghostIds);
+                if (deleteError) console.warn("[Sync] Ghost deletion error:", deleteError.message);
+            }
+        } else {
+            console.log("[Sync] Partial sync (Newest First). Skipping tombstoning to protect existing data.");
         }
 
         // 3. Count validation & Latest Timestamp
@@ -94,10 +97,12 @@ export async function POST(_request: Request) {
 
         return NextResponse.json({
             success: true,
+            isComplete,
             mondayCount: leads.length,
             dbCount,
             upsertedCount,
         });
+
     } catch (error: any) {
         console.error("[Sync] Fatal error:", error.message);
         return NextResponse.json(

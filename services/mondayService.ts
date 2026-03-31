@@ -46,16 +46,18 @@ async function retryRequest<T>(fn: () => Promise<T>, retries = MAX_RETRIES): Pro
 }
 
 /**
- * Fetch ALL items from a single Monday.com group using cursor-based pagination.
- * Handles unlimited items by following the cursor until it's null.
+ * Fetch items from the board, prioritized by most recently updated.
+ * Returns both the items and a flag indicating if the search was exhaustive.
  */
-async function fetchAllItemsFromGroup(groupId: string): Promise<any[]> {
+async function fetchBoardItemsSorted(): Promise<{ items: any[], isComplete: boolean }> {
   const allItems: any[] = [];
   let cursor: string | null = null;
-  let page = 0;
+  let pagesFetched = 0;
+  const MAX_PAGES = 15; // 500 * 15 = 7500 items. 
+  let isComplete = false;
 
   do {
-    page++;
+    pagesFetched++;
     const data: any = await retryRequest(async () => {
       if (cursor) {
         const nextQuery = gql`
@@ -64,6 +66,7 @@ async function fetchAllItemsFromGroup(groupId: string): Promise<any[]> {
               cursor
               items {
                 id name created_at
+                group { id }
                 column_values { id text value }
               }
             }
@@ -72,84 +75,83 @@ async function fetchAllItemsFromGroup(groupId: string): Promise<any[]> {
         return mondayClient.request(nextQuery, { cursor });
       } else {
         const firstQuery = gql`
-          query($boardId: [ID!], $groupId: [String!]) {
+          query($boardId: [ID!]) {
             boards(ids: $boardId) {
-              groups(ids: $groupId) {
-                items_page(limit: ${PAGE_SIZE}) {
-                  cursor
-                  items {
-                    id name created_at
-                    column_values { id text value }
-                  }
+              items_page(
+                limit: ${PAGE_SIZE}, 
+                query_params: { 
+                  order_by: [{ column_id: "last_updated__1", direction: desc }] 
+                }
+              ) {
+                cursor
+                items {
+                  id name created_at
+                  group { id }
+                  column_values { id text value }
                 }
               }
             }
           }
         `;
-        return mondayClient.request(firstQuery, { boardId: [BOARD_ID], groupId: [groupId] });
+        return mondayClient.request(firstQuery, { boardId: [BOARD_ID] });
       }
     });
 
-    let pageData;
-    if (cursor) {
-      pageData = data.next_items_page;
-    } else {
-      pageData = data?.boards?.[0]?.groups?.[0]?.items_page;
-    }
-
+    const pageData: any = cursor ? data.next_items_page : data?.boards?.[0]?.items_page;
     const items: any[] = pageData?.items || [];
-    console.log(`[Monday] Group ${groupId} — page ${page}: fetched ${items.length} items`);
-
-    const tagged = items.map((item: any) => ({ ...item, group_id: groupId }));
-    allItems.push(...tagged);
+    
+    console.log(`[Monday] Page ${pagesFetched}: fetched ${items.length} items (Newest First)`);
+    allItems.push(...items);
 
     cursor = pageData?.cursor || null;
+    
+    if (!cursor) {
+      isComplete = true;
+      break;
+    }
+
+    if (pagesFetched >= MAX_PAGES) break;
+
   } while (cursor);
 
-  console.log(`[Monday] Group ${groupId} — TOTAL fetched: ${allItems.length}`);
-  return allItems;
+  return { items: allItems, isComplete };
 }
 
 /**
  * Main export: Fetch ALL leads from the 3 allowed groups.
- * Guarantees full pagination, retry logic, and group restriction.
+ * Optimized: Sorts by updated_at DESC to ensure latest leads appear immediately.
  */
-export const getLostLeads = async (): Promise<Lead[]> => {
-  // Get group IDs from env at request time with hardcoded fallbacks for the user's specific board
+export const getLostLeads = async (): Promise<{ leads: Lead[], isComplete: boolean }> => {
   const LOST_ID = process.env.MONDAY_LOST_GROUP_ID || "new_group62617__1";
   const NOSHOW_ID = process.env.MONDAY_NOSHOW_GROUP_ID || "new_group64021__1";
   const CANCEL_ID = process.env.MONDAY_CANCEL_GROUP_ID || "new_group54376__1";
   const ALLOWED_GROUPS = [LOST_ID, NOSHOW_ID, CANCEL_ID].filter(Boolean);
 
-  if (!BOARD_ID || ALLOWED_GROUPS.length === 0) {
-    throw new Error("[Monday] Missing MONDAY_BOARD_ID or group environment variables");
+  if (!BOARD_ID) {
+    throw new Error("[Monday] Missing MONDAY_BOARD_ID environment variable");
   }
 
-  console.log(`[Monday] Starting full sync. Board: ${BOARD_ID}, Groups: ${ALLOWED_GROUPS.join(", ")}`);
+  console.log(`[Monday] Starting Sorted Sync. Board: ${BOARD_ID}, Target Groups: ${ALLOWED_GROUPS.length}`);
 
-  const allItems: any[] = [];
+  const { items: rawItems, isComplete } = await fetchBoardItemsSorted();
+  
+  const filteredItems = rawItems.filter(item => ALLOWED_GROUPS.includes(item.group?.id));
+  
+  console.log(`[Monday] Board items: ${rawItems.length}, in target groups: ${filteredItems.length}, Complete: ${isComplete}`);
 
-  for (const groupId of ALLOWED_GROUPS) {
-    const items = await fetchAllItemsFromGroup(groupId);
-    allItems.push(...items);
-  }
-
-  console.log(`[Monday] Grand total fetched from all groups: ${allItems.length}`);
-
-  const leads: Lead[] = allItems.map((item: any) => {
+  const leads: Lead[] = filteredItems.map((item: any) => {
     const getColumnText = (id: string) =>
       item.column_values?.find((c: any) => c.id === id)?.text || "";
     const getColumnValue = (id: string) =>
       item.column_values?.find((c: any) => c.id === id)?.value || null;
 
-    // Owner: try text first, then JSON parse
     let ownerName = getColumnText("person");
     if (!ownerName) {
       try {
         const val = getColumnValue("person");
         if (val) {
           const parsed = JSON.parse(val);
-          ownerName = (parsed?.personsAndTeams || []).map((p: any) => p.name).join(", ");
+          ownerName = (parsed?.personsAndTeams || []).map((p: any) => p.name || `User ${p.id}`).join(", ");
         }
       } catch { /* ignored */ }
     }
@@ -168,8 +170,8 @@ export const getLostLeads = async (): Promise<Lead[]> => {
     } catch { /* ignored */ }
 
     let groupName: "Lost" | "No-Show" | "Cancel" = "Lost";
-    if (item.group_id === NOSHOW_ID) groupName = "No-Show";
-    else if (item.group_id === CANCEL_ID) groupName = "Cancel";
+    if (item.group?.id === NOSHOW_ID) groupName = "No-Show";
+    else if (item.group?.id === CANCEL_ID) groupName = "Cancel";
 
     return {
       id: item.id,
@@ -186,16 +188,15 @@ export const getLostLeads = async (): Promise<Lead[]> => {
       sales_call_date: parseDateCol("date4"),
       deal_value: dealValue,
       plan_type: getColumnText("status4__1"),
-      group_id: item.group_id,
+      group_id: item.group?.id,
       group_name: groupName,
     };
   });
 
   const withPhone = (leads as any[]).filter((l) => l.phone && l.phone.trim() !== "");
-  const withoutPhone = (leads as any[]).filter((l) => !l.phone || l.phone.trim() === "");
+  console.log(`[Monday] Final parsed leads with phone: ${withPhone.length}`);
 
-  console.log(`[Monday] Leads with phone: ${withPhone.length}`);
-  console.log(`[Monday] Leads without phone: ${withoutPhone.length} (Skipping these to prevent dialer errors)`);
-
-  return withPhone;
+  return { leads: withPhone, isComplete };
 };
+
+
