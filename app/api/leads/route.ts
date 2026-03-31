@@ -64,33 +64,42 @@ export async function GET(request: Request) {
         }
 
         // STEP 2 & 3: FIX GROUP MAPPING AND RETURN STRICT DATA
-        const mapped = allLeads.map((row: any) => ({
-            id: row.id,
-            name: row.name,
-            phone: row.phone,
-            group_id: row.group_id,
-            // DO NOT fallback to "Lost", strict mapping -> "Other"
-            group_name: GROUP_MAP[row.group_id] || "Other",
-            updated_at: row.updated_at,
+        const mapped = allLeads.map((row: any) => {
+            // Priority: Determine category based on both group_id AND status
+            let category = GROUP_MAP[row.group_id] || "Other";
             
-            // Standard frontend required fields
-            email: row.email,
-            status: row.status,
-            createdDate: row.created_date,
-            pipeline_stage: row.pipeline_stage,
-            owner: row.owner,
-            interested_in: row.interested_in,
-            notes: row.notes,
-            company: row.company,
-            sales_call_date: row.sales_call_date,
-            deal_value: row.deal_value,
-            plan_type: row.plan_type,
-            monday_created_at: row.monday_created_at,
-            is_in_active_pool: row.is_in_active_pool,
-            call_attempts: row.call_attempts,
-            last_call_at: row.last_call_at,
-            is_connected: row.is_connected,
-        }));
+            // If the status explicitly says No Show, Lost, or Canceled, override the category
+            if (row.status === "No Show") category = "No-Show";
+            else if (row.status === "Lost") category = "Lost";
+            else if (row.status === "Canceled" || row.status === "Cancel") category = "Cancel";
+
+            return {
+                id: row.id,
+                name: row.name,
+                phone: row.phone,
+                group_id: row.group_id,
+                group_name: category,
+                updated_at: row.updated_at,
+                
+                // Standard frontend required fields
+                email: row.email,
+                status: row.status,
+                createdDate: row.created_date,
+                pipeline_stage: row.pipeline_stage,
+                owner: row.owner,
+                interested_in: row.interested_in,
+                notes: row.notes,
+                company: row.company,
+                sales_call_date: row.sales_call_date,
+                deal_value: row.deal_value,
+                plan_type: row.plan_type,
+                monday_created_at: row.monday_created_at,
+                is_in_active_pool: row.is_in_active_pool,
+                call_attempts: row.call_attempts,
+                last_call_at: row.last_call_at,
+                is_connected: row.is_connected,
+            };
+        });
 
         return NextResponse.json({ success: true, data: mapped, count: totalCount });
     } catch (error: any) {

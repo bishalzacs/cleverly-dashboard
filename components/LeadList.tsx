@@ -47,10 +47,14 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
     const [columnDate, setColumnDate] = useState<Record<string, string>>({});
 
     const grouped = {
-        Lost: baseLeads.filter(l => l.group_name === "Lost"),
-        "No-Show": baseLeads.filter(l => l.group_name === "No-Show"),
-        Cancel: baseLeads.filter(l => l.group_name === "Cancel"),
-        Other: baseLeads.filter(l => (l.group_name !== "Lost" && l.group_name !== "No-Show" && l.group_name !== "Cancel"))
+        Lost: baseLeads.filter(l => l.group_name === "Lost" || l.status === "Lost"),
+        "No-Show": baseLeads.filter(l => l.group_name === "No-Show" || l.status === "No Show" || l.status === "No-Show"),
+        Cancel: baseLeads.filter(l => l.group_name === "Cancel" || l.status === "Canceled" || l.status === "Cancel"),
+        Other: baseLeads.filter(l => (
+            l.group_name !== "Lost" && l.status !== "Lost" &&
+            l.group_name !== "No-Show" && l.status !== "No Show" && l.status !== "No-Show" &&
+            l.group_name !== "Cancel" && l.status !== "Canceled" && l.status !== "Cancel"
+        ))
     };
 
     const groupKeys = Object.keys(grouped) as (keyof typeof grouped)[];
