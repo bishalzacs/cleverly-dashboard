@@ -47,27 +47,52 @@ export const useLeads = (filters?: FilterState): UseLeadsReturn => {
         fetchLeads();
     }, [fetchLeads]);
 
-    // 2. Realtime Subscription
+    // 2. Realtime Subscription & Polling
     useEffect(() => {
         const channel = supabase
             .channel('leads-realtime')
             .on(
                 'postgres_changes',
-                { event: 'UPDATE', schema: 'public', table: 'leads' },
+                { event: '*', schema: 'public', table: 'leads' },
                 (payload) => {
-                    setLeads((prev) => 
-                        prev.map((lead) => 
-                            lead.id === payload.new.id ? { ...lead, ...payload.new } : lead
-                        )
-                    );
+                    if (payload.eventType === 'INSERT') {
+                        setLeads((prev) => [payload.new as Lead, ...prev]);
+                    } else if (payload.eventType === 'UPDATE') {
+                        setLeads((prev) => 
+                            prev.map((lead) => 
+                                lead.id === payload.new.id ? { ...lead, ...payload.new as Lead } : lead
+                            )
+                        );
+                    } else if (payload.eventType === 'DELETE') {
+                        setLeads((prev) => prev.filter((lead) => lead.id !== payload.old?.id));
+                    }
                 }
             )
             .subscribe();
 
+        // 3. Auto-polling every 2 minutes (120000ms)
+        const syncInterval = setInterval(async () => {
+            try {
+                // Silently trigger background sync from Monday to DB
+                console.log("[AutoSync] Triggering background sync...");
+                await fetch('/api/sync-leads', { method: 'POST' });
+            } catch (err) {
+                console.warn("[AutoSync] Failed:", err);
+            }
+        }, 120000);
+
         return () => {
             supabase.removeChannel(channel);
+            clearInterval(syncInterval);
         };
-    }, [supabase, fetchLeads]);
+    }, [supabase]);
 
-    return { leads, isLoading, error, refreshLeads: fetchLeads };
+    // Force strict chronological sorting natively in the frontend to guarantee robust ordering
+    const sortedLeads = [...leads].sort((a, b) => {
+        const dateA = new Date(a.monday_created_at || a.createdDate || 0).getTime();
+        const dateB = new Date(b.monday_created_at || b.createdDate || 0).getTime();
+        return dateB - dateA;
+    });
+
+    return { leads: sortedLeads, isLoading, error, refreshLeads: fetchLeads };
 };

@@ -34,7 +34,7 @@ export async function GET(request: Request) {
             let query = supabase
                 .from("leads")
                 .select("*", { count: "exact" })
-                .order("updated_at", { ascending: false }) // STEP 5: ORDERING
+                .order("monday_created_at", { ascending: false, nullsFirst: false }) // STEP 5: ORDERING
                 .range(currentOffset, currentOffset + FETCH_SIZE - 1);
 
             // We do NOT use query.in("group_id", ALLOWED_GROUP_IDS) here. 
