@@ -12,18 +12,14 @@ export async function POST(_request: Request) {
         console.log("[Sync] Fetching leads from Monday.com...");
         const { leads, isComplete } = await getLostLeads();
 
-        if (!leads || leads.length === 0) {
-            console.log("[Sync] No leads returned from Monday.com.");
-            return NextResponse.json({ success: true, message: "No leads to sync", mondayCount: 0, dbCount: 0 });
-        }
-
         console.log(`[Sync] Monday.com returned ${leads.length} leads. Complete: ${isComplete}`);
 
+        const syncStartTime = new Date().toISOString();
+        
         // 1. Upsert in batches of 200
-        const batchSize = 200;
+        const batchSize = 250;
         let upsertedCount = 0;
-        const validMondayIds = leads.map((l) => l.id);
-
+        
         for (let i = 0; i < leads.length; i += batchSize) {
             const batch = leads.slice(i, i + batchSize).map((lead) => ({
                 id: lead.id,
@@ -41,14 +37,19 @@ export async function POST(_request: Request) {
                 deal_value: lead.deal_value ?? null,
                 plan_type: lead.plan_type || null,
                 group_id: lead.group_id || null,
-                updated_at: new Date().toISOString(),
+                updated_at: syncStartTime, // Mark this item as seen in this sync
             }));
+
+            // Log if David is in this batch for debugging
+            const hasDavid = batch.find(l => l.name.toLowerCase().includes("david d"));
+            if (hasDavid) {
+                console.log("⚡ FOUND David D'Angelo in current upsert batch!");
+            }
 
             const { error } = await supabase
                 .from("leads")
                 .upsert(batch, {
                     onConflict: "id",
-                    ignoreDuplicates: false,
                 });
 
             if (error) {
@@ -60,41 +61,25 @@ export async function POST(_request: Request) {
         }
 
         // 2. Tombstone: ONLY if the fetch was complete. 
-        //    If it was a partial sync (fast polling), we don't know what's deleted, so we skip this.
-        if (isComplete) {
-            console.log("[Sync] Exhaustive sync complete. Checking for ghost leads...");
-            const { data: ghostLeads, error: ghostError } = await supabase
+        //    Instead of 'NOT IN' (which hits URL limits), we use the updated_at timestamp.
+        if (isComplete && leads.length > 0) {
+            console.log("[Sync] Exhaustive sync complete. Removing ghost leads (not seen in this sync)...");
+            // Remove any items that weren't part of this sync cycle's upserts
+            const { error: deleteError } = await supabase
                 .from("leads")
-                .select("id")
-                .not("id", "in", `(${validMondayIds.join(",")})`);
-
-            if (ghostError) {
-                console.warn("[Sync] Could not fetch ghost leads:", ghostError.message);
-            } else if (ghostLeads && ghostLeads.length > 0) {
-                const ghostIds = ghostLeads.map((g: any) => g.id);
-                console.log(`[Sync] Removing ${ghostIds.length} ghost leads no longer in Monday...`);
-                const { error: deleteError } = await supabase.from("leads").delete().in("id", ghostIds);
-                if (deleteError) console.warn("[Sync] Ghost deletion error:", deleteError.message);
+                .delete()
+                .lt("updated_at", syncStartTime);
+            
+            if (deleteError) {
+                console.warn("[Sync] Ghost deletion (timestamp-based) error:", deleteError.message);
             }
         } else {
             console.log("[Sync] Partial sync (Newest First). Skipping tombstoning to protect existing data.");
         }
 
-        // 3. Count validation & Latest Timestamp
+        // 3. Status Report
         const { count: dbCount } = await supabase.from("leads").select("*", { count: "exact", head: true });
         
-        // Fetch newest lead to verify updated_at freshness
-        const { data: latestLeads } = await supabase
-            .from("leads")
-            .select("name, updated_at")
-            .order("updated_at", { ascending: false })
-            .limit(1);
-            
-        console.log(`[Sync] Final DB count: ${dbCount} | Monday count: ${leads.length}`);
-        if (latestLeads && latestLeads.length > 0) {
-            console.log(`[Sync] ⚡ Latest lead updated: ${latestLeads[0].name} at ${latestLeads[0].updated_at}`);
-        }
-
         return NextResponse.json({
             success: true,
             isComplete,
@@ -104,7 +89,7 @@ export async function POST(_request: Request) {
         });
 
     } catch (error: any) {
-        console.error("[Sync] Fatal error:", error.message);
+        console.error("[Sync] Fatal error during sync:", error.message);
         return NextResponse.json(
             { success: false, error: error.message || "Failed to sync leads" },
             { status: 500 }
