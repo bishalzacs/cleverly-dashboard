@@ -85,14 +85,14 @@ BEGIN
     VALUES (new_user_id::text, 'Anna', 'anna@cleverly.co', 'anna@321', 'agent', '+1 323 524 2176')
     ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, password = EXCLUDED.password, phone = EXCLUDED.phone;
 
-    -- Oz
-    IF NOT EXISTS (SELECT 1 FROM auth.users WHERE email = 'Oz@cleverly.co') THEN
+    -- Jake
+    IF NOT EXISTS (SELECT 1 FROM auth.users WHERE email = 'jake@cleverly.co') THEN
         INSERT INTO auth.users (id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, is_sso_user)
         VALUES (
             gen_random_uuid(),
             'authenticated',
             'authenticated',
-            'Oz@cleverly.co',
+            'jake@cleverly.co',
             crypt('oz@321', gen_salt('bf')),
             now(),
             '{"provider":"email","providers":["email"]}',
@@ -103,12 +103,12 @@ BEGIN
             false
         ) RETURNING id INTO new_user_id;
     ELSE
-        SELECT id FROM auth.users WHERE email = 'Oz@cleverly.co' INTO new_user_id;
+        SELECT id FROM auth.users WHERE email = 'jake@cleverly.co' INTO new_user_id;
         UPDATE auth.users SET encrypted_password = crypt('oz@321', gen_salt('bf')), updated_at = now() WHERE id = new_user_id;
     END IF;
     UPDATE public.profiles SET phone = '+1 213 263 5329' WHERE id = new_user_id;
     INSERT INTO public."User" (id, name, email, password, role, phone)
-    VALUES (new_user_id::text, 'Oz', 'Oz@cleverly.co', 'oz@321', 'agent', '+1 213 263 5329')
+    VALUES (new_user_id::text, 'Jake', 'jake@cleverly.co', 'oz@321', 'agent', '+1 213 263 5329')
     ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, password = EXCLUDED.password, phone = EXCLUDED.phone;
 
 END $$;
