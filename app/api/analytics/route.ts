@@ -142,6 +142,25 @@ export async function GET(request: Request) {
             });
         }
 
+        // 6.b Merge Twilio status counts into outcomeStats for comprehensive view
+        if (twilioStats && twilioStats.statusCounts) {
+            Object.entries(twilioStats.statusCounts).forEach(([status, count]) => {
+                // Map Twilio statuses to our labels
+                let label = status;
+                if (status === "No-answer" || status === "Noanswer") label = "No Answer";
+                if (status === "Completed") label = "Connected"; 
+                
+                if (outcomeStats[label] !== undefined) {
+                    outcomeStats[label] += count;
+                } else {
+                    // Filter out non-actionable Twilio statuses (Queued, Ringing, etc.) for the chart
+                    if (["Busy", "No Answer", "Connected", "Wrong Number"].includes(label)) {
+                        outcomeStats[label] = (outcomeStats[label] || 0) + count;
+                    }
+                }
+            });
+        }
+
         // 7. Get Lead Stats (for attempts)
         const { data: leadStats } = await supabase
             .from("leads")
@@ -154,7 +173,7 @@ export async function GET(request: Request) {
             success: true,
             data: {
                 totalLeads: totalLeads || 0,
-                callsInPeriod: allCalls.length || 0,
+                callsInPeriod: twilioStats ? twilioStats.totalCalls : (allCalls.length || 0),
                 answerRate,
                 avgDuration,
                 recentCalls: recentCalls,
