@@ -33,14 +33,19 @@ export async function POST(request: Request) {
 
         // 2. Update lead stats if lead_id is provided
         if (lead_id) {
-            const { error: updateError } = await supabase.rpc('increment_lead_calls', { 
-                target_lead_id: lead_id,
-                connected: outcome === 'Connected',
-                is_attempt: outcome !== 'Voicemail'
-            });
+            try {
+                const { error: updateError } = await supabase.rpc('increment_lead_calls', { 
+                    target_lead_id: lead_id,
+                    connected: outcome === 'Connected',
+                    is_attempt: outcome !== 'Voicemail'
+                });
 
-            if (updateError) {
-                console.error("Failed to update lead stats via RPC:", updateError);
+                if (updateError) {
+                    console.error("[LogCall] RPC error (non-fatal):", updateError);
+                    // We don't throw here to avoid failing the whole call log
+                }
+            } catch (err) {
+                console.error("[LogCall] RPC fatal error (non-fatal):", err);
             }
         }
 
