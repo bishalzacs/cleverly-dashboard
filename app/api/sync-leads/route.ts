@@ -60,21 +60,34 @@ export async function POST(_request: Request) {
             console.log(`[Sync] Upserted batch ${Math.ceil((i + batchSize) / batchSize)} (${upsertedCount}/${leads.length})`);
         }
 
-        // 2. Tombstone: ONLY if the fetch was complete. 
-        //    Instead of 'NOT IN' (which hits URL limits), we use the updated_at timestamp.
+        // 2. Tombstone: ONLY if the fetch was complete and matches safety criteria. 
         if (isComplete && leads.length > 0) {
-            console.log("[Sync] Exhaustive sync complete. Removing ghost leads (not seen in this sync)...");
-            // Remove any items that weren't part of this sync cycle's upserts
-            const { error: deleteError } = await supabase
+            // Get current DB count for safety check
+            const { count: currentDbCount } = await supabase
                 .from("leads")
-                .delete()
-                .lt("updated_at", syncStartTime);
+                .select("*", { count: "exact", head: true });
+
+            const dbCountBefore = currentDbCount || 0;
             
-            if (deleteError) {
-                console.warn("[Sync] Ghost deletion (timestamp-based) error:", deleteError.message);
+            // Safety Rule: Only tombstone if we fetched at least 80% of the current DB size, 
+            // or if the DB is very small (< 500) where risk is low.
+            const isSafeToTombstone = leads.length > (dbCountBefore * 0.8) || dbCountBefore < 500;
+
+            if (isSafeToTombstone) {
+                console.log("[Sync] Exhaustive sync complete and verified. Removing ghost leads (not seen in this sync)...");
+                const { error: deleteError } = await supabase
+                    .from("leads")
+                    .delete()
+                    .lt("updated_at", syncStartTime);
+                
+                if (deleteError) {
+                    console.warn("[Sync] Ghost deletion (timestamp-based) error:", deleteError.message);
+                }
+            } else {
+                console.log(`[Sync] WARNING: Potential partial sync (${leads.length} fetched vs ${dbCountBefore} in DB). Skipping tombstone to protect data.`);
             }
         } else {
-            console.log("[Sync] Partial sync (Newest First). Skipping tombstoning to protect existing data.");
+            console.log("[Sync] Partial sync (Newest First) or 0 leads fetched. Skipping tombstoning.");
         }
 
         // 3. Status Report

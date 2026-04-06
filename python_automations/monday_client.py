@@ -4,9 +4,9 @@ import requests
 import json
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path="../.env")
+load_dotenv(dotenv_path="../.env.local")
 
-MONDAY_API_TOKEN = os.getenv("MONDAY_API_TOKEN", "")
+MONDAY_API_KEY = os.getenv("MONDAY_API_KEY", "")
 BOARD_ID = os.getenv("MONDAY_BOARD_ID", "")
 LOST_ID = os.getenv("MONDAY_LOST_GROUP_ID", "new_group62617__1")
 NOSHOW_ID = os.getenv("MONDAY_NOSHOW_GROUP_ID", "new_group64021__1")
@@ -17,7 +17,7 @@ MAX_RETRIES = 3
 RETRY_DELAY_SEC = 1.5
 
 HEADERS = {
-    "Authorization": MONDAY_API_TOKEN,
+    "Authorization": MONDAY_API_KEY,
     "API-Version": "2023-10",
     "Content-Type": "application/json"
 }

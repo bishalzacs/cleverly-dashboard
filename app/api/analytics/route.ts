@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getTwilioCallMetrics } from "@/services/twilioService";
 
 export async function GET(request: Request) {
     try {
@@ -11,6 +12,9 @@ export async function GET(request: Request) {
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
         );
+
+        // Fetch Twilio Metrics (Primary source for Call Stats)
+        const twilioStats = await getTwilioCallMetrics(range as "today" | "week" | "month" | "all");
 
         // Calculate time ranges
         const now = new Date();
@@ -57,8 +61,10 @@ export async function GET(request: Request) {
             return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
         };
 
-        const avgDuration = formatDuration(avgDurationSeconds);
-        const answerRate = allCalls.length > 0 ? ((connectedCalls.length / allCalls.length) * 100).toFixed(1) + "%" : "0%";
+        const avgDuration = twilioStats ? formatDuration(twilioStats.avgDurationSeconds) : formatDuration(avgDurationSeconds);
+        const answerRate = twilioStats && twilioStats.totalCalls > 0 
+            ? (( (twilioStats.statusCounts["Completed"] || 0) / twilioStats.totalCalls) * 100).toFixed(1) + "%" 
+            : (allCalls.length > 0 ? ((connectedCalls.length / allCalls.length) * 100).toFixed(1) + "%" : "0%");
 
         // Generate Chart Data dynamically based on historical buckets
         const chartDataMap: Record<string, number> = {};
@@ -122,13 +128,16 @@ export async function GET(request: Request) {
             "Connected": 0,
             "No Answer": 0,
             "Busy": 0,
-            "Wrong Number": 0
+            "Wrong Number": 0,
+            "No Outcome": 0
         } as Record<string, number>;
 
         if (outcomes) {
             outcomes.forEach(log => {
                 if (log.outcome && outcomeStats[log.outcome] !== undefined) {
                     outcomeStats[log.outcome]++;
+                } else {
+                    outcomeStats["No Outcome"]++;
                 }
             });
         }
@@ -156,6 +165,7 @@ export async function GET(request: Request) {
                     connected: connectedCalls.length || 0
                 },
                 outcomeStats,
+                twilioStats: twilioStats || null, // Include raw Twilio stats for detailed hover/charts
                 avgAttempts,
                 chartData
             }
