@@ -33,11 +33,26 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
     const [dragLeadId, setDragLeadId] = useState<string | null>(null);
     const [dragOverStage, setDragOverStage] = useState<string | null>(null);
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
-    const [localLeads, setLocalLeads] = useState<Lead[]>(leads.filter(l => l.is_in_active_pool));
+    const [page, setPage] = useState(0);
+    const leadsPerPage = 20;
+
+    const validAllLeads = leads.filter(l => !['Lost', 'Canceled', 'No Show'].includes(l.status || ''));
+    const allNewLeads = validAllLeads.filter(l => !l.pipeline_stage || l.pipeline_stage === 'new_lead');
+    const maxPage = Math.max(0, Math.ceil(allNewLeads.length / leadsPerPage) - 1);
+
+    const computeLocalLeads = useCallback((allLeads: Lead[], currentPage: number) => {
+        const valid = allLeads.filter(l => !['Lost', 'Canceled', 'No Show'].includes(l.status || ''));
+        const inProgress = valid.filter(l => l.pipeline_stage && l.pipeline_stage !== 'new_lead');
+        const newLeads = valid.filter(l => !l.pipeline_stage || l.pipeline_stage === 'new_lead');
+        const slicedNewLeads = newLeads.slice(currentPage * leadsPerPage, (currentPage + 1) * leadsPerPage);
+        return [...slicedNewLeads, ...inProgress];
+    }, [leadsPerPage]);
+
+    const [localLeads, setLocalLeads] = useState<Lead[]>(() => computeLocalLeads(leads, 0));
 
     useEffect(() => {
-        setLocalLeads(leads.filter(l => l.is_in_active_pool));
-    }, [leads]);
+        setLocalLeads(computeLocalLeads(leads, page));
+    }, [leads, page, computeLocalLeads]);
 
     const getLeadsByStage = useCallback((stageId: string) => {
         return localLeads.filter((l) => (l.pipeline_stage || "new_lead") === stageId);
@@ -141,7 +156,7 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
                                         <span className="text-xs font-bold text-text-primary uppercase tracking-wider font-outfit">{stage.label}</span>
                                     </div>
                                     <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border leading-none shadow-sm ${stage.badge}`}>
-                                        {stageLeads.length}
+                                        {stage.id === "new_lead" ? allNewLeads.length : stageLeads.length}
                                     </span>
                                 </div>
 
@@ -172,6 +187,29 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
                                         ))
                                     )}
                                 </div>
+
+                                {/* Pagination Dock for New Leads */}
+                                {stage.id === "new_lead" && maxPage > 0 && (
+                                    <div className="border-t border-border-subtle p-3 bg-surface-base/50 flex items-center justify-between gap-2 rounded-b-2xl">
+                                        <button 
+                                            onClick={() => setPage(p => Math.max(0, p - 1))}
+                                            disabled={page === 0}
+                                            className="px-3 py-1.5 text-xs font-bold bg-surface-panel hover:bg-surface-panel-hover border border-border-subtle rounded text-text-primary disabled:opacity-30 transition-all focus:outline-none"
+                                        >
+                                            &lt; Prev
+                                        </button>
+                                        <span className="text-[10px] font-black uppercase text-text-secondary tracking-widest">
+                                            Pg {page + 1} / {maxPage + 1}
+                                        </span>
+                                        <button 
+                                            onClick={() => setPage(p => Math.min(maxPage, p + 1))}
+                                            disabled={page >= maxPage}
+                                            className="px-3 py-1.5 text-xs font-bold bg-brand-primary hover:bg-brand-primary/80 border border-brand-primary/20 rounded text-black disabled:opacity-30 transition-all focus:outline-none shadow-sm"
+                                        >
+                                            Next &gt;
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
