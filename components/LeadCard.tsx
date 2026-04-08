@@ -1,5 +1,6 @@
 "use client";
 
+import React, { memo } from "react";
 import { Lead } from "@/services/mondayService";
 import { formatDistanceToNow, format } from "date-fns";
 
@@ -14,7 +15,7 @@ interface LeadCardProps {
     onDragStart?: (e: React.DragEvent, lead: Lead) => void;
 }
 
-export const LeadCard = ({
+export const LeadCard = memo(({
     lead, isActive, onSelect, onCall, isCallingDisabled, onEdit, draggable, onDragStart,
 }: LeadCardProps) => {
     const targetDate = lead.monday_updated_at || lead.monday_created_at || lead.createdDate;
@@ -135,4 +136,4 @@ export const LeadCard = ({
             </button>
         </div>
     );
-};
+});

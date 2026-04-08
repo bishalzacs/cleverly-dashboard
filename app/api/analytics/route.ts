@@ -173,7 +173,7 @@ export async function GET(request: Request) {
             success: true,
             data: {
                 totalLeads: totalLeads || 0,
-                callsInPeriod: twilioStats ? twilioStats.totalCalls : (allCalls.length || 0),
+                callsInPeriod: twilioStats && twilioStats.totalCalls > 0 ? twilioStats.totalCalls : (allCalls.length > 0 ? allCalls.length : totalAttempts),
                 answerRate,
                 avgDuration,
                 recentCalls: recentCalls,

@@ -34,11 +34,11 @@ export async function GET(request: Request) {
             let query = supabase
                 .from("leads")
                 .select("*", { count: "exact" })
+                .eq("is_in_active_pool", true)
                 .order("monday_created_at", { ascending: false, nullsFirst: false }) // STEP 5: ORDERING
                 .range(currentOffset, currentOffset + FETCH_SIZE - 1);
 
-            // We do NOT use query.in("group_id", ALLOWED_GROUP_IDS) here. 
-            // We want ALL leads, regardless of their group.
+            // We want ALL active leads, regardless of their group.
             
             if (owner) query = query.eq("owner", owner);
             if (from) query = query.gte("monday_created_at", from + "T00:00:00Z");

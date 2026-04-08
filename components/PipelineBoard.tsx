@@ -73,8 +73,10 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ pipeline_stage: stageId }),
             });
+            onLeadsChange();
         } catch (e) {
             console.error("Failed to update pipeline stage:", e);
+            onLeadsChange(); // Revert visual drag failure
         }
     };
 

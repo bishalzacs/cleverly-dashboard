@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+export const dynamic = 'force-dynamic';
+
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const supabase = createClient(
