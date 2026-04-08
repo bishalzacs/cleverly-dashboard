@@ -45,6 +45,12 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
     const [columnSearch, setColumnSearch] = useState<Record<string, string>>({});
     const [columnOwner, setColumnOwner] = useState<Record<string, string>>({});
     const [columnDate, setColumnDate] = useState<Record<string, string>>({});
+    const [columnPage, setColumnPage] = useState<Record<string, number>>({});
+    const PAGE_SIZE = 20;
+
+    const setPage = (group: string, val: number) => {
+        setColumnPage(prev => ({ ...prev, [group]: val }));
+    };
 
     const grouped = {
         Lost: baseLeads.filter(l => l.group_name === "Lost" || l.status === "Lost"),
@@ -149,13 +155,21 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
             <div className="flex-1 overflow-x-auto overflow-y-hidden bg-surface-base">
                 <div className="flex h-full gap-6 p-8 min-w-max">
                     {groupKeys.map((group) => {
-                        const groupLeads = getGroupLeads(group);
+                        const filteredGroupLeads = getGroupLeads(group);
+                        const currentPage = columnPage[group] || 0;
+                        const totalPages = Math.ceil(filteredGroupLeads.length / PAGE_SIZE);
+                        
+                        const pagedLeads = filteredGroupLeads.slice(
+                            currentPage * PAGE_SIZE,
+                            (currentPage + 1) * PAGE_SIZE
+                        );
+
                         return (
                             <div key={group} className="flex flex-col w-[320px] md:w-[360px] flex-shrink-0 bg-surface-panel rounded-2xl border border-border-subtle shadow-2xl overflow-hidden h-full mb-4">
                                 <div className="px-6 py-5 border-b border-border-subtle flex items-center justify-between bg-zinc-950/20 sticky top-0 z-10">
                                     <span className="text-xs font-bold text-text-primary tracking-wider uppercase font-outfit">{group}</span>
                                     <span className="text-[10px] font-black px-2.5 py-1 rounded-lg bg-surface-base border border-border-subtle text-text-secondary shadow-sm">
-                                        {groupLeads.length}
+                                        {filteredGroupLeads.length}
                                     </span>
                                 </div>
                                 <div className="p-4 border-b border-border-subtle bg-surface-base/20 flex flex-col gap-3">
@@ -167,14 +181,20 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                                             type="text" 
                                             placeholder={`Filter ${group}...`}
                                             value={columnSearch[group as string] || ""}
-                                            onChange={(e) => setColumnSearch({...columnSearch, [group]: e.target.value})}
+                                            onChange={(e) => {
+                                                setColumnSearch({...columnSearch, [group]: e.target.value});
+                                                setPage(group, 0); // Reset on search
+                                            }}
                                             className="w-full bg-surface-base border border-border-subtle rounded-xl pl-10 pr-4 py-3 text-xs text-text-primary placeholder-text-secondary/40 focus:outline-none focus:border-text-primary/10 transition-all font-sans shadow-inner"
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <select
                                             value={columnOwner[group as string] || ""}
-                                            onChange={(e) => setColumnOwner({...columnOwner, [group]: e.target.value})}
+                                            onChange={(e) => {
+                                                setColumnOwner({...columnOwner, [group]: e.target.value});
+                                                setPage(group, 0); // Reset on filter
+                                            }}
                                             className="bg-surface-base border border-border-subtle rounded-xl px-3 py-2.5 text-[10px] font-bold text-text-secondary uppercase tracking-widest hover:text-text-primary focus:outline-none transition-all cursor-pointer shadow-inner"
                                         >
                                             <option value="" className="bg-surface-panel">All Reps</option>
@@ -182,7 +202,10 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                                         </select>
                                          <select
                                             value={columnDate[group as string] || "all"}
-                                            onChange={(e) => setColumnDate({...columnDate, [group]: e.target.value})}
+                                            onChange={(e) => {
+                                                setColumnDate({...columnDate, [group]: e.target.value});
+                                                setPage(group, 0); // Reset on filter
+                                            }}
                                             className="bg-surface-base border border-border-subtle rounded-xl px-3 py-2.5 text-[10px] font-bold text-text-secondary uppercase tracking-widest hover:text-text-primary focus:outline-none transition-all cursor-pointer shadow-inner"
                                         >
                                             <option value="all" className="bg-surface-panel">All Time</option>
@@ -198,18 +221,41 @@ export const LeadList = ({ leads, isLoading, error, activeLeadId, isCallActive, 
                                         <div className="space-y-4">
                                             {[1, 2, 3].map((i) => <div key={i} className="h-[140px] rounded-2xl bg-surface-base/40 border border-border-subtle animate-pulse" />)}
                                         </div>
-                                    ) : groupLeads.length === 0 ? (
+                                    ) : pagedLeads.length === 0 ? (
                                         <div className="h-48 flex flex-col items-center justify-center text-center opacity-20 border-2 border-dashed border-border-subtle rounded-2xl">
                                             <p className="text-[10px] font-black uppercase tracking-widest">No matching signals</p>
                                         </div>
                                     ) : (
-                                        groupLeads.map((lead) => (
+                                        pagedLeads.map((lead) => (
                                             <LeadCard key={lead.id} lead={lead} isActive={activeLeadId === lead.id}
                                                 onSelect={onSelectLead} onCall={onCallLead}
                                                 isCallingDisabled={isCallActive} onEdit={setEditingLead} />
                                         ))
                                     )}
                                 </div>
+
+                                {/* Pagination Footer */}
+                                {totalPages > 1 && (
+                                    <div className="border-t border-border-subtle p-3 bg-surface-base/50 flex items-center justify-between gap-2">
+                                        <button 
+                                            onClick={() => setPage(group, Math.max(0, currentPage - 1))}
+                                            disabled={currentPage === 0}
+                                            className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest bg-surface-panel hover:bg-surface-panel-hover border border-border-subtle rounded text-text-primary disabled:opacity-30 transition-all focus:outline-none"
+                                        >
+                                            &lt; Prev
+                                        </button>
+                                        <span className="text-[10px] font-black uppercase text-text-secondary tracking-widest">
+                                            Pg {currentPage + 1} / {totalPages}
+                                        </span>
+                                        <button 
+                                            onClick={() => setPage(group, Math.min(totalPages - 1, currentPage + 1))}
+                                            disabled={currentPage >= totalPages - 1}
+                                            className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest bg-indigo-500 hover:bg-indigo-400 border border-indigo-500/20 rounded text-black disabled:opacity-30 transition-all focus:outline-none shadow-sm"
+                                        >
+                                            Next &gt;
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
