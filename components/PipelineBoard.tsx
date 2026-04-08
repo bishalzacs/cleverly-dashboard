@@ -61,19 +61,7 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
         const lead = localLeads.find(l => l.id === dragLeadId);
         if (!lead) return;
 
-        // Enforce progression rules
-        const attemptStages = ["first_attempt", "second_attempt", "third_attempt"];
-        const currentIndex = PIPELINE_STAGES.findIndex(s => s.id === (lead.pipeline_stage || "new_lead"));
-        const targetIndex = PIPELINE_STAGES.findIndex(s => s.id === stageId);
-
-        if (attemptStages.includes(stageId) && !lead.is_connected && (lead.call_attempts || 0) < 3) {
-            if (targetIndex > currentIndex) {
-                alert(`Cannot move to next stage. Lead requires 3 call attempts (Currently: ${lead.call_attempts || 0})`);
-                setDragLeadId(null);
-                setDragOverStage(null);
-                return;
-            }
-        }
+        // Manual drag and drop is unconstrained
 
         setLocalLeads((prev) => prev.map((l) => l.id === dragLeadId ? { ...l, pipeline_stage: stageId } : l));
         setDragLeadId(null);
