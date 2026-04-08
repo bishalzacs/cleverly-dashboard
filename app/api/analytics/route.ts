@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getTwilioCallMetrics } from "@/services/twilioService";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
@@ -137,8 +134,13 @@ export async function GET(request: Request) {
 
         if (outcomes) {
             outcomes.forEach(log => {
-                if (log.outcome && outcomeStats[log.outcome] !== undefined) {
-                    outcomeStats[log.outcome]++;
+                let label = log.outcome;
+                // Map DB snake_case labels to UI Display labels
+                if (label === "answered") label = "Connected";
+                if (label === "no_answer") label = "No Answer";
+                
+                if (label && outcomeStats[label] !== undefined) {
+                    outcomeStats[label]++;
                 } else {
                     outcomeStats["No Outcome"]++;
                 }

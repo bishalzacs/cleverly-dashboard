@@ -36,12 +36,12 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
     const [page, setPage] = useState(0);
     const leadsPerPage = 20;
 
-    const validAllLeads = leads.filter(l => !['Lost', 'Canceled', 'No Show'].includes(l.status || ''));
+    const validAllLeads = leads;
     const allNewLeads = validAllLeads.filter(l => !l.pipeline_stage || l.pipeline_stage === 'new_lead');
     const maxPage = Math.max(0, Math.ceil(allNewLeads.length / leadsPerPage) - 1);
 
     const computeLocalLeads = useCallback((allLeads: Lead[], currentPage: number) => {
-        const valid = allLeads.filter(l => !['Lost', 'Canceled', 'No Show'].includes(l.status || ''));
+        const valid = allLeads;
         const inProgress = valid.filter(l => l.pipeline_stage && l.pipeline_stage !== 'new_lead');
         const newLeads = valid.filter(l => !l.pipeline_stage || l.pipeline_stage === 'new_lead');
         const slicedNewLeads = newLeads.slice(currentPage * leadsPerPage, (currentPage + 1) * leadsPerPage);
