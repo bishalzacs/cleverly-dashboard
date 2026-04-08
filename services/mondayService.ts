@@ -24,6 +24,7 @@ export interface Lead {
   deal_value?: number;
   plan_type?: string;
   monday_created_at?: string;
+  monday_updated_at?: string;
   group_id?: string;
   group_name?: "Lost" | "No-Show" | "Cancel";
   call_attempts?: number;
@@ -85,7 +86,7 @@ async function fetchBoardItemsSorted(): Promise<{ items: any[], isComplete: bool
               ) {
                 cursor
                 items {
-                  id name created_at
+                  id name created_at updated_at
                   group { id }
                   column_values { id text value }
                 }
@@ -189,6 +190,7 @@ export const getLostLeads = async (): Promise<{ leads: Lead[], isComplete: boole
       status: getColumnText("color_mks814yp") || getColumnText("status__1"),
       createdDate: item.created_at,
       monday_created_at: item.created_at,
+      monday_updated_at: item.updated_at,
       owner: ownerName,
       interested_in: getColumnText("interested_in__1"),
       notes: getColumnText("notes__1"),

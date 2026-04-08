@@ -20,6 +20,7 @@ async function sync() {
         status: lead.status,
         created_date: lead.createdDate ? new Date(lead.createdDate).toISOString() : null,
         monday_created_at: lead.monday_created_at ? new Date(lead.monday_created_at).toISOString() : null,
+        monday_updated_at: lead.monday_updated_at ? new Date(lead.monday_updated_at).toISOString() : null,
         owner: lead.owner || null,
         interested_in: lead.interested_in || null,
         notes: lead.notes || null,

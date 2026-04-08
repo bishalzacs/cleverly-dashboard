@@ -24,7 +24,7 @@ async function runStandaloneSync() {
       boards(ids: $boardId) {
         items_page(limit: 50, query_params: {order_by: [{column_id: "last_updated__1", direction: desc}]}) {
           items {
-            id name created_at
+            id name created_at updated_at
             group { id }
             column_values { id text value }
           }
@@ -45,6 +45,7 @@ async function runStandaloneSync() {
       email: item.column_values.find(cv => cv.id === "email__1")?.text || "",
       status: item.column_values.find(cv => cv.id === "status__1" || cv.id.includes("color"))?.text || "",
       monday_created_at: item.created_at,
+      monday_updated_at: item.updated_at,
       group_id: item.group.id,
       updated_at: new Date().toISOString()
     })).filter(l => l.phone);

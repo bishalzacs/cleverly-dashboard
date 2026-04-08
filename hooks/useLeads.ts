@@ -89,8 +89,8 @@ export const useLeads = (filters?: FilterState): UseLeadsReturn => {
 
     // Force strict chronological sorting natively in the frontend to guarantee robust ordering
     const sortedLeads = [...leads].sort((a, b) => {
-        const dateA = new Date(a.monday_created_at || a.createdDate || 0).getTime();
-        const dateB = new Date(b.monday_created_at || b.createdDate || 0).getTime();
+        const dateA = new Date(a.monday_updated_at || a.monday_created_at || a.createdDate || 0).getTime();
+        const dateB = new Date(b.monday_updated_at || b.monday_created_at || b.createdDate || 0).getTime();
         return dateB - dateA;
     });
 

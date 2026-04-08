@@ -17,8 +17,9 @@ interface LeadCardProps {
 export const LeadCard = ({
     lead, isActive, onSelect, onCall, isCallingDisabled, onEdit, draggable, onDragStart,
 }: LeadCardProps) => {
-    const formattedDate = lead.createdDate
-        ? formatDistanceToNow(new Date(lead.createdDate), { addSuffix: true })
+    const targetDate = lead.monday_updated_at || lead.monday_created_at || lead.createdDate;
+    const formattedDate = targetDate
+        ? `Updated ${formatDistanceToNow(new Date(targetDate), { addSuffix: true })}`
         : "Unknown date";
 
     const callDateStr = lead.sales_call_date
