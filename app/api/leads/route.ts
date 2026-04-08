@@ -34,7 +34,6 @@ export async function GET(request: Request) {
             let query = supabase
                 .from("leads")
                 .select("*", { count: "exact" })
-                .eq("is_in_active_pool", true)
                 .order("monday_created_at", { ascending: false, nullsFirst: false }) // STEP 5: ORDERING
                 .range(currentOffset, currentOffset + FETCH_SIZE - 1);
 

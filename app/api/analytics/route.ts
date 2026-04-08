@@ -6,7 +6,7 @@ export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const agentId = searchParams.get("agent_id");
-        const range = searchParams.get("range") || "today"; // today, week, month, all
+        const range = searchParams.get("range") || "week"; // today, week, month, all
 
         const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,

@@ -21,6 +21,14 @@ export async function POST(_request: Request) {
         let upsertedCount = 0;
         
         for (let i = 0; i < leads.length; i += batchSize) {
+            const batchIds = leads.slice(i, i + batchSize).map(l => l.id);
+            const { data: existingLeads } = await supabase
+                .from("leads")
+                .select("id, pipeline_stage")
+                .in("id", batchIds);
+            
+            const existingStagesMap = new Map(existingLeads?.map(l => [l.id, l.pipeline_stage]) || []);
+
             const batch = leads.slice(i, i + batchSize).map((lead) => ({
                 id: lead.id,
                 name: lead.name,
@@ -38,6 +46,7 @@ export async function POST(_request: Request) {
                 deal_value: lead.deal_value ?? null,
                 plan_type: lead.plan_type || null,
                 group_id: lead.group_id || null,
+                pipeline_stage: existingStagesMap.get(lead.id) || "new_lead",
                 updated_at: syncStartTime, // Mark this item as seen in this sync
             }));
 

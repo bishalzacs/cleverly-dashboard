@@ -33,10 +33,10 @@ export const PipelineBoard = ({ leads, isCallActive, onCallLead, onLeadsChange, 
     const [dragLeadId, setDragLeadId] = useState<string | null>(null);
     const [dragOverStage, setDragOverStage] = useState<string | null>(null);
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
-    const [localLeads, setLocalLeads] = useState<Lead[]>(leads);
+    const [localLeads, setLocalLeads] = useState<Lead[]>(leads.filter(l => l.is_in_active_pool));
 
     useEffect(() => {
-        setLocalLeads(leads);
+        setLocalLeads(leads.filter(l => l.is_in_active_pool));
     }, [leads]);
 
     const getLeadsByStage = useCallback((stageId: string) => {

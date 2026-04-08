@@ -12,6 +12,10 @@ async function sync() {
     const { leads } = await getLostLeads();
     console.log(`Fetched ${leads.length} leads. Upserting into Supabase...`);
 
+    const fetchIds = leads.map(l => l.id);
+    const { data: existingLeads } = await supabase.from("leads").select("id, pipeline_stage").in("id", fetchIds);
+    const existingStagesMap = new Map(existingLeads?.map(l => [l.id, l.pipeline_stage]) || []);
+
     const recordsToUpsert = leads.map((lead) => ({
         id: lead.id,
         name: lead.name,
