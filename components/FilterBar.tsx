@@ -184,10 +184,34 @@ export const FilterBar = ({ leads, filters, onFiltersChange }: FilterBarProps) =
                 )}
             </div>
 
+            {/* Sync Twilio Button */}
+            <button
+                onClick={async (e) => {
+                    const btn = e.currentTarget;
+                    const originalText = btn.innerHTML;
+                    btn.innerText = "PULLING DATA...";
+                    btn.classList.add("cursor-wait", "opacity-80");
+                    try {
+                        const res = await fetch("/api/sync-twilio");
+                        const data = await res.json();
+                        alert(`Twilio Synchronization Complete!\n\nNew Call Logs Created: ${data.totals?.newly_inserted_logs || 0}\nTotal Scanned: ${data.totals?.scanned_from_twilio || 0}`);
+                        window.location.reload(); // Instantly refresh the cards so the user sees the stages update natively!
+                    } catch(err) {
+                        alert("Sync Failed: Check Network");
+                    }
+                    btn.innerHTML = originalText;
+                    btn.classList.remove("cursor-wait", "opacity-80");
+                }}
+                className={`flex items-center gap-2 ${!hasFilters ? 'ml-auto' : ''} px-5 py-2 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500 hover:text-white transition-all shadow-xl shadow-indigo-500/5 active:scale-95`}
+            >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                SYNC TWILIO CALLS
+            </button>
+
             {hasFilters && (
                 <button
                     onClick={() => onFiltersChange({ owner: "", from: "", to: "" })}
-                    className="flex items-center gap-2 ml-auto px-5 py-2 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all shadow-xl shadow-rose-500/5 active:scale-95"
+                    className="flex items-center gap-2 ml-4 px-5 py-2 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all shadow-xl shadow-rose-500/5 active:scale-95"
                 >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                     Flush Filters
