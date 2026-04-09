@@ -16,6 +16,8 @@ export const generateTwilioToken = (clientName?: string): string => {
 
     const identity = clientName || "custom_lead_caller";
 
+    console.log(`[TwilioService] Generating token for identity: ${identity}`);
+
     // Create an access token which we will sign and return to the client
     const accessToken = new AccessToken(twilioAccountSid, twilioApiKey, twilioApiSecret, {
         identity,

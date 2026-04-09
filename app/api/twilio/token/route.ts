@@ -21,8 +21,8 @@ export async function POST(request: Request) {
         }
 
         // Assign a unique identity PER SESSION (Tab)
-        const baseIdentity = user?.email || user?.id || "firebase_agent";
-        const identity = `${baseIdentity}_${sessionId.slice(0, 8)}`; // Use short session suffix
+        const baseIdentity = (user?.email || user?.id || "firebase_agent").replace(/[^a-zA-Z0-9\-_]/g, '_');
+        const identity = `${baseIdentity}_${sessionId.slice(0, 8)}`; 
         
         const token = generateTwilioToken(identity);
 

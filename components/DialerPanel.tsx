@@ -16,6 +16,7 @@ interface DialerPanelProps {
     onClose?: () => void;
     lastCallMeta?: { phone: string; duration: number; leadId?: string; leadName?: string } | null;
     onLogOutcome?: (outcome: string) => void;
+    error?: string | null;
 }
 
 const OUTCOMES = [
@@ -41,7 +42,7 @@ const InfoRow = ({ icon, label, value, accent }: { icon: React.ReactNode; label:
     );
 };
 
-export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onHangUp, onMuteToggle, onCall, lastCallMeta, onLogOutcome, onClose }: DialerPanelProps) => {
+export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onHangUp, onMuteToggle, onCall, lastCallMeta, onLogOutcome, onClose, error }: DialerPanelProps) => {
     const [isLogging, setIsLogging] = useState(false);
     const isCallActive = callStatus !== "idle" && callStatus !== "ended";
     const showOutcomeSelection = callStatus === "ended" && lastCallMeta && onLogOutcome;
@@ -72,6 +73,19 @@ export const DialerPanel = ({ activeLead, callStatus, callDuration, isMuted, onH
 
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-surface-base animate-fade-in">
+
+            {/* Error Alert */}
+            {error && (
+                <div className="mx-6 mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-4 animate-in slide-in-from-top-2">
+                    <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-red-500 mb-1">Dialer Error</h4>
+                        <p className="text-sm text-red-200/80 font-medium leading-tight">{error}</p>
+                    </div>
+                </div>
+            )}
 
             {/* Active call banner */}
             {isCallActive && (

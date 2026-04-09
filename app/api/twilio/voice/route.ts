@@ -9,6 +9,8 @@ export async function POST(request: Request) {
         const to = formData.get("To") as string;
         const callerId = process.env.TWILIO_PHONE_NUMBER!;
 
+        console.log(`[TwilioVoice] Incoming Hook. To: ${to}, CallerId: ${callerId}`);
+
         const twiml = new VoiceResponse();
 
         if (to) {
@@ -28,7 +30,7 @@ export async function POST(request: Request) {
 
         return new NextResponse(twiml.toString(), {
             status: 200,
-            headers: { "Content-Type": "text/xml" },
+            headers: { "Content-Type": "application/xml" },
         });
     } catch (error: any) {
         console.error("TwiML Voice Route Error:", error);
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
         twiml.say("An error occurred. Please try again.");
         return new NextResponse(twiml.toString(), {
             status: 200,
-            headers: { "Content-Type": "text/xml" },
+            headers: { "Content-Type": "application/xml" },
         });
     }
 }

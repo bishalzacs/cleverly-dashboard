@@ -108,6 +108,7 @@ export default function Dashboard() {
                                             lastCallMeta={lastCallMeta}
                                             onLogOutcome={logCallWithOutcome}
                                             onClose={() => setActiveLead(null)}
+                                            error={twilioError}
                                         />
                                     </div>
                                 </div>

@@ -73,24 +73,41 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
                     codecPreferences: [Call.Codec.Opus, Call.Codec.PCMU],
                 });
 
+                console.log("[TwilioDevice] Initialized with token. Registering...");
+
                 initializedDevice.on("registered", () => {
+                    console.log("[TwilioDevice] Status: REGISTERED (Ready)");
                     if (isDestroyed) return;
                     setDeviceStatus("ready");
                     setError(null);
                 });
 
+                initializedDevice.on("unregistered", () => {
+                    console.log("[TwilioDevice] Status: UNREGISTERED");
+                    if (isDestroyed) return;
+                    setDeviceStatus("offline");
+                });
+
                 initializedDevice.on("error", (twilioError: any) => {
+                    console.error("[TwilioDevice] SDK ERROR:", twilioError);
                     if (isDestroyed) return;
                     setDeviceStatus("error");
-                    setError(twilioError?.message || "Dialer Error");
+                    
+                    // Twilio error codes are highly descriptive (e.g., 31201 is unauthorized)
+                    const errorCode = twilioError?.code || "Unknown";
+                    const errorMessage = twilioError?.message || "Dialer Error";
+                    setError(`${errorMessage} (Error Code: ${errorCode})`);
+                });
+
+                initializedDevice.on("tokenWillExpire", () => {
+                    console.log("[TwilioDevice] Token will expire soon. Refresh required.");
+                    // In a more complex app, we'd re-fetch the token here.
                 });
 
                 initializedDevice.register();
                 setDevice(initializedDevice);
             } catch (err: any) {
-                if (isDestroyed) return;
-                setDeviceStatus("error");
-                setError(err.message);
+                console.error("[TwilioDevice] Initialization Failed:", err);
             }
         };
 
@@ -167,15 +184,18 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
                 const params = { To: phoneNumber };
 
                 // initiate call
+                console.log(`[TwilioDevice] Initiating call to: ${phoneNumber}`);
                 const call = await device.connect({ params });
                 setActiveCall(call);
 
                 call.on("accept", () => {
+                    console.log("[TwilioDevice] Call Accepted");
                     setCallStatus("connected");
                     setIsMuted(false);
                 });
 
                 call.on("disconnect", () => {
+                    console.log("[TwilioDevice] Call Disconnected");
                     const meta = activeCallMetaRef.current;
                     const dur = callDurationRef.current;
                     if (meta) {
