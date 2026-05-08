@@ -46,6 +46,19 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
         let initializedDevice: Device;
         let isDestroyed = false;
 
+        const fetchToken = async () => {
+            const res = await fetch("/api/twilio/token", { 
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sessionId }) 
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success || !data.token) {
+                throw new Error(data.error || "Failed to get Twilio token");
+            }
+            return data.token;
+        };
+
         const initDevice = async () => {
             try {
                 setDeviceStatus("connecting");
@@ -56,20 +69,11 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
                     setUserEmail(user.email || null);
                 }
 
-                const res = await fetch("/api/twilio/token", { 
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ sessionId }) 
-                });
-                const data = await res.json();
+                const token = await fetchToken();
 
                 if (isDestroyed) return;
 
-                if (!res.ok || !data.success || !data.token) {
-                    throw new Error(data.error || "Failed to get Twilio token");
-                }
-
-                initializedDevice = new Device(data.token, {
+                initializedDevice = new Device(token, {
                     codecPreferences: [Call.Codec.Opus, Call.Codec.PCMU],
                 });
 
@@ -93,21 +97,32 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
                     if (isDestroyed) return;
                     setDeviceStatus("error");
                     
-                    // Twilio error codes are highly descriptive (e.g., 31201 is unauthorized)
                     const errorCode = twilioError?.code || "Unknown";
                     const errorMessage = twilioError?.message || "Dialer Error";
                     setError(`${errorMessage} (Error Code: ${errorCode})`);
                 });
 
-                initializedDevice.on("tokenWillExpire", () => {
-                    console.log("[TwilioDevice] Token will expire soon. Refresh required.");
-                    // In a more complex app, we'd re-fetch the token here.
+                initializedDevice.on("tokenWillExpire", async () => {
+                    console.log("[TwilioDevice] Token will expire soon. Refreshing...");
+                    try {
+                        const newToken = await fetchToken();
+                        if (initializedDevice && !isDestroyed) {
+                            initializedDevice.updateToken(newToken);
+                            console.log("[TwilioDevice] Token refreshed successfully.");
+                        }
+                    } catch (err) {
+                        console.error("[TwilioDevice] Failed to refresh token:", err);
+                    }
                 });
 
                 initializedDevice.register();
                 setDevice(initializedDevice);
             } catch (err: any) {
                 console.error("[TwilioDevice] Initialization Failed:", err);
+                if (!isDestroyed) {
+                    setDeviceStatus("error");
+                    setError(err.message || "Failed to initialize device");
+                }
             }
         };
 
@@ -143,17 +158,17 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
     }, [callStatus]);
 
     const logCallWithOutcome = useCallback(async (outcome: string, notes?: string) => {
-        if (!activeCallMetaRef.current) return;
+        if (!lastCallMeta) return;
         
         try {
-            const { phone, leadId, leadName } = activeCallMetaRef.current;
+            const { phone, leadId, leadName, duration } = lastCallMeta;
             await fetch("/api/log-call", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
                     phone, 
                     status: "completed", 
-                    duration_seconds: callDurationRef.current, 
+                    duration_seconds: duration, 
                     lead_id: leadId, 
                     lead_name: leadName,
                     agent_id: userId,
@@ -164,11 +179,10 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
                 }),
             });
             setLastCallMeta(null);
-            activeCallMetaRef.current = null;
         } catch (e) {
             console.warn("Failed to log call:", e);
         }
-    }, [userId, userEmail, sessionId]); // Added sessionId, removed lastCallMeta
+    }, [userId, userEmail, sessionId, lastCallMeta]);
 
     const makeCall = useCallback(
         async (phoneNumber: string, leadId?: string, leadName?: string) => {
@@ -204,7 +218,6 @@ export const useTwilioDevice = (): UseTwilioDeviceReturn => {
                     setCallStatus("ended");
                     setActiveCall(null);
                     setIsMuted(false);
-                    activeCallMetaRef.current = null;
                 });
 
                 call.on("cancel", () => {

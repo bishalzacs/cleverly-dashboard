@@ -54,13 +54,18 @@ export const FirebaseLoginForm = () => {
   };
 
   const handleProviderSignIn = async (provider: any) => {
-    setLoading(true);
-    setError(null);
     try {
+      // Call signInWithPopup immediately without any state updates beforehand to prevent browser blocking
       const { user } = await signInWithPopup(auth, provider);
+      setLoading(true);
+      setError(null);
       await setSessionCookie(user);
     } catch (err: any) {
-      setError(err.message || 'Social sign-in failed');
+      if (err.code === 'auth/popup-blocked') {
+        setError('Popup blocked by browser. Please allow popups for this site and try again.');
+      } else {
+        setError(err.message || 'Social sign-in failed');
+      }
       setLoading(false);
     }
   };
